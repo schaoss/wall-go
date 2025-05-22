@@ -1,12 +1,13 @@
 // src/store.ts
 import { create } from 'zustand'
-import { BOARD_SIZE, type Player, type Cell, type Pos } from './lib/types'
+import { BOARD_SIZE, PLAYER_LIST, STONES_PER_PLAYER, type Player, type Cell, type Pos, type Phase, type WallDir } from './lib/types'
 import { isLegalMove } from './utils/isLegalMove'
-import { checkGameEnd, type GameResult } from './utils/checkGameEnd'
+import { checkGameEnd } from './utils/checkGameEnd'
 
 // Configuration – easily tweakable for 2‑player, 3‑player, etc.
-const PLAYERS: Player[] = ['R', 'B']          // order of players
-const STONES_PER_PLAYER = 4                   // stones each player places in setup phase
+const PLAYERS: Player[] = [...PLAYER_LIST]
+const STONES_PER_PLAYER_CONST = STONES_PER_PLAYER
+const SKIP_REASON_ALL_BLOCKED = 'allBlocked' as const
 
 // Helper to compute whose turn during placing phase
 function placingTurnIndex(totalPlaced: number, playerCount: number) {
@@ -46,19 +47,19 @@ function playerHasMove(board: Cell[][], player: Player): boolean {
 interface State {
   board: Cell[][]
   turn: Player
-  selected?: Pos       // 當前被點擊的棋子
+  selected?: Pos
   legal: Set<string>
   stepsTaken: number
-  phase: 'placing' | 'playing' | 'finished'
+  phase: Phase
   players: Player[]
   stonesLimit: number
   stonesPlaced: Record<Player, number>
   placeStone: (pos: Pos) => void
   selectStone: (pos: Pos) => void
   moveTo: (pos: Pos) => void
-  buildWall: (pos: Pos, dir: 'top' | 'left' | 'right' | 'bottom') => void
-  result?: GameResult
-  skipReason?: string   // message to show when a turn is auto‑skipped
+  buildWall: (pos: Pos, dir: WallDir) => void
+  result?: import('./utils/checkGameEnd').GameResult
+  skipReason?: string
   resetGame: () => void
 }
 
@@ -73,14 +74,14 @@ function createEmptyBoard(): Cell[][] {
 function makeInitialState(): Omit<State, 'placeStone' | 'selectStone' | 'moveTo' | 'buildWall' | 'resetGame'> {
   return {
     board: createEmptyBoard(),
-    turn: 'R',
+    turn: PLAYER_LIST[0],
     selected: undefined,
     legal: new Set(),
     stepsTaken: 0,
     phase: 'placing',
-    players: PLAYERS,
-    stonesLimit: STONES_PER_PLAYER,
-    stonesPlaced: Object.fromEntries(PLAYERS.map(p => [p, 0])) as Record<Player, number>,
+    players: [...PLAYER_LIST],
+    stonesLimit: STONES_PER_PLAYER_CONST,
+    stonesPlaced: Object.fromEntries(PLAYER_LIST.map(p => [p, 0])) as Record<Player, number>,
     result: undefined,
     skipReason: undefined,
   }
@@ -96,7 +97,7 @@ export const useGame = create<State>((set, get) => {
         return { turn: p }
       }
     }
-    return { turn: current, skipReason: 'allBlocked' }  // no one can move
+    return { turn: current, skipReason: SKIP_REASON_ALL_BLOCKED }
   }
 
   return {

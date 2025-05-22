@@ -1,4 +1,4 @@
-import { BOARD_SIZE, type Player, type Cell, type Pos } from '../lib/types'
+import { BOARD_SIZE, type Player, type Cell, type Pos, type WallDir } from '../lib/types'
 
 export interface GameResult {
   finished: boolean
@@ -24,11 +24,11 @@ export function checkGameEnd(board: Cell[][], players: Player[]): GameResult {
     })
   )
 
-  const dirs: [number, number, string][] = [
-    [1, 0, 'left' as const],
-    [-1, 0, 'left' as const],
-    [0, 1, 'top' as const],
-    [0, -1, 'top' as const],
+  const dirs: [number, number, WallDir][] = [
+    [1, 0, 'left'],
+    [-1, 0, 'left'],
+    [0, 1, 'top'],
+    [0, -1, 'top'],
   ]
 
   function bfs(x0: number, y0: number) {

@@ -1,17 +1,17 @@
 import clsx from 'clsx'
-import { BOARD_SIZE, type Player } from './lib/types'
+import { BOARD_SIZE, type Phase, type WallDir, type Player, type Pos } from './lib/types'
 import Cell from './Cell'
 
 export interface BoardProps {
   board: import('./lib/types').Cell[][]
-  phase: string
+  phase: Phase
   turn: Player
-  selected: { x: number, y: number } | null
+  selected: Pos | null
   legal: Set<string>
-  selectStone: (pos: { x: number, y: number }) => void
-  placeStone: (pos: { x: number, y: number }) => void
-  moveTo: (pos: { x: number, y: number }) => void
-  buildWall: (pos: { x: number, y: number }, dir: 'top'|'left'|'right'|'bottom') => void
+  selectStone: (pos: Pos) => void
+  placeStone: (pos: Pos) => void
+  moveTo: (pos: Pos) => void
+  buildWall: (pos: Pos, dir: WallDir) => void
 }
 
 export default function Board({

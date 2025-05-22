@@ -1,23 +1,19 @@
 import clsx from 'clsx'
-import { type Player } from './lib/types'
-
-const color = (p: Player) =>
-  p === 'R'
-    ? 'bg-rose-500 dark:bg-rose-400'
-    : 'bg-indigo-500 dark:bg-indigo-400'
+import { type Phase, type WallDir, type Player, type Pos } from './lib/types'
+import { playerColorClass } from './lib/color'
 
 export interface CellProps {
   x: number
   y: number
   cell: import('./lib/types').Cell
   isSel: boolean
-  phase: string
+  phase: Phase
   turn: Player
   legal: Set<string>
-  selectStone: (pos: { x: number, y: number }) => void
-  placeStone: (pos: { x: number, y: number }) => void
-  moveTo: (pos: { x: number, y: number }) => void
-  buildWall: (pos: { x: number, y: number }, dir: 'top'|'left'|'right'|'bottom') => void
+  selectStone: (pos: Pos) => void
+  placeStone: (pos: Pos) => void
+  moveTo: (pos: Pos) => void
+  buildWall: (pos: Pos, dir: WallDir) => void
   board: import('./lib/types').Cell[][]
   boardSize: number
 }
@@ -46,7 +42,7 @@ export default function Cell({
         >
           <div
             className={clsx(
-              color(cell.wallTop),
+              playerColorClass(cell.wallTop),
               'shadow-md transition-all duration-300 rounded',
               'border border-zinc-200 dark:border-zinc-700',
             )}
@@ -67,7 +63,7 @@ export default function Cell({
         >
           <div
             className={clsx(
-              color(cell.wallLeft),
+              playerColorClass(cell.wallLeft),
               'shadow-md transition-all duration-300 rounded',
               'border border-zinc-200 dark:border-zinc-700',
             )}
@@ -86,7 +82,7 @@ export default function Cell({
         <button
           className={clsx(
             'rounded-full cursor-pointer',
-            color(cell.stone),
+            playerColorClass(cell.stone),
             'shadow-lg drop-shadow-md',
             'transition-transform transition-shadow duration-200',
             'hover:scale-110',
@@ -100,7 +96,6 @@ export default function Cell({
             minHeight: '24px',
             maxWidth: '60px',
             maxHeight: '60px',
-            // 不再用 left/top/transform 置中
           }}
           onClick={() => phase === 'playing' && selectStone({ x, y })}
         />

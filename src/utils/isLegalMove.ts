@@ -1,4 +1,4 @@
-import { BOARD_SIZE, type Pos, type Cell } from '../lib/types'
+import { BOARD_SIZE, type Pos, type Cell, type WallDir } from '../lib/types'
 
 export function isLegalMove(from: Pos, to: Pos, board: Cell[][], maxSteps = 2) {
   const q: [Pos, number][] = [[from, 0]]
@@ -15,12 +15,13 @@ export function isLegalMove(from: Pos, to: Pos, board: Cell[][], maxSteps = 2) {
       }
     }
     if (d === maxSteps) continue
-    ;[
-      [1, 0, 'left' as const],
-      [-1, 0, 'left' as const],
-      [0, 1, 'top' as const],
-      [0, -1, 'top' as const],
-    ].forEach(([dx, dy, dir]) => {
+    const dirs: [number, number, WallDir][] = [
+      [1, 0, 'left'],
+      [-1, 0, 'left'],
+      [0, 1, 'top'],
+      [0, -1, 'top'],
+    ]
+    dirs.forEach(([dx, dy, dir]) => {
       const nx = x + (dx as number),
         ny = y + (dy as number)
       if (nx < 0 || ny < 0 || nx >= BOARD_SIZE || ny >= BOARD_SIZE) return
