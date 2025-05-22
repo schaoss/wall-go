@@ -79,6 +79,7 @@ export interface State extends GameSnapshot {
   redo: () => void
   canUndo: boolean
   canRedo: boolean
+  setPhase: (phase: Phase) => void
   _history: GameSnapshot[]
   _future: GameSnapshot[]
 }

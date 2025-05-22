@@ -176,5 +176,6 @@ export const useGame = create<State>((set, get) => {
         _future: get()._future,
       })
     },
+    setPhase(phase) { set({ phase }) },
   }
 })
