@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { playerColorClass } from '../../lib/color'
 import type { Phase, Player, Pos, WallDir } from '../../lib/types'
 import WallButton from './WallButton'
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect } from 'react'
 
 export interface CellProps {
   x: number
@@ -27,15 +27,13 @@ export default function Cell({
   const posKey = `${x},${y}`
   // --- 棋子移動動畫 ---
   const stoneRef = useRef<HTMLButtonElement>(null)
-  const [prevPos, setPrevPos] = useState<{x: number, y: number} | null>(null)
+  const prevPosRef = useRef<{x: number, y: number} | null>(null)
   // 追蹤棋子移動
   useEffect(() => {
     if (cell.stone && phase === 'playing') {
       if (stoneRef.current) {
-        // 取得前一格座標
-        const prev = prevPos
+        const prev = prevPosRef.current
         if (prev && (prev.x !== x || prev.y !== y)) {
-          // 取得父容器的 bounding box
           const parent = stoneRef.current.parentElement?.getBoundingClientRect()
           const prevCell = document.querySelector(
             `[data-cell-x='${prev.x}'][data-cell-y='${prev.y}']`
@@ -54,12 +52,15 @@ export default function Cell({
             })
           }
         }
+        // 只在 x/y 變動時更新 prevPosRef
+        if (!prev || prev.x !== x || prev.y !== y) {
+          prevPosRef.current = {x, y}
+        }
       }
-      setPrevPos({x, y})
     } else if (!cell.stone) {
-      setPrevPos(null)
+      prevPosRef.current = null
     }
-  }, [cell.stone, x, y, phase, prevPos])
+  }, [cell.stone, x, y, phase])
   return (
     <div
       className={clsx(
