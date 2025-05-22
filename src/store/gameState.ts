@@ -48,7 +48,9 @@ export function snapshotFromState(state: GameSnapshot): GameSnapshot {
     players: [...state.players],
     stonesLimit: state.stonesLimit,
     stonesPlaced: { ...state.stonesPlaced },
-    result: state.result ? { ...state.result } : undefined,
+    result: state.result
+      ? JSON.parse(JSON.stringify(state.result))
+      : undefined,
     skipReason: state.skipReason,
   }
 }
@@ -64,7 +66,7 @@ export function restoreSnapshot(s: GameSnapshot): GameSnapshot {
     players: [...s.players],
     stonesLimit: s.stonesLimit,
     stonesPlaced: { ...s.stonesPlaced },
-    result: s.result ? { ...s.result } : undefined,
+    result: s.result ? JSON.parse(JSON.stringify(s.result)) : undefined,
     skipReason: s.skipReason,
   }
 }

@@ -15,15 +15,18 @@ export function createHistoryHandlers(
   snapshotFromState: (s: State) => GameSnapshot,
   restoreSnapshot: (s: GameSnapshot) => Partial<State>
 ) {
-  function pushHistory() {
+  function pushHistory(stateOverride?: State) {
+    // Always deep copy the state before snapshotting to history
+    // Use snapshotFromState to ensure all nested objects are deep copied
+    const stateToSnapshot = stateOverride ? snapshotFromState(stateOverride) : snapshotFromState(get())
     set({
-      _history: [...get()._history, snapshotFromState(get())],
+      _history: [...get()._history, stateToSnapshot],
       _future: [],
     })
   }
   function popHistory() {
-    if (get()._history.length === 0) return
-    const prev = get()._history[get()._history.length - 1]
+    if (get()._history.length <= 1) return // Only allow undo if there is a previous state
+    const prev = get()._history[get()._history.length - 2]
     set({
       ...restoreSnapshot(prev),
       _history: get()._history.slice(0, -1),

@@ -1,3 +1,15 @@
+import { beforeAll } from 'vitest'
+import { JSDOM } from 'jsdom'
+
+beforeAll(() => {
+  if (typeof window === 'undefined') {
+    const dom = new JSDOM('<!doctype html><html><body></body></html>')
+    globalThis.window = dom.window as any
+    globalThis.document = dom.window.document
+    globalThis.navigator = dom.window.navigator
+  }
+})
+
 import { act, renderHook } from '@testing-library/react'
 import { useGame } from './index'
 import { BOARD_SIZE, PLAYER_LIST, STONES_PER_PLAYER, type Pos } from '../lib/types'

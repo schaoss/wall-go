@@ -56,32 +56,34 @@ export const useGame = create<State>((_set, get) => {
     undo() { popHistory() },
     redo() { popFuture() },
     placeStone(pos: Pos) {
-      pushHistory()
-      const { board, players, stonesPlaced, stonesLimit } = get()
+      const { board, players, stonesPlaced, stonesLimit, phase } = get()
+      if (phase === 'finished') return
       const totalPlaced = Object.values(stonesPlaced).reduce((a, b) => a + b, 0)
       const currentIdx = placingTurnIndex(totalPlaced, players.length)
       const currentPlayer = players[currentIdx]
       if (board[pos.y][pos.x].stone) return
-      board[pos.y][pos.x].stone = currentPlayer
-      stonesPlaced[currentPlayer]++
+      // Deep copy for history snapshot
+      pushHistory(undefined)
+      // Deep copy for mutation
+      const next = deepCopyStateData(get())
+      next.board![pos.y][pos.x].stone = currentPlayer
+      next.stonesPlaced![currentPlayer]++
       const newTotal = totalPlaced + 1
       const nextIdx = placingTurnIndex(newTotal, players.length)
       const nextPlayer = players[nextIdx]
-      const allDone = Object.values(stonesPlaced).every(c => c === stonesLimit)
-      set({
-        board: [...board],
-        turn: nextPlayer,
-        phase: allDone ? 'playing' : 'placing',
-        stonesPlaced: { ...stonesPlaced },
-        selected: undefined,
-        legal: new Set(),
-        stepsTaken: 0,
-        skipReason: undefined,
-        result: undefined,
-      })
+      const allDone = Object.values(next.stonesPlaced!).every(c => c === stonesLimit)
+      next.turn = nextPlayer
+      next.phase = (allDone ? 'playing' : 'placing') as import('../lib/types').Phase
+      next.selected = undefined
+      next.legal = new Set<string>()
+      next.stepsTaken = 0
+      next.skipReason = undefined
+      next.result = undefined
+      set(next)
     },
     selectStone(pos: Pos) {
-      const { board, turn, stepsTaken } = get()
+      const { board, turn, stepsTaken, phase } = get()
+      if (phase !== 'playing') return
       if (stepsTaken > 0) return
       if (board[pos.y][pos.x].stone !== turn) return
       const legal = new Set<string>()
@@ -95,104 +97,103 @@ export const useGame = create<State>((_set, get) => {
       set({ selected: pos, legal, stepsTaken: 0, skipReason: undefined })
     },
     moveTo(to: Pos) {
-      pushHistory()
-      const { selected, board, legal, stepsTaken } = get()
+      const { selected, board, legal, stepsTaken, phase } = get()
+      if (phase !== 'playing') return
       if (!selected) return
       if (!legal.has(`${to.x},${to.y}`)) return
+      const piece = board[selected.y][selected.x].stone
+      if (!piece) return
+      // Deep copy for history snapshot
+      pushHistory(undefined)
+      // Deep copy for mutation
+      const next = deepCopyStateData(get())
+      next.board![selected.y][selected.x].stone = null
+      next.board![to.y][to.x].stone = piece
       const dist = Math.abs(to.x - selected.x) + Math.abs(to.y - selected.y)
       const newSteps = stepsTaken + dist
-      const piece = board[selected.y][selected.x].stone
-      board[selected.y][selected.x].stone = null
-      board[to.y][to.x].stone = piece
       const nextLegal = new Set<string>()
       if (newSteps < 2) {
-        for (let yy = 0; yy < board.length; yy++) {
-          for (let xx = 0; xx < board.length; xx++) {
-            if (isLegalMove(to, { x: xx, y: yy }, board, 2 - newSteps)) {
+        for (let yy = 0; yy < next.board!.length; yy++) {
+          for (let xx = 0; xx < next.board!.length; xx++) {
+            if (isLegalMove(to, { x: xx, y: yy }, next.board!, 2 - newSteps)) {
               nextLegal.add(`${xx},${yy}`)
             }
           }
         }
       }
-      set({
-        board: [...board],
-        selected: to,
-        legal: nextLegal,
-        stepsTaken: newSteps,
-        skipReason: undefined,
-      })
+      next.selected = to
+      next.legal = nextLegal
+      next.stepsTaken = newSteps
+      next.skipReason = undefined
+      set(next)
     },
     buildWall(pos: Pos, dir: WallDir) {
-      pushHistory()
-      const { board, turn, selected } = get()
+      const { board, turn, selected, phase } = get()
+      if (phase !== 'playing') return
       if (!selected || selected.x !== pos.x || selected.y !== pos.y) return
-      let built = false
-      const cell = board[pos.y][pos.x]
+      // Check if wall can be built before mutating
       if (dir === 'top') {
-        if (pos.y === 0) return
-        if (cell.wallTop === null) {
-          cell.wallTop = turn
-          built = true
-        }
+        if (pos.y === 0 || board[pos.y][pos.x].wallTop !== null) return
       } else if (dir === 'left') {
-        if (pos.x === 0) return
-        if (cell.wallLeft === null) {
-          cell.wallLeft = turn
-          built = true
-        }
+        if (pos.x === 0 || board[pos.y][pos.x].wallLeft !== null) return
       } else if (dir === 'right') {
-        if (pos.x + 1 < board.length && board[pos.y][pos.x + 1].wallLeft === null) {
-          board[pos.y][pos.x + 1].wallLeft = turn
-          built = true
-        }
+        if (pos.x + 1 >= board.length || board[pos.y][pos.x + 1].wallLeft !== null) return
       } else if (dir === 'bottom') {
-        if (pos.y + 1 < board.length && board[pos.y + 1][pos.x].wallTop === null) {
-          board[pos.y + 1][pos.x].wallTop = turn
-          built = true
-        }
-      }
-      if (!built) return
-      const end = checkGameEnd(board, PLAYERS)
-      if (end.finished) {
-        set({
-          board: [...board],
-          phase: 'finished',
-          result: end,
-          selected: undefined,
-          legal: new Set(),
-          stepsTaken: 0,
-        })
+        if (pos.y + 1 >= board.length || board[pos.y + 1][pos.x].wallTop !== null) return
+      } else {
         return
       }
-      const { turn: nextTurn, skipReason } = advanceTurn(board, turn, PLAYERS)
+      // Deep copy for history snapshot
+      pushHistory(undefined)
+      // Deep copy for mutation
+      const next = deepCopyStateData(get())
+      const cell = next.board![pos.y][pos.x]
+      if (dir === 'top') {
+        cell.wallTop = turn
+      } else if (dir === 'left') {
+        cell.wallLeft = turn
+      } else if (dir === 'right') {
+        next.board![pos.y][pos.x + 1].wallLeft = turn
+      } else if (dir === 'bottom') {
+        next.board![pos.y + 1][pos.x].wallTop = turn
+      }
+      const end = checkGameEnd(next.board!, PLAYERS)
+      if (end.finished) {
+        next.phase = 'finished' as import('../lib/types').Phase
+        next.result = end
+        next.selected = undefined
+        next.legal = new Set<string>()
+        next.stepsTaken = 0
+        set(next)
+        return
+      }
+      const { turn: nextTurn, skipReason } = advanceTurn(next.board!, turn, PLAYERS)
       if (skipReason === 'allBlocked') {
-        const endB = checkGameEnd(board, PLAYERS)
+        const endB = checkGameEnd(next.board!, PLAYERS)
         if (!endB.finished) {
           endB.finished = true
           endB.tie = true
         }
-        set({
-          board: [...board],
-          phase: 'finished',
-          result: endB,
-          selected: undefined,
-          legal: new Set(),
-          stepsTaken: 0,
-          skipReason: undefined,
-        })
+        next.phase = 'finished' as import('../lib/types').Phase
+        next.result = endB
+        next.selected = undefined
+        next.legal = new Set<string>()
+        next.stepsTaken = 0
+        next.skipReason = undefined
+        set(next)
         return
       }
-      set({
-        board: [...board],
-        selected: undefined,
-        turn: nextTurn,
-        legal: new Set(),
-        stepsTaken: 0,
-        skipReason,
-      })
+      next.selected = undefined
+      next.turn = nextTurn
+      next.legal = new Set<string>()
+      next.stepsTaken = 0
+      next.skipReason = skipReason
+      set(next)
     },
     resetGame() {
       const initial = makeInitialState()
+      // Deep copy for history snapshot
+      pushHistory(undefined)
       set({
         ...initial,
         _history: [snapshotFromState(initial)],
@@ -202,3 +203,21 @@ export const useGame = create<State>((_set, get) => {
     setPhase(phase) { set({ phase }) },
   }
 })
+
+// Utility to deep copy only the data fields of State (not methods)
+function deepCopyStateData(state: State): Partial<State> {
+  return {
+    board: state.board.map(row => row.map(cell => ({ ...cell }))),
+    stonesPlaced: { ...state.stonesPlaced },
+    players: [...state.players],
+    selected: state.selected ? { ...state.selected } : undefined,
+    legal: new Set(state.legal),
+    result: state.result ? JSON.parse(JSON.stringify(state.result)) : undefined,
+    turn: state.turn,
+    stepsTaken: state.stepsTaken,
+    phase: state.phase,
+    stonesLimit: state.stonesLimit,
+    skipReason: state.skipReason,
+    // _history and _future are not copied here
+  }
+}
