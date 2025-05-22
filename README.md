@@ -9,7 +9,7 @@ Builds to a completely static site so it can be served on **GitHub Pages** (or a
 
 ## Demo
 
-> (Once deployed) https://schaoss.github.io/wall-go/
+https://schaoss.github.io/wall-go/
 
 ---
 
@@ -29,7 +29,7 @@ This project uses the following tools and libraries:
 | Tool / Library      | Purpose                               |
 |---------------------|----------------------------------------|
 | **Bun**             | Runtime, package manager, and dev server |
-| **React**           | UI framework                          |
+| **React**           | JavaScript framework                          |
 | **TypeScript**      | Type-safe development                 |
 | **Vite**            | Lightning-fast bundler                |
 | **Tailwind CSS v4** | Utility-first styling                 |
@@ -56,61 +56,6 @@ bun run build        # outputs to /dist
 ```
 
 Open <http://localhost:5173> and start placing stones!
-
----
-
-## Deploy to GitHub Pages
-
-1. **Add the homepage field**
-
-   In `package.json`:
-
-   ```jsonc
-   {
-     "homepage": "https://schaoss.github.io/wall-go"
-   }
-   ```
-
-2. **Install the gh‑pages helper (already in dev deps)**  
-   ```bash
-   bun add -D gh-pages
-   ```
-
-3. **One‑shot manual deploy**
-
-   ```bash
-   bun run build
-   bun run deploy      # runs gh-pages -d dist
-   ```
-
-   This pushes `dist/` to the `gh-pages` branch and your site will be live at the URL above.
-
-### CI Deploy (recommended)
-
-Create `.github/workflows/deploy.yml`:
-
-```yaml
-name: Deploy to GH‑Pages
-on:
-  push:
-    branches: [main]
-jobs:
-  build-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: "latest"
-      - run: bun install
-      - run: bun run build
-      - uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-```
-
-Push to `main` and GitHub Actions will automatically build and publish.
 
 ---
 
