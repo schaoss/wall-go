@@ -1,9 +1,10 @@
 import clsx from 'clsx'
-import { BOARD_SIZE, type Phase, type WallDir, type Player, type Pos } from './lib/types'
+import { BOARD_SIZE } from '../../lib/types'
+import type { Phase, WallDir, Player, Pos } from '../../lib/types'
 import Cell from './Cell'
 
 export interface BoardProps {
-  board: import('./lib/types').Cell[][]
+  board: import('../../lib/types').Cell[][]
   phase: Phase
   turn: Player
   selected: Pos | null
@@ -14,7 +15,7 @@ export interface BoardProps {
   buildWall: (pos: Pos, dir: WallDir) => void
 }
 
-export default function Board({
+function Board({
   board, phase, turn, selected, legal,
   selectStone, placeStone, moveTo, buildWall
 }: BoardProps) {
@@ -27,7 +28,7 @@ export default function Board({
           `grid-rows-${BOARD_SIZE}`,
           'gap-[2px] p-2 sm:p-4',
           'transition-all duration-500',
-          'bg-white/80 dark:bg-zinc-900/80', // 讓棋盤底色也能切換
+          'bg-white/80 dark:bg-zinc-900/80',
         )}
       >
         {board.map((row, y) =>
@@ -58,3 +59,5 @@ export default function Board({
     </div>
   )
 }
+
+export default Board

@@ -6,7 +6,6 @@ import { checkGameEnd } from './utils/checkGameEnd'
 
 // Configuration – easily tweakable for 2‑player, 3‑player, etc.
 const PLAYERS: Player[] = [...PLAYER_LIST]
-const STONES_PER_PLAYER_CONST = STONES_PER_PLAYER
 const SKIP_REASON_ALL_BLOCKED = 'allBlocked' as const
 
 // Helper to compute whose turn during placing phase
@@ -80,7 +79,7 @@ function makeInitialState(): Omit<State, 'placeStone' | 'selectStone' | 'moveTo'
     stepsTaken: 0,
     phase: 'placing',
     players: [...PLAYER_LIST],
-    stonesLimit: STONES_PER_PLAYER_CONST,
+    stonesLimit: STONES_PER_PLAYER,
     stonesPlaced: Object.fromEntries(PLAYER_LIST.map(p => [p, 0])) as Record<Player, number>,
     result: undefined,
     skipReason: undefined,
