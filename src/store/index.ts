@@ -6,7 +6,31 @@ import { placingTurnIndex, advanceTurn } from './actions'
 import { isLegalMove } from '../utils/isLegalMove'
 import { checkGameEnd } from '../utils/checkGameEnd'
 
-export const useGame = create<State>((set, get) => {
+export const useGame = create<State>((_set, get) => {
+  // 包一層 set，讓每次 set 都自動同步 canUndo/canRedo
+  const set: typeof _set = (partial, replace) => {
+    if (replace === true) {
+      // 直接覆蓋
+      _set(partial as State, true)
+    } else {
+      _set((state) => {
+        const next = typeof partial === 'function' ? partial(state) : partial
+        // 類型安全取得 _history/_future
+        const _history = (typeof next === 'object' && next && '_history' in next && Array.isArray((next as Partial<State>)._history))
+          ? (next as Partial<State>)._history!
+          : state._history
+        const _future = (typeof next === 'object' && next && '_future' in next && Array.isArray((next as Partial<State>)._future))
+          ? (next as Partial<State>)._future!
+          : state._future
+        return {
+          ...state,
+          ...next,
+          canUndo: _history.length > 1,
+          canRedo: _future.length > 0,
+        }
+      })
+    }
+  }
   // --- history ---
   const { pushHistory, popHistory, popFuture } = createHistoryHandlers(
     get,
@@ -27,10 +51,10 @@ export const useGame = create<State>((set, get) => {
     ...initial,
     _history: [snapshotFromState(initial)],
     _future: [],
+    canUndo: false,
+    canRedo: false,
     undo() { popHistory() },
     redo() { popFuture() },
-    get canUndo() { return get()._history.length > 1 },
-    get canRedo() { return get()._future.length > 0 },
     placeStone(pos: Pos) {
       pushHistory()
       const { board, players, stonesPlaced, stonesLimit } = get()
