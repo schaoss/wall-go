@@ -65,8 +65,6 @@ export const useGame = create<State>((_set, get) => {
         const currentIdx = placingTurnIndex(totalPlaced, players.length)
         const currentPlayer = players[currentIdx]
         if (board[pos.y][pos.x].stone) return state
-        // Push current state to history BEFORE mutation
-        const newHistory = [...state._history, snapshotFromState(state)]
         // Mutate a deep copy of state
         const next = snapshotFromState(state)
         next.board[pos.y][pos.x].stone = currentPlayer
@@ -82,6 +80,8 @@ export const useGame = create<State>((_set, get) => {
         next.stepsTaken = 0
         next.skipReason = undefined
         next.result = undefined
+        // Push the new state (after mutation) to history
+        const newHistory = [...state._history, snapshotFromState(next)]
         return {
           ...next,
           _history: newHistory,
@@ -114,8 +114,6 @@ export const useGame = create<State>((_set, get) => {
         if (!legal.has(`${to.x},${to.y}`)) return state
         const piece = board[selected.y][selected.x].stone
         if (!piece) return state
-        // Push current state to history BEFORE mutation
-        const newHistory = [...state._history, snapshotFromState(state)]
         // Mutate a deep copy of state
         const next = snapshotFromState(state)
         next.board[selected.y][selected.x].stone = null
@@ -136,6 +134,8 @@ export const useGame = create<State>((_set, get) => {
         next.legal = nextLegal
         next.stepsTaken = newSteps
         next.skipReason = undefined
+        // Push the new state (after mutation) to history
+        const newHistory = [...state._history, snapshotFromState(next)]
         return {
           ...next,
           _history: newHistory,
@@ -160,8 +160,6 @@ export const useGame = create<State>((_set, get) => {
         } else {
           return state
         }
-        // Push current state to history BEFORE mutation
-        const newHistory = [...state._history, snapshotFromState(state)]
         // Mutate a deep copy of state
         const next = snapshotFromState(state)
         const cell = next.board[pos.y][pos.x]
@@ -181,6 +179,8 @@ export const useGame = create<State>((_set, get) => {
           next.selected = undefined
           next.legal = new Set<string>()
           next.stepsTaken = 0
+          // Push the new state (after mutation) to history
+          const newHistory = [...state._history, snapshotFromState(next)]
           return {
             ...next,
             _history: newHistory,
@@ -200,6 +200,8 @@ export const useGame = create<State>((_set, get) => {
           next.legal = new Set<string>()
           next.stepsTaken = 0
           next.skipReason = undefined
+          // Push the new state (after mutation) to history
+          const newHistory = [...state._history, snapshotFromState(next)]
           return {
             ...next,
             _history: newHistory,
@@ -211,6 +213,8 @@ export const useGame = create<State>((_set, get) => {
         next.legal = new Set<string>()
         next.stepsTaken = 0
         next.skipReason = skipReason
+        // Push the new state (after mutation) to history
+        const newHistory = [...state._history, snapshotFromState(next)]
         return {
           ...next,
           _history: newHistory,
@@ -220,9 +224,10 @@ export const useGame = create<State>((_set, get) => {
     },
     resetGame() {
       set(state => {
-        // Push current state to history BEFORE mutation
-        const newHistory = [...state._history, snapshotFromState(state)]
+        // Mutate a new initial state
         const initial = makeInitialState()
+        // Push the new state (after mutation) to history
+        const newHistory = [...state._history, snapshotFromState(initial)]
         return {
           ...initial,
           _history: newHistory,

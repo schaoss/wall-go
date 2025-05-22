@@ -23,12 +23,15 @@ export function createHistoryHandlers(
   }
   function popHistory() {
     if (get()._history.length <= 1) return // Only allow undo if there is a previous state
-    const prev = get()._history[get()._history.length - 2]
-    const currentSnapshot = snapshotFromState(get())
+    const history = get()._history
+    const future = get()._future
+    // Move the last snapshot to _future, restore the new last snapshot
+    const prev = history[history.length - 2]
+    const currentSnapshot = history[history.length - 1]
     set({
       ...restoreSnapshot(prev),
-      _history: get()._history.slice(0, -1),
-      _future: [currentSnapshot, ...get()._future],
+      _history: history.slice(0, -1),
+      _future: [currentSnapshot, ...future],
     })
   }
   function popFuture() {
