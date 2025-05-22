@@ -5,6 +5,7 @@ import GameStatus from './components/ui/GameStatus'
 import { useGame } from './store/index'
 import { checkGameEnd } from './utils/checkGameEnd'
 import { PLAYER_LIST } from './lib/types'
+import GameButton from './components/ui/GameButton'
 
 export default function App() {
   const {
@@ -31,40 +32,81 @@ export default function App() {
   }, [dark])
 
   return (
-    <div className="flex flex-col items-center gap-4 py-6 min-h-screen bg-gradient-to-br from-rose-50 via-indigo-50 to-amber-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 transition-all duration-500">
+    <div
+      className={[
+        'flex flex-col items-center gap-4 py-4 min-h-dvh min-w-0',
+        'bg-gradient-to-br from-rose-50 via-indigo-50 to-amber-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900',
+        'transition-all duration-500',
+        'box-border',
+        'p-4',
+      ].join(' ')}
+      style={{
+        maxWidth: '100vw',
+        minHeight: '100dvh',
+      }}
+    >
       <div className="w-full flex justify-between px-4">
         <div className="flex gap-2">
-          <button
-            className="px-3 py-1 rounded bg-white/80 dark:bg-zinc-800/80 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-100 font-semibold shadow disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
+          <GameButton
             onClick={undo}
             disabled={!canUndo}
-            type="button"
-            aria-label="復原 (Undo)"
-          >↶ Undo</button>
-          <button
-            className="px-3 py-1 rounded bg-white/80 dark:bg-zinc-800/80 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-100 font-semibold shadow disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
+            ariaLabel="復原 (Undo)"
+          >↶ Undo</GameButton>
+          <GameButton
             onClick={redo}
             disabled={!canRedo}
-            type="button"
-            aria-label="重做 (Redo)"
-          >↷ Redo</button>
+            ariaLabel="重做 (Redo)"
+          >↷ Redo</GameButton>
         </div>
         <DarkModeToggle dark={dark} setDark={setDark} />
       </div>
-      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 drop-shadow mb-2 animate-fade-in">
-        Wall Go · {phase === 'placing' ? '擺子階段' : `輪到 ${turn}`}
+      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 drop-shadow mb-2 animate-fade-in flex items-center gap-2">
+        {phase === 'finished' && result ? (
+          result.tie ? (
+            <>平手！</>
+          ) : result.winner ? (
+            <>
+              勝者：
+              <span
+                className={
+                  result.winner === 'R'
+                    ? 'inline-block w-6 h-6 rounded-full bg-rose-500 dark:bg-rose-400 border-2 border-rose-300 dark:border-rose-500 shadow-sm mx-1 align-middle'
+                    : 'inline-block w-6 h-6 rounded-full bg-indigo-500 dark:bg-indigo-400 border-2 border-indigo-300 dark:border-indigo-500 shadow-sm mx-1 align-middle'
+                }
+                aria-label={result.winner === 'R' ? '紅方' : '藍方'}
+              />
+            </>
+          ) : null
+        ) : (
+          <>Wall Go · {phase === 'placing' ? '擺子階段' : phase === 'playing' ? '行動階段' : '結算階段'}</>
+        )}
       </h1>
-      <div className="flex gap-4 mb-2 animate-fade-in">
+      <div className="flex gap-4 mb-2 animate-fade-in items-center">
         {Object.entries(live.score ?? {}).map(([p, s]) => (
           <span
             key={p}
-            className="font-mono text-lg px-2 py-1 rounded bg-white/70 dark:bg-zinc-800/80 shadow-sm border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 transition-all duration-300"
+            className="flex items-center gap-2 font-mono text-lg px-2 py-1 rounded bg-white/70 dark:bg-zinc-800/80 shadow-sm border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 transition-all duration-300"
           >
-            {p}: {s}
+            <span
+              className={
+                p === 'R'
+                  ? 'inline-block w-5 h-5 rounded-full bg-rose-500 dark:bg-rose-400 border-2 border-rose-300 dark:border-rose-500 shadow-sm mr-1'
+                  : 'inline-block w-5 h-5 rounded-full bg-indigo-500 dark:bg-indigo-400 border-2 border-indigo-300 dark:border-indigo-500 shadow-sm mr-1'
+              }
+              aria-label={p === 'R' ? '紅方' : '藍方'}
+            />
+            {s}
           </span>
         ))}
+        {phase === 'finished' && (
+          <GameButton
+            onClick={resetGame}
+            ariaLabel="再玩一次"
+            className="!bg-emerald-200/80 !dark:bg-emerald-900/80 !hover:bg-emerald-400/80 !dark:hover:bg-emerald-800/95 !text-emerald-900 !dark:text-emerald-100 !border-emerald-300 !dark:border-emerald-700 shadow-lg"
+          >再玩一次</GameButton>
+        )}
       </div>
-      <GameStatus phase={phase} skipReason={skipReason ?? null} result={result ?? null} resetGame={resetGame} />
+      <GameStatus phase={phase} skipReason={skipReason ?? null} />
       <Board
         board={board}
         phase={phase}

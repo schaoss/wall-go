@@ -18,11 +18,13 @@ export interface CellProps {
   buildWall: (pos: Pos, dir: WallDir) => void
   board: import('../../lib/types').Cell[][]
   boardSize: number
+  // 新增: 領地資訊
+  territoryOwner?: Player | null
 }
 
 export default function Cell({
   x, y, cell, isSel, phase, turn, legal,
-  selectStone, placeStone, moveTo, buildWall, board, boardSize
+  selectStone, placeStone, moveTo, buildWall, board, boardSize, territoryOwner
 }: CellProps) {
   const posKey = `${x},${y}`
   // --- 棋子移動動畫 ---
@@ -64,11 +66,16 @@ export default function Cell({
   return (
     <div
       className={clsx(
-        'relative aspect-square border border-zinc-300 dark:border-zinc-700 bg-white/70 dark:bg-zinc-900/70 overflow-visible',
+        'relative aspect-square border border-zinc-300 dark:border-zinc-700 overflow-visible rounded-lg',
         'transition-all duration-300',
         'flex items-center justify-center',
+        // 結算時只顯示領地顏色，不加預設底色
+        phase !== 'finished' && 'bg-white/70 dark:bg-zinc-900/70',
         !cell.stone && phase === 'placing' && 'hover:bg-amber-100/60 dark:hover:bg-zinc-800/40',
-        legal.has(posKey) && 'hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40',
+        legal.has(`${x},${y}`) && 'hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40',
+        // 結算時根據領地上色
+        phase === 'finished' && territoryOwner === 'R' && 'bg-rose-100 dark:bg-rose-900/60',
+        phase === 'finished' && territoryOwner === 'B' && 'bg-indigo-100 dark:bg-indigo-900/60',
       )}
       data-cell-x={x}
       data-cell-y={y}
@@ -115,7 +122,7 @@ export default function Cell({
           ref={stoneRef}
           key={cell.stone + '-' + x + '-' + y}
           className={clsx(
-            'rounded-full cursor-pointer',
+            'rounded-full',
             playerColorClass(cell.stone),
             'shadow-lg drop-shadow-md',
             'transition-transform transition-shadow duration-300',
@@ -123,6 +130,8 @@ export default function Cell({
             'flex items-center justify-center',
             'border border-zinc-200 dark:border-zinc-700',
             'animate-stone-move',
+            // 只有輪到該玩家時才是 pointer
+            phase === 'playing' && cell.stone === turn ? 'cursor-pointer' : 'cursor-default',
           )}
           style={{
             width: '70%',
@@ -132,14 +141,14 @@ export default function Cell({
             maxWidth: '60px',
             maxHeight: '60px',
           }}
-          onClick={() => phase === 'playing' && selectStone({ x, y })}
+          onClick={() => phase === 'playing' && cell.stone === turn && selectStone({ x, y })}
         />
       )}
 
       {/* 擺子階段空格動畫 */}
       {!cell.stone && phase === 'placing' && (
         <button
-          className="absolute inset-0 bg-transparent hover:bg-amber-100/60 cursor-pointer transition-all duration-200"
+          className="absolute inset-0 bg-transparent hover:bg-amber-100/60 cursor-pointer transition-all duration-200 rounded-lg"
           onClick={() => placeStone({ x, y })}
         />
       )}

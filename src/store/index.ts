@@ -192,12 +192,11 @@ export const useGame = create<State>((_set, get) => {
       })
     },
     resetGame() {
-      pushHistory()
       const initial = makeInitialState()
       set({
         ...initial,
-        _history: get()._history,
-        _future: get()._future,
+        _history: [snapshotFromState(initial)],
+        _future: [],
       })
     },
     setPhase(phase) { set({ phase }) },
