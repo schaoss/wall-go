@@ -1,4 +1,5 @@
 # Wall‑Go 🧱♟️
+![cover](https://schaoss.github.io/wall-go/cover.png)
 
 > Wall Go (牆壁圍棋) – open-source React + TypeScript implementation. Play the strategy board game from Devil’s Plan 2 in your browser. Undo/redo, territory scoring, and beautiful UI. [圍棋小遊戲, Wall Go, Devil's Plan, 牆壁圍棋, React, TypeScript, GitHub, 開源, 桌遊, 單人遊戲, browser game]
 
