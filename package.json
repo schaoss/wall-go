@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist",
-    "test": "vitest"
+    "test": "vitest run --browser --coverage",
+    "test:ui": "vitest --ui --browser",
+    "test:watch": "vitest watch --browser"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.7",
@@ -20,6 +22,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
+    "@testing-library/react": "^16.3.0",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
