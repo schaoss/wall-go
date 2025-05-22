@@ -10,7 +10,7 @@ export const useGame = create<State>((set, get) => {
   // --- history ---
   const { pushHistory, popHistory, popFuture } = createHistoryHandlers(
     get,
-    (partial) => set({ ...get(), ...partial }),
+    set,
     (state) => {
       // snapshot 只存遊戲狀態，不存 _history/_future/undo/redo/canUndo/canRedo
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -29,7 +29,7 @@ export const useGame = create<State>((set, get) => {
     _future: [],
     undo() { popHistory() },
     redo() { popFuture() },
-    get canUndo() { return get()._history.length > 0 },
+    get canUndo() { return get()._history.length > 1 },
     get canRedo() { return get()._future.length > 0 },
     placeStone(pos: Pos) {
       pushHistory()
@@ -45,11 +45,15 @@ export const useGame = create<State>((set, get) => {
       const nextPlayer = players[nextIdx]
       const allDone = Object.values(stonesPlaced).every(c => c === stonesLimit)
       set({
-        ...get(),
         board: [...board],
         turn: nextPlayer,
         phase: allDone ? 'playing' : 'placing',
         stonesPlaced: { ...stonesPlaced },
+        selected: undefined,
+        legal: new Set(),
+        stepsTaken: 0,
+        skipReason: undefined,
+        result: undefined,
       })
     },
     selectStone(pos: Pos) {
@@ -64,7 +68,7 @@ export const useGame = create<State>((set, get) => {
           }
         }
       }
-      set({ ...get(), selected: pos, legal, stepsTaken: 0, skipReason: undefined })
+      set({ selected: pos, legal, stepsTaken: 0, skipReason: undefined })
     },
     moveTo(to: Pos) {
       pushHistory()
@@ -86,7 +90,13 @@ export const useGame = create<State>((set, get) => {
           }
         }
       }
-      set({ ...get(), board: [...board], selected: to, legal: nextLegal, stepsTaken: newSteps, skipReason: undefined })
+      set({
+        board: [...board],
+        selected: to,
+        legal: nextLegal,
+        stepsTaken: newSteps,
+        skipReason: undefined,
+      })
     },
     buildWall(pos: Pos, dir: WallDir) {
       pushHistory()
@@ -121,7 +131,6 @@ export const useGame = create<State>((set, get) => {
       const end = checkGameEnd(board, PLAYERS)
       if (end.finished) {
         set({
-          ...get(),
           board: [...board],
           phase: 'finished',
           result: end,
@@ -139,7 +148,6 @@ export const useGame = create<State>((set, get) => {
           endB.tie = true
         }
         set({
-          ...get(),
           board: [...board],
           phase: 'finished',
           result: endB,
@@ -151,7 +159,6 @@ export const useGame = create<State>((set, get) => {
         return
       }
       set({
-        ...get(),
         board: [...board],
         selected: undefined,
         turn: nextTurn,
@@ -164,8 +171,9 @@ export const useGame = create<State>((set, get) => {
       pushHistory()
       const initial = makeInitialState()
       set({
-        ...get(),
         ...initial,
+        _history: get()._history,
+        _future: get()._future,
       })
     },
   }

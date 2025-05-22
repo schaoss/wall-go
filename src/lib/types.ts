@@ -10,6 +10,6 @@ export interface Cell {
 
 export type Phase = 'placing' | 'playing' | 'finished'
 export type WallDir = 'top' | 'left' | 'right' | 'bottom'
-export const PLAYER_LIST = ['R', 'B'] as const
+export const PLAYER_LIST = ['R', 'B'] as readonly Player[]
 export const STONES_PER_PLAYER = 4 as const
 export const WallDirArray = ['top', 'left', 'right', 'bottom'] as const

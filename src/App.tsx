@@ -4,6 +4,7 @@ import DarkModeToggle from './components/ui/DarkModeToggle'
 import GameStatus from './components/ui/GameStatus'
 import { useGame } from './store/index'
 import { checkGameEnd } from './utils/checkGameEnd'
+import { PLAYER_LIST } from './lib/types'
 
 export default function App() {
   const {
@@ -12,7 +13,7 @@ export default function App() {
     undo, redo, canUndo, canRedo,
   } = useGame()
 
-  const live = checkGameEnd(board, ['R', 'B'])
+  const live = checkGameEnd(board, [...PLAYER_LIST])
 
   // 深色模式切換
   const [dark, setDark] = useState(() =>
