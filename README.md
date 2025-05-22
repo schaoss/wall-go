@@ -34,7 +34,6 @@ This project uses the following tools and libraries:
 | **Vite**            | Lightning-fast bundler                |
 | **Tailwind CSS v4** | Utility-first styling                 |
 | **Zustand**         | Lightweight state management          |
-| **gh-pages**        | Deployment helper to GitHub Pages     |
 
 ---
 
