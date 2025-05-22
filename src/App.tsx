@@ -57,13 +57,27 @@ export default function App() {
               return (
                 <div key={posKey} className="relative aspect-square border border-zinc-300">
                   {/* 牆 */}
-                  {cell.wallTop && <div className={clsx('absolute left-0 top-0 h-1 w-full', color(cell.wallTop))} />}
-                  {cell.wallLeft && <div className={clsx('absolute left-0 top-0 w-1 h-full', color(cell.wallLeft))} />}
+                  {cell.wallTop && (
+                    <div
+                      className={clsx(
+                        'absolute -top-[2.5px] left-0 h-[5px] w-full',
+                        color(cell.wallTop)
+                      )}
+                    />
+                  )}
+                  {cell.wallLeft && (
+                    <div
+                      className={clsx(
+                        'absolute -left-[2.5px] top-0 w-[5px] h-full',
+                        color(cell.wallLeft)
+                      )}
+                    />
+                  )}
 
                   {/* 石子 */}
                   {cell.stone && (
                     <button
-                      className={clsx('absolute inset-[15%] rounded-full', color(cell.stone),
+                      className={clsx('absolute inset-[15%] rounded-full cursor-pointer', color(cell.stone),
                         isSel && 'ring-2 ring-amber-400')}
                       onClick={() => phase === 'playing' && selectStone({ x, y })}
                     />
@@ -72,7 +86,7 @@ export default function App() {
                   {/* 擺子階段空格 */}
                   {!cell.stone && phase === 'placing' && (
                     <button
-                      className="absolute inset-0 hover:bg-amber-100/40"
+                      className="absolute inset-0 hover:bg-amber-100/40 cursor-pointer"
                       onClick={() => placeStone({ x, y })}
                     />
                   )}
@@ -80,7 +94,7 @@ export default function App() {
                   {/* 合法移動格 */}
                   {legal.has(posKey) && (
                     <button
-                      className="absolute inset-0 bg-emerald-400/20 hover:bg-emerald-400/40"
+                      className="absolute inset-0 bg-emerald-400/20 hover:bg-emerald-400/40 cursor-pointer"
                       onClick={() => moveTo({ x, y })}
                     />
                   )}
@@ -88,31 +102,77 @@ export default function App() {
                   {/* 建牆按鈕（若此格被選中） */}
                   {isSel && (
                     <>
-                      {/* TOP wall button */}
+                      {/* TOP */}
                       {y > 0 && !cell.wallTop && (
                         <button
                           onClick={() => buildWall({ x, y }, 'top')}
-                          className="absolute -top-1 left-1/2 -translate-x-1/2 h-1.5 w-6 rounded bg-gray-500/60 hover:bg-rose-500"
-                        />
+                          className={clsx(
+                            'group absolute -top-[13px] left-1/2 -translate-x-1/2 w-16 h-6 flex items-center justify-center bg-transparent cursor-pointer z-1'
+                          )}
+                        >
+                          <div
+                            className={clsx(
+                              'h-[5px] w-full rounded bg-gray-500/60',
+                              turn === 'R'
+                                ? 'group-hover:bg-rose-300/60'
+                                : 'group-hover:bg-indigo-300/60'
+                            )}
+                          />
+                        </button>
                       )}
-                      {/* LEFT wall button */}
+                      {/* LEFT */}
                       {x > 0 && !cell.wallLeft && (
                         <button
                           onClick={() => buildWall({ x, y }, 'left')}
-                          className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded bg-gray-500/60 hover:bg-rose-500"
-                        />
+                          className={clsx(
+                            'group absolute -left-[13px] top-1/2 -translate-y-1/2 w-6 h-16 flex items-center justify-center bg-transparent cursor-pointer z-1'
+                          )}
+                        >
+                          <div
+                            className={clsx(
+                              'w-[5px] h-full rounded bg-gray-500/60',
+                              turn === 'R'
+                                ? 'group-hover:bg-rose-300/60'
+                                : 'group-hover:bg-indigo-300/60'
+                            )}
+                          />
+                        </button>
                       )}
+                      {/* RIGHT */}
                       {x < BOARD_SIZE - 1 && !board[y][x + 1].wallLeft && (
                         <button
                           onClick={() => buildWall({ x, y }, 'right')}
-                          className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded bg-gray-500/60 hover:bg-rose-500"
-                        />
+                          className={clsx(
+                            'group absolute -right-[13px] top-1/2 -translate-y-1/2 w-6 h-16 flex items-center justify-center bg-transparent cursor-pointer z-1'
+                          )}
+                        >
+                          <div
+                            className={clsx(
+                              'w-[5px] h-full rounded bg-gray-500/60',
+                              turn === 'R'
+                                ? 'group-hover:bg-rose-300/60'
+                                : 'group-hover:bg-indigo-300/60'
+                            )}
+                          />
+                        </button>
                       )}
+                      {/* BOTTOM */}
                       {y < BOARD_SIZE - 1 && !board[y + 1][x].wallTop && (
                         <button
                           onClick={() => buildWall({ x, y }, 'bottom')}
-                          className="absolute left-1/2 -translate-x-1/2 bottom-0 h-1.5 w-6 rounded bg-gray-500/60 hover:bg-rose-500"
-                        />
+                          className={clsx(
+                            'group absolute -bottom-[13px] left-1/2 -translate-x-1/2 w-16 h-6 flex items-center justify-center bg-transparent cursor-pointer z-1'
+                          )}
+                        >
+                          <div
+                            className={clsx(
+                              'h-[5px] w-full rounded bg-gray-500/60',
+                              turn === 'R'
+                                ? 'group-hover:bg-rose-300/60'
+                                : 'group-hover:bg-indigo-300/60'
+                            )}
+                          />
+                        </button>
                       )}
                     </>
                   )}
