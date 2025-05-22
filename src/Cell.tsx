@@ -1,7 +1,10 @@
 import clsx from 'clsx'
 import { type Player } from './lib/types'
 
-const color = (p: Player) => (p === 'R' ? 'bg-rose-500' : 'bg-indigo-500')
+const color = (p: Player) =>
+  p === 'R'
+    ? 'bg-rose-500 dark:bg-rose-400'
+    : 'bg-indigo-500 dark:bg-indigo-400'
 
 export interface CellProps {
   x: number
@@ -27,11 +30,11 @@ export default function Cell({
   return (
     <div
       className={clsx(
-        'relative aspect-square border border-zinc-300 bg-white/70 overflow-visible',
+        'relative aspect-square border border-zinc-300 dark:border-zinc-700 bg-white/70 dark:bg-zinc-900/70 overflow-visible',
         'transition-all duration-300',
-        'flex items-center justify-center', // 讓格子內容用 flex 置中
-        !cell.stone && phase === 'placing' && 'hover:bg-amber-100/60',
-        legal.has(posKey) && 'hover:bg-emerald-200/40',
+        'flex items-center justify-center',
+        !cell.stone && phase === 'placing' && 'hover:bg-amber-100/60 dark:hover:bg-zinc-800/40',
+        legal.has(posKey) && 'hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40',
       )}
     >
       {/* 牆動畫 */}
@@ -45,6 +48,7 @@ export default function Cell({
             className={clsx(
               color(cell.wallTop),
               'shadow-md transition-all duration-300 rounded',
+              'border border-zinc-200 dark:border-zinc-700',
             )}
             style={{
               width: '80%',
@@ -65,6 +69,7 @@ export default function Cell({
             className={clsx(
               color(cell.wallLeft),
               'shadow-md transition-all duration-300 rounded',
+              'border border-zinc-200 dark:border-zinc-700',
             )}
             style={{
               height: '80%',
@@ -85,7 +90,8 @@ export default function Cell({
             'shadow-lg drop-shadow-md',
             'transition-transform transition-shadow duration-200',
             'hover:scale-110',
-            'flex items-center justify-center', // 讓棋子內容用 flex 置中
+            'flex items-center justify-center',
+            'border border-zinc-200 dark:border-zinc-700',
           )}
           style={{
             width: '70%',
@@ -160,8 +166,8 @@ export default function Cell({
                 'bg-gray-500/60 transition-all duration-200 shadow',
                 d.divClass,
                 turn === 'R'
-                  ? 'group-hover:bg-rose-300/60'
-                  : 'group-hover:bg-indigo-300/60',
+                  ? 'group-hover:bg-rose-300/60 dark:group-hover:bg-rose-400/60'
+                  : 'group-hover:bg-indigo-300/60 dark:group-hover:bg-indigo-400/60',
               )}
             />
           </button>

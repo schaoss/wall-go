@@ -19,14 +19,15 @@ export default function Board({
   selectStone, placeStone, moveTo, buildWall
 }: BoardProps) {
   return (
-    <div className="border-4 border-zinc-500 rounded-2xl shadow-xl bg-gradient-to-br from-zinc-50 to-zinc-200 transition-all duration-500 hover:shadow-2xl inline-block max-w-[800px] w-full aspect-square">
+    <div className="border-4 border-zinc-500 dark:border-zinc-700 rounded-2xl shadow-xl bg-gradient-to-br from-zinc-50 to-zinc-200 dark:from-zinc-900 dark:to-zinc-800 transition-all duration-500 hover:shadow-2xl inline-block max-w-[800px] w-full aspect-square">
       <div
         className={clsx(
           'grid',
           `grid-cols-${BOARD_SIZE}`,
           `grid-rows-${BOARD_SIZE}`,
           'gap-[2px] p-2 sm:p-4',
-          'transition-all duration-500'
+          'transition-all duration-500',
+          'bg-white/80 dark:bg-zinc-900/80', // 讓棋盤底色也能切換
         )}
       >
         {board.map((row, y) =>
