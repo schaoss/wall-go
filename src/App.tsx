@@ -11,6 +11,7 @@ import GameModeMenu from './components/ui/GameModeMenu'
 import ConfirmDialog from './components/ui/ConfirmDialog'
 import { TurnManager } from './agents/TurnManager'
 import { HumanAgent, MinimaxAiAgent } from './agents'
+import { RandomAiAgent } from './agents/RandomAiAgent'
 import type { PlayerAction } from './lib/types'
 import type { Player } from './lib/types'
 
@@ -20,6 +21,9 @@ type AiSide = 'R' | 'B'
 export default function App() {
   const [mode, setMode] = useState<GameMode | null>(null)
   const [aiSide, setAiSide] = useState<AiSide>('B')
+
+  // --- AI 難度狀態 ---
+  const [aiLevel, setAiLevel] = useState<'random' | 'minimax'>('random')
 
   const {
     board, turn, phase, result, selected, legal, skipReason,
@@ -98,7 +102,8 @@ export default function App() {
     if (!mode) return
     const human = new HumanAgent()
     humanAgentRef.current = human
-    const ai = new MinimaxAiAgent()
+    // 根據 aiLevel 決定 AI agent
+    const ai = aiLevel === 'minimax' ? new MinimaxAiAgent() : new RandomAiAgent()
     const agents: Record<Player, import('./agents/PlayerAgent').PlayerAgent> =
       mode === 'ai'
         ? (aiSide === 'R' ? { R: ai, B: human } : { R: human, B: ai })
@@ -120,7 +125,7 @@ export default function App() {
       isGameOver: (state) => state.phase === 'finished' || !!state.result,
     })
     turnManagerStartedRef.current = false // 每次 setup 都重設 flag
-  }, [mode, aiSide, buildWall, moveTo, placeStone, selectStone])
+  }, [mode, aiSide, aiLevel, buildWall, moveTo, placeStone, selectStone])
 
   // 初始化 TurnManager 與代理組合（mode/aiSide 變動時重建）
   useEffect(() => {
@@ -155,8 +160,8 @@ export default function App() {
             setHumanSide(null)
           }
         }}
-        aiSide={aiSide}
         setAiSide={setAiSide}
+        setAiLevel={setAiLevel}
       />
     )
   }

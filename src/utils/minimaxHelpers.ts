@@ -148,10 +148,28 @@ export function isSuicideMove(gameState: GameSnapshot, action: PlayerAction, pla
   return false
 }
 
+// 判斷某棋子是否在純淨領地（該格屬於 player 領地，且四周都無敵方鄰近）
+function isInPureTerritory(gameState: GameSnapshot, pos: {x: number, y: number}, player: string): boolean {
+  const { board } = gameState
+  const territory = getTerritoryMap(board)
+  if (territory[pos.y][pos.x] !== player) return false
+
+  return true
+}
+
 // Minimax 主體
 export function minimax(state: GameSnapshot, depth: number, maximizing: boolean, player: string): number {
   if (depth === 0) return evaluate(state, player)
-  const actions = getLegalActions(state)
+  let actions = getLegalActions(state)
+  // 過濾掉移動純淨領地內棋子的行動
+  if (state.phase === 'playing') {
+    actions = actions.filter(a => {
+      if (a.type === 'move' && a.from) {
+        return !isInPureTerritory(state, a.from, state.turn)
+      }
+      return true
+    })
+  }
   if (actions.length === 0) return evaluate(state, player)
   if (maximizing) {
     let maxEval = -Infinity
@@ -171,6 +189,7 @@ export function minimax(state: GameSnapshot, depth: number, maximizing: boolean,
 }
 
 // 擺子階段：最大化可移動格數
+// 修正 getRandomAiAction 用法，確保傳入 { legalActions } 並保證回傳型別
 export function selectBestPlacingAction(gameState: GameSnapshot, actions: PlayerAction[]): PlayerAction {
   const placeActions = actions.filter(a => a.type === 'place')
   if (placeActions.length === 1) {
