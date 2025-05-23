@@ -70,12 +70,12 @@ export default function Cell({
         'transition-all duration-300',
         'flex items-center justify-center',
         // 結算時只顯示領地顏色，不加預設底色
-        phase !== 'finished' && 'bg-white/70 dark:bg-zinc-900/70',
+        (phase !== 'finished' && !territoryOwner) || phase === 'placing' && 'bg-white/70 dark:bg-zinc-900/70',
         !cell.stone && phase === 'placing' && 'hover:bg-amber-100/60 dark:hover:bg-zinc-800/40',
         legal.has(`${x},${y}`) && 'hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40',
-        // 結算時根據領地上色
-        phase === 'finished' && territoryOwner === 'R' && 'bg-rose-100 dark:bg-rose-900/60',
-        phase === 'finished' && territoryOwner === 'B' && 'bg-indigo-100 dark:bg-indigo-900/60',
+        // 只要 territoryOwner 有值就上色
+        territoryOwner === 'R' && 'bg-rose-100 dark:bg-rose-900/60',
+        territoryOwner === 'B' && 'bg-indigo-100 dark:bg-indigo-900/60',
       )}
       data-cell-x={x}
       data-cell-y={y}

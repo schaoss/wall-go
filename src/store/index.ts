@@ -229,11 +229,10 @@ export const useGame = create<State>((_set, get) => {
       set(state => {
         // Mutate a new initial state
         const initial = makeInitialState()
-        // Push the new state (after mutation) to history
-        const newHistory = [...state._history, snapshotFromState(initial)]
         return {
           ...initial,
-          _history: newHistory,
+          phase: 'placing',
+          _history: [snapshotFromState({ ...initial, phase: 'placing' })],
           _future: [],
         }
       })

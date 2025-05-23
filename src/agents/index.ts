@@ -2,3 +2,4 @@
 export * from './PlayerAgent'
 export * from './HumanAgent'
 export * from './RandomAiAgent'
+export * from './MinimaxAiAgent'

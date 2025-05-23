@@ -10,7 +10,7 @@ import Footer from './components/ui/Footer'
 import GameModeMenu from './components/ui/GameModeMenu'
 import ConfirmDialog from './components/ui/ConfirmDialog'
 import { TurnManager } from './agents/TurnManager'
-import { HumanAgent, RandomAiAgent } from './agents'
+import { HumanAgent, MinimaxAiAgent } from './agents'
 import type { PlayerAction } from './lib/types'
 import type { Player } from './lib/types'
 
@@ -97,7 +97,7 @@ export default function App() {
     if (!mode) return
     const human = new HumanAgent()
     humanAgentRef.current = human
-    const ai = new RandomAiAgent()
+    const ai = new MinimaxAiAgent()
     const agents: Record<Player, import('./agents/PlayerAgent').PlayerAgent> =
       mode === 'ai'
         ? (aiSide === 'R' ? { R: ai, B: human } : { R: human, B: ai })
@@ -119,7 +119,7 @@ export default function App() {
       isGameOver: (state) => state.phase === 'finished' || !!state.result,
     })
     turnManagerStartedRef.current = false // 每次 setup 都重設 flag
-  }, [mode, aiSide, buildWall, moveTo, placeStone])
+  }, [mode, aiSide, buildWall, moveTo, placeStone, selectStone])
 
   // 初始化 TurnManager 與代理組合（mode/aiSide 變動時重建）
   useEffect(() => {
@@ -179,6 +179,7 @@ export default function App() {
           onRedo={redo}
           canUndo={canUndo}
           canRedo={canRedo}
+          phase={phase}
           onHome={handleHome}
           onToggleDark={() => setDark(d => !d)}
           dark={dark}
@@ -226,7 +227,11 @@ export default function App() {
           ))}
           {phase === 'finished' && (
             <GameButton
-              onClick={resetGame}
+              onClick={() => {
+                setMode(null)
+                resetGame()
+                setPhase('selecting')
+              }}
               ariaLabel="再玩一次"
               className="!bg-emerald-200/80 !dark:bg-emerald-900/80 !hover:bg-emerald-400/80 !dark:hover:bg-emerald-800/95 !text-emerald-900 !dark:text-emerald-100 !border-emerald-300 !dark:border-emerald-700 shadow-lg"
             >再玩一次</GameButton>

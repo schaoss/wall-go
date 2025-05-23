@@ -1,5 +1,6 @@
 // src/components/ui/Navbar.tsx
 import GameButton from './GameButton'
+import type { Phase } from '../../lib/types'
 
 export default function Navbar({
   onUndo,
@@ -8,6 +9,7 @@ export default function Navbar({
   canRedo,
   onHome,
   onToggleDark,
+  phase,
   dark,
 }: {
   onUndo: () => void
@@ -16,6 +18,7 @@ export default function Navbar({
   canRedo: boolean
   onHome: () => void
   onToggleDark: () => void
+  phase: Phase
   dark: boolean
 }) {
   return (
@@ -23,12 +26,12 @@ export default function Navbar({
       <div className="flex gap-2 items-center">
         <GameButton
           onClick={onUndo}
-          disabled={!canUndo}
+          disabled={!canUndo || phase === 'finished'}
           ariaLabel="復原 (Undo)"
         >↶ Undo</GameButton>
         <GameButton
           onClick={onRedo}
-          disabled={!canRedo}
+          disabled={!canRedo || phase === 'finished'}
           ariaLabel="重做 (Redo)"
         >↷ Redo</GameButton>
       </div>

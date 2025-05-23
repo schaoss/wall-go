@@ -20,12 +20,8 @@ function Board({
   board, phase, turn, selected, legal,
   selectStone, placeStone, moveTo, buildWall
 }: BoardProps) {
-  // 領地資訊: phase finished 時才計算
-  let territoryMap: (Player | null)[][] | null = null
-  if (phase === 'finished') {
-    // 取得領地分布
-    territoryMap = getTerritoryMap(board)
-  }
+  // 領地資訊: 每次都計算
+  const territoryMap = getTerritoryMap(board)
   return (
     <div
       className="border-4 border-zinc-500 dark:border-zinc-700 rounded-2xl shadow-xl bg-gradient-to-br from-zinc-50 to-zinc-200 dark:from-zinc-900 dark:to-zinc-800 transition-all duration-500 hover:shadow-2xl inline-block"
