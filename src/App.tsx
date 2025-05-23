@@ -9,6 +9,8 @@ import Navbar from './components/ui/Navbar'
 import Footer from './components/ui/Footer'
 import GameModeMenu from './components/ui/GameModeMenu'
 import ConfirmDialog from './components/ui/ConfirmDialog'
+import { useAutoAi } from './store/useAutoAi'
+
 type GameMode = 'pvp' | 'ai'
 type AiSide = 'R' | 'B'
 
@@ -49,11 +51,24 @@ export default function App() {
     setMode(null); resetGame();
   }
 
+  // hooks 必須在頂層呼叫，不能放在 if (!mode) 之後
+  useAutoAi({
+    mode,
+    aiSide,
+    phase,
+    turn,
+    board,
+    legal,
+    placeStone,
+    selectStone,
+    moveTo,
+    buildWall,
+  })
+
   // 選擇模式畫面
   if (!mode) {
     return (
       <GameModeMenu
-        mode={mode}
         setMode={setMode}
         aiSide={aiSide}
         setAiSide={setAiSide}
