@@ -84,7 +84,10 @@ export default function App() {
           )}
         </h1>
         <div className="flex gap-4 mb-2 animate-fade-in items-center">
-          {Object.entries(live.score ?? {}).map(([p, s]) => (
+          {(phase === 'placing'
+            ? PLAYER_LIST.map(p => [p, 0])
+            : Object.entries(live.score ?? {}))
+          .map(([p, s]) => (
             <span
               key={p}
               className="flex items-center gap-2 font-mono text-lg px-2 py-1 rounded bg-white/70 dark:bg-zinc-800/80 shadow-sm border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 transition-all duration-300"
