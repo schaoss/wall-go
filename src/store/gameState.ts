@@ -1,18 +1,4 @@
-import { BOARD_SIZE, PLAYER_LIST, STONES_PER_PLAYER, type Player, type Cell, type Pos, type Phase, type WallDir } from '../lib/types'
-
-export interface GameSnapshot {
-  board: Cell[][]
-  turn: Player
-  selected?: Pos
-  legal: Set<string>
-  stepsTaken: number
-  phase: Phase
-  players: Player[]
-  stonesLimit: number
-  stonesPlaced: Record<Player, number>
-  result?: import('../utils/checkGameEnd').GameResult
-  skipReason?: string
-}
+import { BOARD_SIZE, PLAYER_LIST, STONES_PER_PLAYER, type Player, type Cell, type GameSnapshot } from '../lib/types'
 
 export function createEmptyBoard(): Cell[][] {
   const emptyCell = (): Cell => ({ stone: null, wallTop: null, wallLeft: null })
@@ -69,20 +55,4 @@ export function restoreSnapshot(s: GameSnapshot): GameSnapshot {
     result: s.result ? JSON.parse(JSON.stringify(s.result)) : undefined,
     skipReason: s.skipReason,
   }
-}
-
-export interface State extends GameSnapshot {
-  placeStone: (pos: Pos) => void
-  selectStone: (pos: Pos) => void
-  moveTo: (pos: Pos) => void
-  buildWall: (pos: Pos, dir: WallDir) => void
-  resetGame: () => void
-  undo: () => void
-  redo: () => void
-  canUndo: boolean
-  canRedo: boolean
-  setPhase: (phase: Phase) => void
-  setPlayers: (players: Player[]) => void
-  _history: GameSnapshot[]
-  _future: GameSnapshot[]
 }

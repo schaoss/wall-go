@@ -1,11 +1,12 @@
 // Zustand store for Wall Go with robust undo/redo and deep copy history pattern
 import { create } from 'zustand'
-import { PLAYER_LIST, type Pos, type WallDir } from '../lib/types'
-import { makeInitialState, snapshotFromState, restoreSnapshot, type State } from './gameState'
+import { PLAYER_LIST, type Pos, type WallDir, type State, type GameSnapshot } from '../lib/types'
+import { makeInitialState, snapshotFromState, restoreSnapshot } from './gameState'
 import { createHistoryHandlers } from './history'
 import { placingTurnIndex, advanceTurn } from './actions'
 import { isLegalMove } from '../utils/isLegalMove'
 import { checkGameEnd } from '../utils/checkGameEnd'
+import { isHumanTurnSnap } from '../utils/humanTurn'
 
 // This store uses a functional set pattern for all mutating actions.
 // Each mutation pushes a deep copy of the current state to history BEFORE mutation.
@@ -34,7 +35,7 @@ export const useGame = create<State>((_set, get) => {
     }
   }
   // --- history ---
-  const { popHistory, popFuture } = createHistoryHandlers(
+  createHistoryHandlers(
     get,
     set,
     (state) => {
@@ -55,8 +56,36 @@ export const useGame = create<State>((_set, get) => {
     _future: [],
     canUndo: false,
     canRedo: false,
-    undo() { popHistory() },
-    redo() { popFuture() },
+    humanSide: null,
+    undo() {
+      // 快轉直到回到 human 玩家
+      const { _history, humanSide } = get()
+      if (_history.length <= 1) return
+      let idx = _history.length - 2
+      while (idx > 0 && !isHumanTurnSnap(_history[idx], humanSide)) idx--
+      const prev = _history[idx]
+      set({
+        ...restoreSnapshot(prev),
+        _history: _history.slice(0, idx + 1),
+        _future: _history.slice(idx + 1).reverse(),
+      })
+    },
+    redo() {
+      // 快轉直到回到 human 玩家
+      const { _future, _history, humanSide } = get()
+      if (_future.length === 0) return
+      let idx = 0
+      while (idx < _future.length - 1 && !isHumanTurnSnap(_future[idx], humanSide)) idx++
+      const next = _future[idx]
+      set({
+        ...restoreSnapshot(next),
+        _history: [..._history, ..._future.slice(0, idx + 1)],
+        _future: _future.slice(idx + 1),
+      })
+    },
+    setHumanSide(side) {
+      set({ humanSide: side })
+    },
     placeStone(pos: Pos) {
       set(state => {
         const { board, players, stonesPlaced, stonesLimit, phase } = state
@@ -226,7 +255,7 @@ export const useGame = create<State>((_set, get) => {
       })
     },
     resetGame() {
-      set(state => {
+      set(() => {
         // Mutate a new initial state
         const initial = makeInitialState()
         return {

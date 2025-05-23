@@ -1,33 +1,11 @@
-import type { PlayerAction, Cell } from '../lib/types'
-import { WallDirArray } from '../lib/types'
+import type { PlayerAction, GameSnapshot } from '../lib/types'
 import { isLegalMove } from './isLegalMove'
-import type { GameSnapshot } from '../store/gameState'
+import { getLegalWallActions } from './wall'
 
 // 隨機 AI：從合法行動中隨機選一個
 export function getRandomAiAction({ legalActions }: { legalActions: PlayerAction[] }): PlayerAction | null {
   if (legalActions.length === 0) return null
   return legalActions[Math.floor(Math.random() * legalActions.length)]
-}
-
-// 產生所有合法建牆行動
-export function getLegalWallActions(board: Cell[][], x: number, y: number): PlayerAction[] {
-  const actions: PlayerAction[] = []
-  for (const dir of WallDirArray) {
-    let canBuild = false
-    if (dir === 'top' && y > 0 && !board[y][x].wallTop) canBuild = true
-    if (dir === 'left' && x > 0 && !board[y][x].wallLeft) canBuild = true
-    if (dir === 'right' && x < board.length - 1 && !board[y][x + 1].wallLeft) canBuild = true
-    if (dir === 'bottom' && y < board.length - 1 && !board[y + 1][x].wallTop) canBuild = true
-    if (canBuild) {
-      actions.push({
-        type: 'wall',
-        from: { x, y },
-        pos: { x, y },
-        dir
-      })
-    }
-  }
-  return actions
 }
 
 // 產生所有合法行動

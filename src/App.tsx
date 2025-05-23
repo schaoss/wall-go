@@ -26,6 +26,7 @@ export default function App() {
     placeStone, selectStone, moveTo, buildWall, setPhase, resetGame,
     undo, redo, canUndo, canRedo,
     stepsTaken,
+    setHumanSide,
   } = useGame()
 
   const live = checkGameEnd(board, [...PLAYER_LIST])
@@ -148,6 +149,11 @@ export default function App() {
         setMode={m => {
           setMode(m)
           setPhase('placing')
+          if (m === 'ai') {
+            setHumanSide(aiSide === 'R' ? 'B' : 'R')
+          } else {
+            setHumanSide(null)
+          }
         }}
         aiSide={aiSide}
         setAiSide={setAiSide}
