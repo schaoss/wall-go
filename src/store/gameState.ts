@@ -28,7 +28,7 @@ export function makeInitialState(): GameSnapshot {
     selected: undefined,
     legal: new Set(),
     stepsTaken: 0,
-    phase: 'placing',
+    phase: 'selecting',
     players: [...PLAYER_LIST],
     stonesLimit: STONES_PER_PLAYER,
     stonesPlaced: Object.fromEntries(PLAYER_LIST.map(p => [p, 0])) as Record<Player, number>,
@@ -82,6 +82,7 @@ export interface State extends GameSnapshot {
   canUndo: boolean
   canRedo: boolean
   setPhase: (phase: Phase) => void
+  setPlayers: (players: Player[]) => void
   _history: GameSnapshot[]
   _future: GameSnapshot[]
 }

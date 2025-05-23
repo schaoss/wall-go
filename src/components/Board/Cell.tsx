@@ -12,10 +12,10 @@ export interface CellProps {
   phase: Phase
   turn: Player
   legal: Set<string>
-  selectStone: (pos: Pos) => void
-  placeStone: (pos: Pos) => void
-  moveTo: (pos: Pos) => void
-  buildWall: (pos: Pos, dir: WallDir) => void
+  selectStone?: (pos: Pos) => void
+  placeStone?: (pos: Pos) => void
+  moveTo?: (pos: Pos) => void
+  buildWall?: (pos: Pos, dir: WallDir) => void
   board: import('../../lib/types').Cell[][]
   boardSize: number
   // 新增: 領地資訊
@@ -131,7 +131,7 @@ export default function Cell({
             'border border-zinc-200 dark:border-zinc-700',
             'animate-stone-move',
             // 只有輪到該玩家時才是 pointer
-            phase === 'playing' && cell.stone === turn ? 'cursor-pointer' : 'cursor-default',
+            phase === 'playing' && cell.stone === turn && selectStone ? 'cursor-pointer' : 'cursor-default',
           )}
           style={{
             width: '70%',
@@ -141,12 +141,12 @@ export default function Cell({
             maxWidth: '60px',
             maxHeight: '60px',
           }}
-          onClick={() => phase === 'playing' && cell.stone === turn && selectStone({ x, y })}
+          onClick={() => phase === 'playing' && cell.stone === turn && selectStone && selectStone({ x, y })}
         />
       )}
 
       {/* 擺子階段空格動畫 */}
-      {!cell.stone && phase === 'placing' && (
+      {placeStone && !cell.stone && phase === 'placing' && (
         <button
           className="absolute inset-0 bg-transparent hover:bg-amber-100/60 cursor-pointer transition-all duration-200 rounded-lg"
           onClick={() => placeStone({ x, y })}
@@ -154,7 +154,7 @@ export default function Cell({
       )}
 
       {/* 合法移動格動畫 */}
-      {legal.has(posKey) && (
+      {moveTo && legal.has(posKey) && (
         <button
           className="absolute inset-0 bg-emerald-400/20 hover:bg-emerald-400/60 cursor-pointer transition-all duration-200 animate-pulse"
           onClick={() => moveTo({ x, y })}
@@ -162,7 +162,7 @@ export default function Cell({
       )}
 
       {/* 建牆按鈕動畫（若此格被選中） */}
-      {isSel && (() => {
+      {buildWall && isSel && (() => {
         const wallDirs = [
           {
             dir: 'top',

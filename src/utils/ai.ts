@@ -1,18 +1,14 @@
-import type { Pos, WallDir } from '../lib/types'
+import type { PlayerAction } from '../lib/types'
 
-export interface AiAction {
-  type: 'place' | 'move' | 'wall'
-  from?: Pos // 僅 playing 階段需要
-  pos: Pos   // 目標座標（move: to, wall: 牆座標, place: 落子）
-  dir?: WallDir
-}
+// 已廢棄：請改用代理架構（PlayerAgent, RandomAiAgent, HumanAgent, TurnManager）統一處理 AI/真人行動。
+// 保留檔案僅供相容性提示。
 
 // 隨機 AI：從合法行動中隨機選一個
 export function getRandomAiAction({
   legalActions
 }: {
-  legalActions: AiAction[]
-}): AiAction | null {
+  legalActions: PlayerAction[]
+}): PlayerAction | null {
   if (legalActions.length === 0) return null
   return legalActions[Math.floor(Math.random() * legalActions.length)]
 }

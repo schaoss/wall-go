@@ -10,10 +10,10 @@ export interface BoardProps {
   turn: Player
   selected: Pos | null
   legal: Set<string>
-  selectStone: (pos: Pos) => void
-  placeStone: (pos: Pos) => void
-  moveTo: (pos: Pos) => void
-  buildWall: (pos: Pos, dir: WallDir) => void
+  selectStone?: (pos: Pos) => void
+  placeStone?: (pos: Pos) => void
+  moveTo?: (pos: Pos) => void
+  buildWall?: (pos: Pos, dir: WallDir) => void
 }
 
 function Board({

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import Board from './components/Board/Board'
 import GameStatus from './components/ui/GameStatus'
 import { useGame } from './store/index'
@@ -9,20 +9,23 @@ import Navbar from './components/ui/Navbar'
 import Footer from './components/ui/Footer'
 import GameModeMenu from './components/ui/GameModeMenu'
 import ConfirmDialog from './components/ui/ConfirmDialog'
-import { useAutoAi } from './store/useAutoAi'
+import { TurnManager } from './agents/TurnManager'
+import { HumanAgent, RandomAiAgent } from './agents'
+import type { PlayerAction } from './lib/types'
+import type { Player } from './lib/types'
 
 type GameMode = 'pvp' | 'ai'
 type AiSide = 'R' | 'B'
 
 export default function App() {
-  // 新增：遊戲模式與 AI 先後手
   const [mode, setMode] = useState<GameMode | null>(null)
   const [aiSide, setAiSide] = useState<AiSide>('B')
 
   const {
     board, turn, phase, result, selected, legal, skipReason,
-    placeStone, selectStone, moveTo, buildWall, resetGame,
+    placeStone, selectStone, moveTo, buildWall, setPhase, resetGame,
     undo, redo, canUndo, canRedo,
+    stepsTaken,
   } = useGame()
 
   const live = checkGameEnd(board, [...PLAYER_LIST])
@@ -48,33 +51,112 @@ export default function App() {
       setShowConfirm(true)
       return
     }
-    setMode(null); resetGame();
+    setMode(null)
+    resetGame()
+    setPhase('selecting')
   }
 
-  // hooks 必須在頂層呼叫，不能放在 if (!mode) 之後
-  useAutoAi({
-    mode,
-    aiSide,
-    phase,
-    turn,
-    board,
-    legal,
-    placeStone,
-    selectStone,
-    moveTo,
-    buildWall,
-  })
+  // --- 代理主流程整合 ---
+  const turnManagerRef = useRef<TurnManager | null>(null)
+  const humanAgentRef = useRef<HumanAgent | null>(null)
+
+  // 狀態快照（只給 TurnManager 用）
+  type GameStateRef = {
+    board: typeof board
+    turn: typeof turn
+    selected: typeof selected
+    legal: typeof legal
+    stepsTaken: number
+    phase: typeof phase
+    players: Player[]
+    stonesLimit: number
+    stonesPlaced: Record<Player, number>
+    result: typeof result
+    skipReason: typeof skipReason
+  }
+  const latestStateRef = useRef<GameStateRef | null>(null)
+  useEffect(() => {
+    latestStateRef.current = {
+      board,
+      turn,
+      selected,
+      legal,
+      stepsTaken,
+      phase,
+      players: [...PLAYER_LIST],
+      stonesLimit: 4,
+      stonesPlaced: { R: 0, B: 0, ...Object.fromEntries(PLAYER_LIST.map(p => [p, 0])) },
+      result,
+      skipReason,
+    }
+  }, [board, turn, selected, legal, stepsTaken, phase, result, skipReason])
+
+  const turnManagerStartedRef = useRef(false)
+
+  const setupTurnManager = useCallback(() => {
+    if (!mode) return
+    const human = new HumanAgent()
+    humanAgentRef.current = human
+    const ai = new RandomAiAgent()
+    const agents: Record<Player, import('./agents/PlayerAgent').PlayerAgent> =
+      mode === 'ai'
+        ? (aiSide === 'R' ? { R: ai, B: human } : { R: human, B: ai })
+        : { R: human, B: human }
+    turnManagerRef.current = new TurnManager({
+      agents,
+      getGameState: () => latestStateRef.current!,
+      applyAction: async (action: PlayerAction) => {
+        if (action.type === 'place') {
+          placeStone(action.pos)
+        } else if (action.type === 'move') {
+          if (action.from) selectStone(action.from)
+          moveTo(action.pos)
+        } else if (action.type === 'wall' && action.dir) {
+          if (action.from) selectStone(action.from)
+          buildWall(action.pos, action.dir)
+        }
+      },
+      isGameOver: (state) => state.phase === 'finished' || !!state.result,
+    })
+    turnManagerStartedRef.current = false // 每次 setup 都重設 flag
+  }, [mode, aiSide, buildWall, moveTo, placeStone])
+
+  // 初始化 TurnManager 與代理組合（mode/aiSide 變動時重建）
+  useEffect(() => {
+    if (!mode) return
+    setupTurnManager()
+  }, [mode, aiSide, setupTurnManager])
+
+  // phase 進入 placing 或 playing 時才啟動主循環
+  useEffect(() => {
+    if (!turnManagerRef.current) return
+    if ((phase === 'placing' || phase === 'playing') && !turnManagerStartedRef.current) {
+      turnManagerRef.current.startLoop()
+      turnManagerStartedRef.current = true
+    }
+  }, [phase])
+
+  // 玩家互動：不判斷回合，直接送入 humanAgent
+  const handlePlayerAction = useCallback((action: PlayerAction) => {
+    humanAgentRef.current?.submitAction(action)
+  }, [])
 
   // 選擇模式畫面
-  if (!mode) {
+  if (phase === 'selecting') {
     return (
       <GameModeMenu
-        setMode={setMode}
+        setMode={m => {
+          setMode(m)
+          setPhase('placing')
+        }}
         aiSide={aiSide}
         setAiSide={setAiSide}
       />
     )
   }
+
+  // 判斷目前回合是否真人（僅用於 UI 是否啟用互動）
+  const isHumanTurn = turnManagerRef.current?.['agents']?.[turn] instanceof HumanAgent
 
   return (
     <>
@@ -89,7 +171,7 @@ export default function App() {
         style={{
           maxWidth: '100vw',
           minHeight: '100dvh',
-          paddingBottom: '80px', // 防止內容被 footer 遮住
+          paddingBottom: '80px',
         }}
       >
         <Navbar
@@ -157,10 +239,10 @@ export default function App() {
           turn={turn}
           selected={selected ?? null}
           legal={legal}
-          selectStone={selectStone}
-          placeStone={placeStone}
-          moveTo={moveTo}
-          buildWall={buildWall}
+          placeStone={phase === 'placing' ? (pos => handlePlayerAction({ type: 'place', pos })) : (isHumanTurn ? (pos => handlePlayerAction({ type: 'place', pos })) : undefined)}
+          selectStone={isHumanTurn && phase === 'playing' ? (pos => selectStone(pos)) : undefined}
+          moveTo={isHumanTurn && phase === 'playing' ? (pos => handlePlayerAction({ type: 'move', pos })) : undefined}
+          buildWall={isHumanTurn && phase === 'playing' ? ((pos, dir) => handlePlayerAction({ type: 'wall', pos, dir })) : undefined}
         />
       </div>
       <Footer />
@@ -176,6 +258,7 @@ export default function App() {
           setShowConfirm(false)
           setMode(null)
           resetGame()
+          setPhase('selecting')
         }}
         onCancel={() => setShowConfirm(false)}
       />

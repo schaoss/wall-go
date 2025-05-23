@@ -90,6 +90,7 @@ export const useGame = create<State>((_set, get) => {
       })
     },
     selectStone(pos: Pos) {
+      console.log('selectStone', pos)
       set(state => {
         const { board, turn, stepsTaken, phase } = state
         if (phase !== 'playing') return state
@@ -188,6 +189,8 @@ export const useGame = create<State>((_set, get) => {
           }
         }
         const { turn: nextTurn, skipReason } = advanceTurn(next.board, turn, PLAYERS)
+        console.log('currentTurn', turn)
+        console.log('nextTurn', nextTurn)
         if (skipReason === 'allBlocked') {
           const endB = checkGameEnd(next.board, PLAYERS)
           if (!endB.finished) {
@@ -236,5 +239,19 @@ export const useGame = create<State>((_set, get) => {
       })
     },
     setPhase(phase) { set({ phase }) },
+    setPlayers(players: import('../lib/types').Player[]) {
+      set(state => ({
+        ...state,
+        players,
+        turn: players[0],
+        phase: state.phase === 'selecting' ? 'placing' : state.phase, // 只有在 selecting 時才自動進入 placing
+        stepsTaken: 0,
+        selected: undefined,
+        legal: new Set(),
+        result: undefined,
+        skipReason: undefined,
+        stonesPlaced: Object.fromEntries(players.map(p => [p, 0])) as Record<string, number>,
+      }))
+    },
   }
 })
