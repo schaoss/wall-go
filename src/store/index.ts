@@ -1,6 +1,6 @@
 // Zustand store for Wall Go with robust undo/redo and deep copy history pattern
 import { create } from 'zustand'
-import { PLAYER_LIST, type Pos, type WallDir, type State, type GameSnapshot } from '../lib/types'
+import { PLAYER_LIST, type Pos, type WallDir, type State } from '../lib/types'
 import { makeInitialState, snapshotFromState, restoreSnapshot } from './gameState'
 import { createHistoryHandlers } from './history'
 import { placingTurnIndex, advanceTurn } from './actions'

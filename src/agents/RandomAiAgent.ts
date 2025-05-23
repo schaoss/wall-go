@@ -1,6 +1,6 @@
 // 隨機 AI 玩家代理
 import type { PlayerAgent } from './PlayerAgent'
-import type { GameSnapshot } from '../store/gameState'
+import type { GameSnapshot } from '../lib/types'
 import { getLegalActions, getRandomAiAction } from '../utils/ai'
 import type { PlayerAction } from '../lib/types'
 
