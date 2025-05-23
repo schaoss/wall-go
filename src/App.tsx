@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react'
 import Board from './components/Board/Board'
-import DarkModeToggle from './components/ui/DarkModeToggle'
 import GameStatus from './components/ui/GameStatus'
 import { useGame } from './store/index'
 import { checkGameEnd } from './utils/checkGameEnd'
 import { PLAYER_LIST } from './lib/types'
 import GameButton from './components/ui/GameButton'
+import Navbar from './components/ui/Navbar'
+import Footer from './components/ui/Footer'
+import GameModeMenu from './components/ui/GameModeMenu'
+import ConfirmDialog from './components/ui/ConfirmDialog'
+type GameMode = 'pvp' | 'ai'
+type AiSide = 'R' | 'B'
 
 export default function App() {
+  // 新增：遊戲模式與 AI 先後手
+  const [mode, setMode] = useState<GameMode | null>(null)
+  const [aiSide, setAiSide] = useState<AiSide>('B')
+
   const {
     board, turn, phase, result, selected, legal, skipReason,
     placeStone, selectStone, moveTo, buildWall, resetGame,
@@ -31,6 +40,27 @@ export default function App() {
     }
   }, [dark])
 
+  const [showConfirm, setShowConfirm] = useState(false)
+  const handleHome = () => {
+    if ((canUndo || canRedo) && (phase !== 'finished')) {
+      setShowConfirm(true)
+      return
+    }
+    setMode(null); resetGame();
+  }
+
+  // 選擇模式畫面
+  if (!mode) {
+    return (
+      <GameModeMenu
+        mode={mode}
+        setMode={setMode}
+        aiSide={aiSide}
+        setAiSide={setAiSide}
+      />
+    )
+  }
+
   return (
     <>
       <div
@@ -47,21 +77,15 @@ export default function App() {
           paddingBottom: '80px', // 防止內容被 footer 遮住
         }}
       >
-        <div className="w-full flex justify-between px-4">
-          <div className="flex gap-2">
-            <GameButton
-              onClick={undo}
-              disabled={!canUndo}
-              ariaLabel="復原 (Undo)"
-            >↶ Undo</GameButton>
-            <GameButton
-              onClick={redo}
-              disabled={!canRedo}
-              ariaLabel="重做 (Redo)"
-            >↷ Redo</GameButton>
-          </div>
-          <DarkModeToggle dark={dark} setDark={setDark} />
-        </div>
+        <Navbar
+          onUndo={undo}
+          onRedo={redo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onHome={handleHome}
+          onToggleDark={() => setDark(d => !d)}
+          dark={dark}
+        />
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 drop-shadow mb-2 animate-fade-in flex items-center gap-2">
           {phase === 'finished' && result ? (
             result.tie ? (
@@ -124,26 +148,22 @@ export default function App() {
           buildWall={buildWall}
         />
       </div>
-      <footer
-        className="fixed bottom-0 left-0 w-full z-50 text-center text-sm text-zinc-500 dark:text-zinc-400 select-none bg-white/80 dark:bg-zinc-900/90 shadow-[0_-2px_12px_-4px_rgba(0,0,0,0.08)] backdrop-blur border-t border-zinc-200 dark:border-zinc-800 py-2"
-        style={{
-          boxSizing: 'border-box',
+      <Footer />
+      <ConfirmDialog
+        open={showConfirm}
+        title="回到模式選擇"
+        message={
+          '遊戲尚未結束，確定要回到模式選擇嗎？\n目前進度將會消失。'
+        }
+        confirmText="確定"
+        cancelText="取消"
+        onConfirm={() => {
+          setShowConfirm(false)
+          setMode(null)
+          resetGame()
         }}
-      >
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-4">
-          <span>
-            © 2025 Gary Chu &nbsp;·&nbsp; Made with <span className="text-rose-400">♥</span>
-          </span>
-          <a
-            href="https://github.com/schaoss/wall-go"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
-          >
-            GitHub
-          </a>
-        </div>
-      </footer>
+        onCancel={() => setShowConfirm(false)}
+      />
     </>
   )
 }
