@@ -90,9 +90,9 @@ export default function Cell({
               'border border-zinc-200 dark:border-zinc-700',
             )}
             style={{
-              width: '80%',
-              height: '5px',
-              marginTop: '-2.5px',
+              width: '85%',
+              height: '7px',
+              marginTop: '-5px',
               zIndex: 2,
             }}
           />
@@ -107,9 +107,9 @@ export default function Cell({
               'border border-zinc-200 dark:border-zinc-700',
             )}
             style={{
-              height: '80%',
-              width: '5px',
-              marginLeft: '-2.5px',
+              height: '85%',
+              width: '7px',
+              marginLeft: '-5px',
               zIndex: 2,
             }}
           />
@@ -156,7 +156,7 @@ export default function Cell({
       {/* 合法移動格動畫 */}
       {moveTo && legal.has(posKey) && (
         <button
-          className="absolute inset-0 bg-emerald-400/20 hover:bg-emerald-400/60 cursor-pointer transition-all duration-200 animate-pulse"
+          className="absolute inset-0 bg-emerald-400/20 hover:bg-emerald-400/60 cursor-pointer transition-all duration-200 animate-pulse rounded-lg"
           onClick={() => moveTo({ x, y })}
         />
       )}
