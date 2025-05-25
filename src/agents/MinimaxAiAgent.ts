@@ -2,8 +2,8 @@
 import type { PlayerAgent } from './PlayerAgent'
 import type { GameSnapshot } from '../lib/types'
 import type { PlayerAction } from '../lib/types'
-import { getLegalActions, getRandomAiAction } from '../utils/ai'
-import { selectBestPlacingAction, minimax, applyAction, isSuicideMove } from '../utils/minimaxHelpers'
+import { getLegalActions, getRandomAction, applyAction, isSuicideMove } from '../utils/ai'
+import { selectBestPlacingAction, minimax } from '../utils/minimaxHelpers'
 
 export class MinimaxAiAgent implements PlayerAgent {
   async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
@@ -28,8 +28,8 @@ export class MinimaxAiAgent implements PlayerAgent {
           bestActions.push(action)
         }
       }
-      return getRandomAiAction({ legalActions: bestActions })!
+      return getRandomAction({ legalActions: bestActions })!
     }
-    return getRandomAiAction({ legalActions: actions })!
+    return getRandomAction({ legalActions: actions })!
   }
 }

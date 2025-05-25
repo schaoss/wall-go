@@ -7,8 +7,10 @@ const GAME_MODES = [
 ] as const
 
 const AI_LEVELS = [
-  { key: 'random', label: '🐰 初階' },
-  { key: 'minimax', label: '🐢 中階' },
+  { key: 'random', label: '🎲 練習' },
+  { key: 'minimax', label: '🌱 初階' },
+  { key: 'killer', label: '🐵 中階' },
+  // { key: 'devil', label: '👾 高階' },
 ] as const
 
 type GameMode = typeof GAME_MODES[number]['key']
@@ -25,7 +27,7 @@ export default function GameModeMenu({
   setAiLevel: (l: AiLevel) => void
 }) {
   const [showAiSelect, setShowAiSelect] = useState(false)
-  const [selectedLevel, setSelectedLevel] = useState<AiLevel>('random')
+  const [selectedLevel, setSelectedLevel] = useState<AiLevel>('killer')
 
   return (
     <div className="flex flex-col items-center justify-center min-h-dvh bg-gradient-to-br from-rose-50 via-indigo-50 to-amber-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 p-4">
@@ -70,14 +72,14 @@ export default function GameModeMenu({
                 {AI_LEVELS.map(l => (
                   <option key={l.key} value={l.key}>{l.label}</option>
                 ))}
-                <option value="hard" disabled>👾 困難</option>
+                <option value="devil" disabled>👾 高階</option>
               </select>
             </label>
             <div className="flex gap-4 justify-center w-full">
               <GameButton
                 onClick={() => { setAiLevel(selectedLevel); setAiSide('B'); setMode('ai') }}
-                className="!bg-rose-400 !dark:!bg-rose-500 !text-white !shadow-lg hover:!bg-rose-500 hover:!dark:bg-rose-400 focus:!ring-rose-400 focus:!dark:ring-rose-300 transition-colors px-6 py-2 text-base font-semibold"
-              >🐰 你先手</GameButton>
+                className="!bg-rose-400 !dark:!bg-rose-500 !text-white !shadow-lg hover:!bg-rose-500 hover:!dark:bg-rose-400 focus:!ring-rose-400 focus:!dark:ring-rose-300 transition-colors px-4 py-2 text-base font-semibold"
+              >🐰 先手</GameButton>
               <GameButton
                 onClick={() => {
                   // 隨機選擇先後手
@@ -86,13 +88,13 @@ export default function GameModeMenu({
                   setAiSide(side)
                   setMode('ai')
                 }}
-                className="px-6 py-2 text-base font-semibold"
+                className="px-4 py-2 text-base font-semibold"
                 ariaLabel="隨機先後手"
               >🎲 隨機</GameButton>
               <GameButton
                 onClick={() => { setAiLevel(selectedLevel); setAiSide('R'); setMode('ai') }}
-                className="!bg-indigo-500 !dark:!bg-indigo-400 !text-white !shadow-lg hover:!bg-indigo-600 hover:!dark:bg-indigo-300 focus:!ring-indigo-400 focus:!dark:ring-indigo-300 transition-colors px-6 py-2 text-base font-semibold"
-              >🐢 你後手</GameButton>
+                className="!bg-indigo-500 !dark:!bg-indigo-400 !text-white !shadow-lg hover:!bg-indigo-600 hover:!dark:bg-indigo-300 focus:!ring-indigo-400 focus:!dark:ring-indigo-300 transition-colors px-4 py-2 text-base font-semibold"
+              >🐢 後手</GameButton>
             </div>
           </div>
           <GameButton

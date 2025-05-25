@@ -10,8 +10,7 @@ import Footer from './components/ui/Footer'
 import GameModeMenu from './components/ui/GameModeMenu'
 import ConfirmDialog from './components/ui/ConfirmDialog'
 import { TurnManager } from './agents/TurnManager'
-import { HumanAgent, MinimaxAiAgent } from './agents'
-import { RandomAiAgent } from './agents/RandomAiAgent'
+import { HumanAgent, RandomAiAgent, MinimaxAiAgent, KillerAgent } from './agents'
 import type { PlayerAction } from './lib/types'
 import type { Player } from './lib/types'
 
@@ -23,7 +22,7 @@ export default function App() {
   const [aiSide, setAiSide] = useState<AiSide>('B')
 
   // --- AI 難度狀態 ---
-  const [aiLevel, setAiLevel] = useState<'random' | 'minimax'>('random')
+  const [aiLevel, setAiLevel] = useState<'random' | 'minimax' | 'killer'>('killer')
 
   const {
     board, turn, phase, result, selected, legal, skipReason,
@@ -103,7 +102,12 @@ export default function App() {
     const human = new HumanAgent()
     humanAgentRef.current = human
     // 根據 aiLevel 決定 AI agent
-    const ai = aiLevel === 'minimax' ? new MinimaxAiAgent() : new RandomAiAgent()
+    const aiMap = {
+      random: RandomAiAgent,
+      minimax: MinimaxAiAgent,
+      killer: KillerAgent
+    }
+    const ai = new aiMap[aiLevel]()
     const agents: Record<Player, import('./agents/PlayerAgent').PlayerAgent> =
       mode === 'ai'
         ? (aiSide === 'R' ? { R: ai, B: human } : { R: human, B: ai })
@@ -264,9 +268,9 @@ export default function App() {
       <Footer />
       <ConfirmDialog
         open={showConfirm}
-        title="回到模式選擇"
+        title="回到首頁"
         message={
-          '遊戲尚未結束，確定要回到模式選擇嗎？\n目前進度將會消失。'
+          '遊戲尚未結束，確定要回到首頁嗎？\n目前進度將會消失。'
         }
         confirmText="確定"
         cancelText="取消"

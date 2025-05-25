@@ -1,7 +1,7 @@
 // src/utils/minimaxHelpers.ts
 import type { GameSnapshot, PlayerAction } from '../lib/types'
 import { getTerritoryMap } from './territory'
-import { getLegalActions, getRandomAiAction } from './ai'
+import { getLegalActions, getRandomAction, applyAction, isInPureTerritory } from './ai'
 
 // 評分函數：領地分數 + 可走格數
 export function evaluate(gameState: GameSnapshot, player: string): number {
@@ -104,59 +104,6 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
   return (myTerritory - oppTerritory) * 10 + (myReach - oppReach)
 }
 
-// 複製遊戲狀態（淺拷貝，僅用於模擬）
-export function cloneGameState(state: GameSnapshot): GameSnapshot {
-  return JSON.parse(JSON.stringify(state))
-}
-
-// 模擬執行 action，回傳新狀態（僅處理棋子/牆，忽略複雜規則）
-export function applyAction(state: GameSnapshot, action: PlayerAction): GameSnapshot {
-  const newState = cloneGameState(state)
-  const { board, turn } = newState
-  if (action.type === 'place') {
-    board[action.pos.y][action.pos.x].stone = turn
-  } else if (action.type === 'move' && action.from) {
-    board[action.from.y][action.from.x].stone = null
-    board[action.pos.y][action.pos.x].stone = turn
-    if (action.followUp) {
-      return applyAction(newState, action.followUp)
-    }
-  } else if (action.type === 'wall' && action.dir) {
-    if (action.dir === 'top') board[action.pos.y][action.pos.x].wallTop = turn
-    if (action.dir === 'left') board[action.pos.y][action.pos.x].wallLeft = turn
-    if (action.dir === 'right') board[action.pos.y][action.pos.x + 1].wallLeft = turn
-    if (action.dir === 'bottom') board[action.pos.y + 1][action.pos.x].wallTop = turn
-  }
-  // 換手
-  newState.turn = turn === 'R' ? 'B' : 'R'
-  return newState
-}
-
-// 自殺步判斷
-export function isSuicideMove(gameState: GameSnapshot, action: PlayerAction, player: string): boolean {
-  // 模擬這步之後，對手能否直接吃掉己方任一棋子
-  const nextState = applyAction(gameState, action)
-  const oppActions = getLegalActions(nextState)
-  for (const oppAction of oppActions) {
-    if (oppAction.type === 'move' && oppAction.from) {
-      const fromCell = nextState.board[oppAction.from.y][oppAction.from.x]
-      if (fromCell.stone === player) {
-        return true
-      }
-    }
-  }
-  return false
-}
-
-// 判斷某棋子是否在純淨領地（該格屬於 player 領地，且四周都無敵方鄰近）
-function isInPureTerritory(gameState: GameSnapshot, pos: {x: number, y: number}, player: string): boolean {
-  const { board } = gameState
-  const territory = getTerritoryMap(board)
-  if (territory[pos.y][pos.x] !== player) return false
-
-  return true
-}
-
 // Minimax 主體
 export function minimax(state: GameSnapshot, depth: number, maximizing: boolean, player: string): number {
   if (depth === 0) return evaluate(state, player)
@@ -189,7 +136,7 @@ export function minimax(state: GameSnapshot, depth: number, maximizing: boolean,
 }
 
 // 擺子階段：最大化可移動格數
-// 修正 getRandomAiAction 用法，確保傳入 { legalActions } 並保證回傳型別
+// 修正 getRandomAction 用法，確保傳入 { legalActions } 並保證回傳型別
 export function selectBestPlacingAction(gameState: GameSnapshot, actions: PlayerAction[]): PlayerAction {
   const placeActions = actions.filter(a => a.type === 'place')
   if (placeActions.length === 1) {
@@ -261,7 +208,7 @@ export function selectBestPlacingAction(gameState: GameSnapshot, actions: Player
         bestActions.push(action)
       }
     }
-    return getRandomAiAction({ legalActions: bestActions })!
+    return getRandomAction({ legalActions: bestActions })!
   } else {
     let bestScore = -Infinity
     let bestFirstActions: PlayerAction[] = []
@@ -282,6 +229,6 @@ export function selectBestPlacingAction(gameState: GameSnapshot, actions: Player
         }
       }
     }
-    return getRandomAiAction({ legalActions: bestFirstActions })!
+    return getRandomAction({ legalActions: bestFirstActions })!
   }
 }

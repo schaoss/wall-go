@@ -9,33 +9,25 @@ export interface GameResult {
 }
 
 export function checkGameEnd(board: Cell[][], players: Player[]): GameResult {
-  // 若棋盤上沒有任何棋子，遊戲尚未開始，不應該 finished
-  let hasStone = false
-  for (let y = 0; y < board.length; y++) {
-    for (let x = 0; x < board.length; x++) {
-      if (board[y][x].stone) {
-        hasStone = true
-        break
-      }
-    }
-    if (hasStone) break
-  }
-  if (!hasStone) {
-    const totals: Record<Player, number> = Object.fromEntries(
-      players.map(p => [p, 0])
-    ) as Record<Player, number>
-    return { finished: false, score: totals }
-  }
-  const territory = getTerritoryMap(board)
-  const totals: Record<Player, number> = Object.fromEntries(
+  const totals = Object.fromEntries(
     players.map(p => [p, 0])
   ) as Record<Player, number>
+
   const remainingStones = new Set<string>()
-  board.forEach((row, y) =>
-    row.forEach((cell, x) => {
+  board.forEach((row, y) => row.forEach((cell, x) => {
       if (cell.stone) remainingStones.add(`${x},${y}`)
     })
   )
+  // 若棋盤上沒有任何棋子，遊戲尚未開始，不應該 finished
+  if (remainingStones.size === 0) {
+    return {
+      finished: false,
+      score: totals
+    }
+  }
+
+  const territory = getTerritoryMap(board)
+
   // 直接根據 territory 結果移除所有純淨領地格子的 remainingStones
   for (let y = 0; y < board.length; y++) {
     for (let x = 0; x < board.length; x++) {
@@ -55,7 +47,5 @@ export function checkGameEnd(board: Cell[][], players: Player[]): GameResult {
     // 分數一樣時，明確設 tie: true
     return { finished: true, tie: true, score: totals }
   }
-  // 條件 B：無合法動作（簡易版可省略）
-  // ...
   return { finished: false, score: totals }
 }
