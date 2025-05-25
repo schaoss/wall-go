@@ -44,5 +44,10 @@
       "right": "right",
       "aria": "Build {{dir}} wall at ({{x}},{{y}})"
     }
+  },
+  "seo": {
+    "title": "Wall Go | React + TypeScript | Devil's Plan Strategy Board Game",
+    "description": "Wall Go – open-source React + TypeScript implementation. Play the strategy board game from Devil’s Plan 2 in your browser. Undo/redo, territory scoring, and beautiful UI. Free, open source, single-player, and playable in your browser.",
+    "keywords": "Wall Go, Devil's Plan, React, TypeScript, board game, strategy game, undo redo, territory, GitHub, open source, browser game, wallgo, devil's plan game, wall go single player"
   }
 }
