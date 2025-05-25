@@ -1,5 +1,5 @@
-import { useRef, useEffect } from 'react'
-import { COLOR } from '../../lib/colors'
+import { useRef, useEffect, useState } from 'react'
+import GameButton from './GameButton'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -21,6 +21,7 @@ export default function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const [visible, setVisible] = useState(open)
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -43,29 +44,38 @@ export default function ConfirmDialog({
     return () => dialog.removeEventListener('close', handleClose)
   }, [open, onCancel])
 
+  useEffect(() => {
+    if (open) setVisible(true)
+    else setVisible(false)
+  }, [open])
+
   return (
-    <dialog
-      ref={dialogRef}
-      className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] rounded-2xl shadow-2xl p-0 border-0 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 max-w-xs w-[90vw] animate-fade-in backdrop:bg-black/30"
-      style={{ padding: 0 }}
-    >
-      <form method="dialog" className="flex flex-col gap-4 p-6">
-        {title && <div className="text-lg font-extrabold mb-1 text-center tracking-tight">{title}</div>}
-        <div className="mb-2 whitespace-pre-line text-center text-base">{message}</div>
-        <div className="flex gap-4 justify-end mt-2">
-          <button
-            type="button"
-            className={`px-4 py-1 rounded font-semibold border transition ${COLOR.neutral}`}
-            onClick={onCancel}
-            autoFocus
-          >{cancelText}</button>
-          <button
-            type="button"
-            className={`px-4 py-1 rounded font-semibold border transition shadow ${COLOR.danger}`}
-            onClick={onConfirm}
-          >{confirmText}</button>
+    open && (
+      <dialog
+        ref={dialogRef}
+        open={visible}
+        className="fixed left-0 top-0 w-full h-full z-[100] p-0 border-0 bg-transparent flex items-center justify-center"
+        style={{ padding: 0 }}
+      >
+        <div className="fixed inset-0 bg-black/40 z-0" />
+        <div className="relative max-w-xs w-[90vw] rounded-2xl shadow-2xl bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 animate-fade-in">
+          <form method="dialog" className="flex flex-col gap-4 p-6">
+            {title && <div className="text-lg font-extrabold mb-1 text-center tracking-tight">{title}</div>}
+            <div className="mb-2 whitespace-pre-line text-center text-base">{message}</div>
+            <div className="flex gap-4 justify-end mt-2">
+              <GameButton
+                onClick={onCancel}
+                ariaLabel="取消"
+              >{cancelText}</GameButton>
+              <GameButton
+                onClick={onConfirm}
+                variant="danger"
+                ariaLabel="確定"
+              >{confirmText}</GameButton>
+            </div>
+          </form>
         </div>
-      </form>
-    </dialog>
+      </dialog>
+    )
   )
 }

@@ -9,6 +9,7 @@ import Navbar from './components/ui/Navbar'
 import Footer from './components/ui/Footer'
 import GameModeMenu from './components/ui/GameModeMenu'
 import ConfirmDialog from './components/ui/ConfirmDialog'
+import RuleDialog from './components/ui/RuleDialog'
 import { TurnManager } from './agents/TurnManager'
 import { HumanAgent, RandomAiAgent, MinimaxAiAgent, KillerAgent } from './agents'
 import type { PlayerAction } from './lib/types'
@@ -18,6 +19,7 @@ type GameMode = 'pvp' | 'ai'
 type AiSide = 'R' | 'B'
 
 export default function App() {
+  const [showRule, setShowRule] = useState(false)
   const [mode, setMode] = useState<GameMode | null>(null)
   const [aiSide, setAiSide] = useState<AiSide>('B')
 
@@ -264,7 +266,13 @@ export default function App() {
           moveTo={isHumanTurn && phase === 'playing' ? (pos => handlePlayerAction({ type: 'move', pos })) : undefined}
           buildWall={isHumanTurn && phase === 'playing' ? ((pos, dir) => handlePlayerAction({ type: 'wall', pos, dir })) : undefined}
         />
+        <div className="w-full flex justify-center my-3 animate-fade-in">
+          <GameButton onClick={() => setShowRule(true)} text ariaLabel="遊戲規則說明">
+            遊戲規則說明
+          </GameButton>
+        </div>
       </div>
+      <RuleDialog open={showRule} onClose={() => setShowRule(false)} />
       <Footer />
       <ConfirmDialog
         open={showConfirm}
