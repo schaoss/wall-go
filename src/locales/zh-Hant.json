@@ -46,8 +46,8 @@
     }
   },
   "seo": {
-    "title": "Wall Go（牆壁圍棋）| React + TypeScript | Devil's Plan 策略桌遊",
-    "description": "Wall Go（牆壁圍棋）– 開源 React + TypeScript 實作。Devil’s Plan 2 策略桌遊線上玩，支援單人/雙人、領地計分、復原重做、現代化 UI。",
-    "keywords": "Wall Go, 牆壁圍棋, Devil's Plan, React, TypeScript, board game, strategy game, undo redo, territory, GitHub, 開源, 桌遊, 線上遊戲, 小遊戲, browser game, 圍棋, wallgo, devil's plan game, wall go single player"
+    "title": "Wall Go（牆壁圍棋）| 線上策略桌遊 | Devil's Plan 同款遊戲",
+    "description": "Wall Go（牆壁圍棋）－免費線上策略桌遊，支援單人/雙人、領地計分、復原重做、現代化 UI。Devil’s Plan 2 同款遊戲，開源、免註冊、直接開玩！",
+    "keywords": "Wall Go, 牆壁圍棋, Devil's Plan, board game, strategy game, undo redo, territory, GitHub, 開源, 桌遊, 線上遊戲, 小遊戲, browser game, 圍棋, wallgo, devil's plan game, wall go single player"
   }
 }

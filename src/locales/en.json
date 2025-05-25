@@ -46,8 +46,8 @@
     }
   },
   "seo": {
-    "title": "Wall Go | React + TypeScript | Devil's Plan Strategy Board Game",
-    "description": "Wall Go – open-source React + TypeScript implementation. Play the strategy board game from Devil’s Plan 2 in your browser. Undo/redo, territory scoring, and beautiful UI. Free, open source, single-player, and playable in your browser.",
-    "keywords": "Wall Go, Devil's Plan, React, TypeScript, board game, strategy game, undo redo, territory, GitHub, open source, browser game, wallgo, devil's plan game, wall go single player"
+    "title": "Wall Go | Online Strategy Board Game | Devil's Plan Inspired",
+    "description": "Wall Go – Free online strategy board game inspired by Devil’s Plan. Play solo or with friends, territory scoring, undo/redo, and a modern UI. No signup needed, just play!",
+    "keywords": "Wall Go, Devil's Plan, board game, strategy game, undo redo, territory, open source, browser game, wallgo, devil's plan game, wall go single player"
   }
 }
