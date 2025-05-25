@@ -1,40 +1,110 @@
-import { PLAYER_LIST, type Player, type Phase, type Pos, type Cell, type PlayerAction } from '../lib/types'
+import { PLAYER_LIST, type PlayerAction, type State } from '../lib/types'
 import GameButton from './ui/GameButton'
 import Navbar from './ui/Navbar'
 import Board from './Board/Board'
 import { useTranslation } from 'react-i18next'
-import type { GameResult } from '../utils/checkGameEnd'
-
-interface GameProps {
-  board: Cell[][]
-  phase: Phase
-  turn: Player
-  selected: Pos | null
-  legal: Set<string>
-  result: GameResult | null
-  live: { score?: Record<Player, number> }
-  canUndo: boolean
-  canRedo: boolean
-  undo: () => void
-  redo: () => void
-  handleHome: () => void
-  dark: boolean
-  setDark: (d: boolean) => void
-  isHumanTurn: boolean
-  handlePlayerAction: (action: PlayerAction) => void
-  selectStone: (pos: Pos) => void
-  resetGame: () => void
-  setMode: (m: any) => void
-  setPhase: (p: Phase) => void
-  setShowRule: (b: boolean) => void
-}
+import { useGame } from '../store/index'
+import { checkGameEnd } from '../utils/checkGameEnd'
+import { useRef, useEffect, useCallback } from 'react'
+import { TurnManager } from '../agents/TurnManager'
+import { HumanAgent, RandomAiAgent, MinimaxAiAgent, KillerAgent } from '../agents'
 
 export default function Game({
-  board, phase, turn, selected, legal, result, live,
-  canUndo, canRedo, undo, redo, handleHome, dark, setDark,
-  isHumanTurn, handlePlayerAction, selectStone, resetGame, setMode, setPhase, setShowRule
-}: GameProps) {
+  gameMode, aiSide, aiLevel, setGameMode, setShowRule, dark, setDark
+}: {
+  gameMode: 'pvp' | 'ai'
+  aiSide: 'R' | 'B'
+  aiLevel: 'random' | 'minimax' | 'killer'
+  setGameMode: (m: 'pvp' | 'ai' | null) => void
+  setShowRule: (b: boolean) => void
+  dark: boolean
+  setDark: (d: boolean | ((d: boolean) => boolean)) => void
+}) {
+  // 內部自行管理 useGame 狀態與 AI 流程
+  const {
+    board, turn, phase, result, selected, legal,
+    placeStone, selectStone, moveTo, buildWall, setPhase, resetGame,
+    undo, redo, canUndo, canRedo,
+  } = useGame()
+  const live = checkGameEnd(board, [...PLAYER_LIST])
   const { t } = useTranslation()
+
+  // --- 代理主流程整合 ---
+  const turnManagerRef = useRef<TurnManager | null>(null)
+  const humanAgentRef = useRef<HumanAgent | null>(null)
+  // 直接用 useGame() 的完整 state 當 snapshot
+  const latestStateRef = useRef<State | null>(null)
+  useEffect(() => {
+    latestStateRef.current = useGame.getState()
+  }, [board, turn, selected, legal, phase, result])
+
+  const turnManagerStartedRef = useRef(false)
+
+  const setupTurnManager = useCallback(() => {
+    if (!gameMode) return
+    const human = new HumanAgent()
+    humanAgentRef.current = human
+    const aiMap = {
+      random: RandomAiAgent,
+      minimax: MinimaxAiAgent,
+      killer: KillerAgent
+    }
+    const ai = new aiMap[aiLevel]()
+    const agents =
+      gameMode === 'ai'
+        ? (aiSide === 'R' ? { R: ai, B: human } : { R: human, B: ai })
+        : { R: human, B: human }
+    turnManagerRef.current = new TurnManager({
+      agents,
+      getGameState: () => latestStateRef.current!,
+      applyAction: async (action: PlayerAction) => {
+        if (action.type === 'place') {
+          placeStone(action.pos)
+        } else if (action.type === 'move') {
+          if (action.from) selectStone(action.from)
+          moveTo(action.pos)
+        } else if (action.type === 'wall' && action.dir) {
+          if (action.from) selectStone(action.from)
+          buildWall(action.pos, action.dir)
+        }
+      },
+      isGameOver: (state) => state.phase === 'finished' || !!state.result,
+    })
+    turnManagerStartedRef.current = false
+  }, [gameMode, aiSide, aiLevel, buildWall, moveTo, placeStone, selectStone])
+
+  useEffect(() => {
+    if (!gameMode) return
+    setPhase('placing')
+    setupTurnManager()
+  }, [gameMode, aiSide, setPhase, setupTurnManager])
+
+  useEffect(() => {
+    if (!turnManagerRef.current) return
+    if ((phase === 'placing' || phase === 'playing') && !turnManagerStartedRef.current) {
+      turnManagerRef.current.startLoop()
+      turnManagerStartedRef.current = true
+    }
+  }, [phase])
+
+  const handlePlayerAction = useCallback((action: PlayerAction) => {
+    humanAgentRef.current?.submitAction(action)
+  }, [])
+
+  const isHumanTurn = turnManagerRef.current?.['agents']?.[turn] instanceof HumanAgent
+
+  const onTurnEnd = useCallback(() => {
+    if (phase !== 'playing') return
+    setTimeout(() => {
+      if (live.finished) setPhase('finished')
+    }, 0)
+  }, [phase, live, setPhase])
+
+  // 每當遊戲狀態變化時檢查是否需要結束回合
+  useEffect(() => {
+    onTurnEnd()
+  }, [onTurnEnd, turn, phase, result, live])
+
   return (
     <div
       className={[
@@ -56,7 +126,10 @@ export default function Game({
         canUndo={canUndo}
         canRedo={canRedo}
         phase={phase}
-        onHome={handleHome}
+        onHome={() => {
+          setGameMode(null)
+          resetGame()
+        }}
         dark={dark}
         setDark={setDark}
       />
@@ -112,7 +185,7 @@ export default function Game({
         {phase === 'finished' && (
           <GameButton
             onClick={() => {
-              setMode(null)
+              setGameMode(null)
               resetGame()
               setPhase('selecting')
             }}
@@ -127,7 +200,7 @@ export default function Game({
         turn={turn}
         selected={selected ?? null}
         legal={legal}
-        placeStone={phase === 'placing' ? (pos => handlePlayerAction({ type: 'place', pos })) : (isHumanTurn ? (pos => handlePlayerAction({ type: 'place', pos })) : undefined)}
+        placeStone={phase === 'placing' || isHumanTurn ? (pos => handlePlayerAction({ type: 'place', pos })) : undefined}
         selectStone={isHumanTurn && phase === 'playing' ? (pos => selectStone(pos)) : undefined}
         moveTo={isHumanTurn && phase === 'playing' ? (pos => handlePlayerAction({ type: 'move', pos })) : undefined}
         buildWall={isHumanTurn && phase === 'playing' ? ((pos, dir) => handlePlayerAction({ type: 'wall', pos, dir })) : undefined}

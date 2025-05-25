@@ -100,10 +100,10 @@ export default function GameModeMenu({
               <select
                 value={selectedLevel}
                 onChange={e => setSelectedLevel(e.target.value as AiLevel)}
-                className="rounded border border-zinc-300 dark:border-zinc-600 px-2 py-1 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="rounded border border-zinc-300 dark:border-zinc-600 px-2 py-1 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
               >
                 {AI_LEVELS.map(l => (
-                  <option key={l.key} value={l.key}>{t(`menu.ai.levels.${l.key}`, l.label)}</option>
+                  <option className="cursor-pointer" key={l.key} value={l.key}>{t(`menu.ai.levels.${l.key}`, l.label)}</option>
                 ))}
                 <option value="devil" disabled>{t('menu.ai.levels.devil', '👾 高階')}</option>
               </select>
