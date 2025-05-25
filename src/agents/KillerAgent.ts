@@ -43,7 +43,7 @@ export class KillerAgent implements PlayerAgent {
         bestActions.push(action)
       }
     }
-    return getRandomAction({ legalActions: bestActions })!
+    return bestActions.length ? getRandomAction({ legalActions: bestActions })! : getRandomAction({ legalActions: actions })!
   }
 
   async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
