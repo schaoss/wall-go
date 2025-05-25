@@ -162,6 +162,7 @@ export default function App() {
   // 選擇模式畫面
   if (phase === 'selecting') {
     return (
+      <>
       <GameModeMenu
         setMode={m => {
           setMode(m)
@@ -174,7 +175,10 @@ export default function App() {
         }}
         setAiSide={setAiSide}
         setAiLevel={setAiLevel}
-      />
+        setShowRule={setShowRule}
+        />
+        <RuleDialog open={showRule} onClose={() => setShowRule(false)} />
+      </>
     )
   }
 
@@ -273,13 +277,13 @@ export default function App() {
           buildWall={isHumanTurn && phase === 'playing' ? ((pos, dir) => handlePlayerAction({ type: 'wall', pos, dir })) : undefined}
         />
         <div className="w-full flex justify-center my-3 animate-fade-in">
-          <GameButton onClick={() => setShowRule(true)} text ariaLabel="遊戲規則說明">
-            遊戲規則說明
+          <GameButton onClick={() => setShowRule(true)} text ariaLabel="遊戲規則">
+            遊戲規則
           </GameButton>
         </div>
       </div>
-      <RuleDialog open={showRule} onClose={() => setShowRule(false)} />
       <Footer />
+      <RuleDialog open={showRule} onClose={() => setShowRule(false)} />
       <ConfirmDialog
         open={showConfirm}
         title="回到首頁"

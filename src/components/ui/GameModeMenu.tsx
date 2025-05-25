@@ -21,10 +21,12 @@ export default function GameModeMenu({
   setMode,
   setAiSide,
   setAiLevel,
+  setShowRule,
 }: {
   setMode: (m: GameMode) => void
   setAiSide: (s: AiSide) => void
   setAiLevel: (l: AiLevel) => void
+  setShowRule: (show: boolean) => void
 }) {
   const [showAiSelect, setShowAiSelect] = useState(false)
   const [selectedLevel, setSelectedLevel] = useState<AiLevel>('killer')
@@ -51,7 +53,7 @@ export default function GameModeMenu({
         ))}
       </div>
       {/* AI 難度與先後手合併選擇（難度為下拉選單） */}
-      <div style={{ minHeight: 120, transition: 'opacity 0.5s, max-height 0.5s, margin 0.5s' }}
+      <div style={{ transition: 'opacity 0.3s, max-height 0.3s, margin 0.3s' }}
         className={
           'w-full flex justify-center' +
           (showAiSelect
@@ -103,6 +105,11 @@ export default function GameModeMenu({
             text
           >返回</GameButton>
         </div>
+      </div>
+      <div className="w-full flex justify-center mt-6 animate-fade-in">
+        <GameButton onClick={() => setShowRule(true)} text ariaLabel="遊戲規則">
+          遊戲規則
+        </GameButton>
       </div>
     </div>
   )
