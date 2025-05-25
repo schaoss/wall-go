@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import Board from './components/Board/Board'
-import GameStatus from './components/ui/GameStatus'
 import { useGame } from './store/index'
 import { checkGameEnd } from './utils/checkGameEnd'
 import { PLAYER_LIST } from './lib/types'
@@ -19,6 +19,8 @@ type GameMode = 'pvp' | 'ai'
 type AiSide = 'R' | 'B'
 
 export default function App() {
+  const { t } = useTranslation()
+
   const [showRule, setShowRule] = useState(false)
   const [mode, setMode] = useState<GameMode | null>(null)
   const [aiSide, setAiSide] = useState<AiSide>('B')
@@ -208,28 +210,36 @@ export default function App() {
           canRedo={canRedo}
           phase={phase}
           onHome={handleHome}
-          onToggleDark={() => setDark(d => !d)}
           dark={dark}
+          setDark={setDark}
         />
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 drop-shadow mb-2 animate-fade-in flex items-center gap-2">
           {phase === 'finished' && result ? (
             result.tie ? (
-              <>平手！</>
+              <>{t('game.tie', '平手！')}</>
             ) : result.winner ? (
               <>
-                勝者：
+                {t('game.winner', '勝者：')}
                 <span
                   className={
                     result.winner === 'R'
                       ? 'inline-block w-6 h-6 rounded-full bg-rose-500 dark:bg-rose-400 border-2 border-rose-300 dark:border-rose-500 shadow-sm mx-1 align-middle'
                       : 'inline-block w-6 h-6 rounded-full bg-indigo-500 dark:bg-indigo-400 border-2 border-indigo-300 dark:border-indigo-500 shadow-sm mx-1 align-middle'
                   }
-                  aria-label={result.winner === 'R' ? '紅方' : '藍方'}
+                  aria-label={result.winner === 'R' ? t('game.red', '紅方') : t('game.blue', '藍方')}
                 />
               </>
             ) : null
           ) : (
-            <>Wall Go · {phase === 'placing' ? '擺子階段' : phase === 'playing' ? '行動階段' : '結算階段'}</>
+            <>
+              Wall Go · {
+                phase === 'placing'
+                  ? t('game.phase.placing', '擺子階段')
+                  : phase === 'playing'
+                  ? t('game.phase.playing', '行動階段')
+                  : t('game.phase.finished', '結算階段')
+              }
+            </>
           )}
         </h1>
         <div className="flex gap-4 mb-2 animate-fade-in items-center">
@@ -247,7 +257,7 @@ export default function App() {
                     ? 'inline-block w-5 h-5 rounded-full bg-rose-500 dark:bg-rose-400 border-2 border-rose-300 dark:border-rose-500 shadow-sm mr-1'
                     : 'inline-block w-5 h-5 rounded-full bg-indigo-500 dark:bg-indigo-400 border-2 border-indigo-300 dark:border-indigo-500 shadow-sm mr-1'
                 }
-                aria-label={p === 'R' ? '紅方' : '藍方'}
+                aria-label={p === 'R' ? t('game.red', '紅方') : t('game.blue', '藍方')}
               />
               {s}
             </span>
@@ -259,12 +269,11 @@ export default function App() {
                 resetGame()
                 setPhase('selecting')
               }}
-              ariaLabel="再玩一次"
-              className="!bg-emerald-200/80 !dark:bg-emerald-900/80 !hover:bg-emerald-400/80 !dark:hover:bg-emerald-800/95 !text-emerald-900 !dark:text-emerald-100 !border-emerald-300 !dark:border-emerald-700 shadow-lg"
-            >再玩一次</GameButton>
+              ariaLabel={t('game.again', '再玩一次')}
+              variant='success'
+            >{t('game.again', '再玩一次')}</GameButton>
           )}
         </div>
-        <GameStatus phase={phase} skipReason={skipReason ?? null} />
         <Board
           board={board}
           phase={phase}
@@ -277,8 +286,8 @@ export default function App() {
           buildWall={isHumanTurn && phase === 'playing' ? ((pos, dir) => handlePlayerAction({ type: 'wall', pos, dir })) : undefined}
         />
         <div className="w-full flex justify-center my-3 animate-fade-in">
-          <GameButton onClick={() => setShowRule(true)} text ariaLabel="遊戲規則">
-            遊戲規則
+          <GameButton onClick={() => setShowRule(true)} text ariaLabel={t('menu.rule', '遊戲規則')}>
+            {t('menu.rule', '遊戲規則')}
           </GameButton>
         </div>
       </div>
@@ -286,12 +295,12 @@ export default function App() {
       <RuleDialog open={showRule} onClose={() => setShowRule(false)} />
       <ConfirmDialog
         open={showConfirm}
-        title="回到首頁"
+        title={t('menu.home', '回到首頁')}
         message={
-          '遊戲尚未結束，確定要回到首頁嗎？\n目前進度將會消失。'
+          t('menu.confirmHome', '遊戲尚未結束，確定要回到首頁嗎？\n目前進度將會消失。')
         }
-        confirmText="確定"
-        cancelText="取消"
+        confirmText={t('common.confirm', '確定')}
+        cancelText={t('common.cancel', '取消')}
         onConfirm={() => {
           setShowConfirm(false)
           setMode(null)

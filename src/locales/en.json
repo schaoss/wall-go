@@ -1,0 +1,48 @@
+{
+  "menu": {
+    "title": "Wall Go",
+    "mode": {
+      "pvp": "🤝 2 Players",
+      "ai": "🤖 vs AI"
+    },
+    "rule": "Game Rules",
+    "ai": {
+      "select": "Select AI level and side:",
+      "level": "AI Level:",
+      "levels": {
+        "random": "🎲 Practice",
+        "minimax": "🌱 Easy",
+        "killer": "🐵 Medium",
+        "devil": "👾 Hard"
+      },
+      "first": "🐰 First",
+      "second": "🐢 Second",
+      "random": "🎲 Random",
+      "back": "Back"
+    }
+  },
+  "rule": {
+    "title": "Game Rules",
+    "content": "【Objective】\nMove your pieces on a 7×7 board and build walls to carve out your own “territory” (a closed area that contains only your pieces). When the game ends, count the squares in each player’s territory; the one with more squares wins.\n\n【Equipment & Players】\n・Board: 7×7 squares\n・Players: 2 (Red and Blue), 4 pieces each\n・Walls: unlimited, colored by player\n\n【Game Flow】\n1.Placement Phase:\nPlayers alternate placing their 4 pieces in the order Red, Blue, Blue, Red, Red, … until all pieces are on the board.\n\n2.Action Phase (turn-based):\n (a). Choose any of your pieces that can still act.\n (b). Move 0, 1, or 2 steps; each step must be straight (up, down, left, right) and may not cross or pass through walls or other pieces.\n (c). After moving, you must place one wall segment on an empty side of that piece’s square (also required if you moved 0 steps).\n\n【Walls & Borders】\n・The outer border of the board counts as a wall.\n・In a two-player game, walls cannot be removed once placed.\n\n【End Condition】\nAll closed areas on the board contain pieces of only one player.\n\n【Scoring】\nCount the squares in each player’s territory; each square is worth one point.\n\n【Victory】\nThe player with the higher score wins; if scores are tied, the game is a draw.\n\n── Enjoy the game!",
+    "close": "Close"
+  },
+  "game": {
+    "phase": {
+      "placing": "Placement Phase",
+      "playing": "Action Phase",
+      "finished": "Scoring Phase"
+    },
+    "winner": "🥇 Winner:",
+    "tie": " 🤜🤛 Draw!",
+    "again": "Play Again",
+    "red": "Red",
+    "blue": "Blue",
+    "wall": {
+      "top": "top",
+      "bottom": "bottom",
+      "left": "left",
+      "right": "right",
+      "aria": "Build {{dir}} wall at ({{x}},{{y}})"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 // src/components/ui/Navbar.tsx
 import GameButton from './GameButton'
 import type { Phase } from '../../lib/types'
+import LanguageThemeSwitcher from './LanguageThemeSwitcher'
 
 export default function Navbar({
   onUndo,
@@ -8,18 +9,18 @@ export default function Navbar({
   canUndo,
   canRedo,
   onHome,
-  onToggleDark,
   phase,
   dark,
+  setDark,
 }: {
   onUndo: () => void
   onRedo: () => void
   canUndo: boolean
   canRedo: boolean
   onHome: () => void
-  onToggleDark: () => void
   phase: Phase
   dark: boolean
+  setDark: (d: boolean | ((d: boolean) => boolean)) => void
 }) {
   return (
     <div className="w-full flex justify-between px-4">
@@ -42,12 +43,7 @@ export default function Navbar({
         >
           <span role="img" aria-label="主選單" className="text-xl">🏠</span>
         </GameButton>
-        <GameButton
-          onClick={onToggleDark}
-          ariaLabel="切換深色/亮色模式"
-        >
-          <span role="img" aria-label="切換深色/亮色模式" className="text-xl">{dark ? '☀️' : '🌙'}</span>
-        </GameButton>
+        <LanguageThemeSwitcher dark={dark} setDark={setDark} />
       </div>
     </div>
   )

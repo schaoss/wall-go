@@ -1,6 +1,7 @@
 // WallButton component extracted from Cell.tsx
 import clsx from 'clsx'
 import type { WallDir, Player } from '../../lib/types'
+import { useTranslation } from 'react-i18next'
 
 interface WallButtonProps {
   dir: WallDir
@@ -14,7 +15,9 @@ interface WallButtonProps {
 }
 
 export default function WallButton({ dir, show, x, y, turn, onBuild, btnClass, divClass }: WallButtonProps) {
+  const { t } = useTranslation()
   if (!show) return null
+  const dirLabel = dir === 'top' ? t('game.wall.top', '上') : dir === 'bottom' ? t('game.wall.bottom', '下') : dir === 'left' ? t('game.wall.left', '左') : t('game.wall.right', '右')
   return (
     <button
       onClick={() => onBuild(dir)}
@@ -24,7 +27,7 @@ export default function WallButton({ dir, show, x, y, turn, onBuild, btnClass, d
         'transition-all duration-200',
         'hover:scale-110',
       )}
-      aria-label={`在(${x},${y})建${dir === 'top' ? '上' : dir === 'bottom' ? '下' : dir === 'left' ? '左' : '右'}牆`}
+      aria-label={t('game.wall.aria', { x, y, dir: dirLabel, defaultValue: `在(${x},${y})建${dirLabel}牆` })}
       type="button"
     >
       <div
