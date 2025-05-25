@@ -9,7 +9,7 @@ export class KillerAgent implements PlayerAgent {
     return getBestPlacement(gameState)
   }
 
-  private getBestMove: (gameState: GameSnapshot) => PlayerAction = (gameState) => {
+  private getBestMove: (gameState: GameSnapshot, legalActions: PlayerAction[]) => PlayerAction = (gameState, legalActions) => {
     const { turn: me, board } = gameState
     const actions: PlayerAction[] = []
     const myStone = gameState.board.flatMap((row, y) =>
@@ -43,7 +43,7 @@ export class KillerAgent implements PlayerAgent {
         bestActions.push(action)
       }
     }
-    return bestActions.length ? getRandomAction({ legalActions: bestActions })! : getRandomAction({ legalActions: actions })!
+    return bestActions.length ? getRandomAction({ legalActions: bestActions })! : getRandomAction({ legalActions })!
   }
 
   async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
@@ -56,7 +56,7 @@ export class KillerAgent implements PlayerAgent {
       case 'placing':
         return this.choosePlacement(gameState)
       case 'playing':
-        return this.getBestMove(gameState)
+        return this.getBestMove(gameState, actions)
       default:
         return getRandomAction({ legalActions: actions })!
     }
