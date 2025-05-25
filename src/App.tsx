@@ -192,7 +192,7 @@ export default function App() {
       <div
         className={[
           'flex flex-col items-center gap-4 py-4 min-h-dvh min-w-0',
-          'bg-gradient-to-br from-rose-50 via-indigo-50 to-amber-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900',
+          'bg-gradient-to-br from-rose-50 via-indigo-50 to-amber-50 dark:from-zinc-900 dark:via-zinc-700 dark:to-zinc-900',
           'transition-all duration-500',
           'box-border',
           'p-4',

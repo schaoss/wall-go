@@ -24,7 +24,7 @@ function Board({
   const territoryMap = getTerritoryMap(board)
   return (
     <div
-      className="border-4 border-zinc-500 dark:border-zinc-700 rounded-2xl shadow-xl bg-gradient-to-br from-zinc-50 to-zinc-200 dark:from-zinc-900 dark:to-zinc-800 transition-all duration-500 hover:shadow-2xl inline-block"
+      className="border-4 border-zinc-300 dark:border-zinc-700 rounded-2xl shadow-xl bg-gradient-to-br from-zinc-50 to-zinc-200 dark:from-zinc-900 dark:to-zinc-800 transition-all duration-500 hover:shadow-2xl inline-block"
       style={{
         width: '100%',
         maxWidth: 'min(800px, 100vw - 32px)', // 32px padding for mobile
