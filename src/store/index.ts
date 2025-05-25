@@ -119,7 +119,6 @@ export const useGame = create<State>((_set, get) => {
       })
     },
     selectStone(pos: Pos) {
-      console.log('selectStone', pos)
       set(state => {
         const { board, turn, stepsTaken, phase } = state
         if (phase !== 'playing') return state
@@ -218,8 +217,6 @@ export const useGame = create<State>((_set, get) => {
           }
         }
         const { turn: nextTurn, skipReason } = advanceTurn(next.board, turn, PLAYERS)
-        console.log('currentTurn', turn)
-        console.log('nextTurn', nextTurn)
         if (skipReason === 'allBlocked') {
           const endB = checkGameEnd(next.board, PLAYERS)
           if (!endB.finished) {

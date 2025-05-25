@@ -38,11 +38,9 @@ export class TurnManager {
   async startLoop() {
     while (!this.isGameOver(this.getGameState())) {
       const state = this.getGameState()
-      console.log('Current turn:', state.phase, state.turn, state)
       if (this.onTurnStart) this.onTurnStart(state.turn)
       const agent = this.agents[state.turn]
       const action = await agent.getAction(state)
-      console.log('Action:', action)
       await this.executeAction(action)
     }
   }

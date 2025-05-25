@@ -37,17 +37,23 @@ export default function App() {
   const live = checkGameEnd(board, [...PLAYER_LIST])
 
   // 深色模式切換
-  const [dark, setDark] = useState(() =>
-    typeof window !== 'undefined'
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches
-      : false
-  )
+  const [dark, setDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('theme')
+      if (stored === 'dark') return true
+      if (stored === 'light') return false
+      return window.matchMedia('(prefers-color-scheme: dark)').matches
+    }
+    return false
+  })
   useEffect(() => {
     const root = document.documentElement
     if (dark) {
       root.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
     } else {
       root.classList.remove('dark')
+      localStorage.setItem('theme', 'light')
     }
   }, [dark])
 

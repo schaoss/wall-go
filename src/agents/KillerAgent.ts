@@ -43,7 +43,6 @@ export class KillerAgent implements PlayerAgent {
         bestActions.push(action)
       }
     }
-    console.log('KillerAgent best actions:', bestActions, 'score:', bestScore)
     return getRandomAction({ legalActions: bestActions })!
   }
 
