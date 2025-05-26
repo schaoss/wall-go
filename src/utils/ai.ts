@@ -194,6 +194,106 @@ export function reachable(board: Cell[][], player: Player): number {
 }
 
 /**
+ * Performs a Breadth-First Search to find all reachable empty cells from a given set of starting points.
+ *
+ * @param board The game board.
+ * @param queue An initial queue of positions (typically empty cells adjacent to player stones).
+ * @param seen A 2D boolean array marking visited cells.
+ * @returns A Set of strings representing the coordinates of reachable empty cells (e.g., "x,y").
+ */
+function bfsForReachableSet(
+  board: Cell[][],
+  queue: Pos[],
+  seen: boolean[][],
+): Set<string> {
+  const n = board.length
+  const reachableEmptyCells = new Set<string>()
+
+  while (queue.length) {
+    const { x, y } = queue.shift()!
+
+    // Add the current empty cell to the set
+    // The initial queue should only contain empty cells, so no need to check board[y][x].stone here
+    reachableEmptyCells.add(`${x},${y}`)
+
+    for (const [dx, dy, dir] of DIRS) {
+      const nx = x + dx,
+        ny = y + dy
+      if (nx < 0 || ny < 0 || nx >= n || ny >= n) continue
+
+      const blocked =
+        dir === 'left'
+          ? dx === 1
+            ? board[y][x + 1].wallLeft
+            : board[y][x].wallLeft
+          : dy === 1
+            ? board[y + 1][x].wallTop
+            : board[y][x].wallTop
+      if (blocked) continue
+
+      if (seen[ny][nx]) continue
+      const targetCell = board[ny][nx]
+      if (targetCell.stone) continue // Can only traverse empty cells
+
+      seen[ny][nx] = true
+      queue.push({ x: nx, y: ny })
+    }
+  }
+  return reachableEmptyCells
+}
+
+/**
+ * Calculates the set of all empty cells reachable by a player.
+ *
+ * @param board The game board.
+ * @param player The player whose reachable set is to be calculated.
+ * @returns A Set of strings representing the coordinates of reachable empty cells (e.g., "x,y").
+ */
+export function getReachableSet(board: Cell[][], player: Player): Set<string> {
+  const n = board.length
+  const seen = Array.from({ length: n }, () => Array<boolean>(n).fill(false))
+  const queue: Pos[] = []
+
+  // Initialize the queue with empty cells adjacent to the player's stones
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      if (board[y][x].stone === player) {
+        seen[y][x] = true // Mark player's stone as seen
+
+        // Check neighbors of this stone
+        for (const [dx, dy, dir] of DIRS) {
+          const nx = x + dx,
+            ny = y + dy
+          if (nx < 0 || ny < 0 || nx >= n || ny >= n) continue
+
+          const blockedByWall =
+            dir === 'left'
+              ? dx === 1
+                ? board[y][x + 1].wallLeft // Wall on the right of current stone (left of neighbor)
+                : board[y][x].wallLeft     // Wall on the left of current stone
+              : dy === 1
+                ? board[y + 1][x].wallTop  // Wall below current stone (top of neighbor)
+                : board[y][x].wallTop      // Wall above current stone
+          if (blockedByWall) continue
+
+          if (seen[ny][nx]) continue      // Already visited or is another player stone
+          if (board[ny][nx].stone) continue // Neighbor is not an empty cell
+
+          // If we reach here, {nx, ny} is an empty, non-walled-off, unvisited neighbor
+          seen[ny][nx] = true
+          queue.push({ x: nx, y: ny })
+        }
+      }
+    }
+  }
+
+  // All cells initially added to the queue are empty and seen.
+  // bfsForReachableSet will add these initial cells to the result AND explore from them.
+  return bfsForReachableSet(board, queue, seen)
+}
+
+
+/**
  * 某顆棋在目前版面是否「被完全孤立」（可走格 = 1 → 只有自己）
  */
 export function isIsolated(board: Cell[][], x: number, y: number): boolean {

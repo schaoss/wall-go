@@ -1,64 +1,44 @@
-// Minimax AI 玩家代理
-import type { PlayerAgent } from './PlayerAgent'
-import type { PlayerAction, GameSnapshot } from '../lib/types'
-import { isInPureTerritory, getLegalActions, getLegalDestinations, getRandomAction, getBestPlacement, isSuicideMove, scoreAction } from '../utils/ai'
-import { getLegalWallActions } from '../utils/wall'
+// src/agents/KillerAgent.ts
+import type { PlayerAgent } from './PlayerAgent';
+import type { GameSnapshot, PlayerAction } from '../lib/types';
 
 export class KillerAgent implements PlayerAgent {
-  private choosePlacement = (gameState: GameSnapshot): PlayerAction => {
-    return getBestPlacement(gameState)
-  }
+  private worker: Worker;
 
-  private getBestMove: (gameState: GameSnapshot, legalActions: PlayerAction[]) => PlayerAction = (gameState, legalActions) => {
-    const { turn: me, board } = gameState
-    const actions: PlayerAction[] = []
-    const myStone = gameState.board.flatMap((row, y) =>
-      row.map((cell, x) => cell.stone === me ? { x, y } : null).filter(Boolean)
-    )
-
-    for (const p of myStone) {
-      if (!p || isInPureTerritory(gameState, p, me)) continue
-
-      getLegalDestinations(gameState, p).forEach(pos => {
-        for (const wallAction of getLegalWallActions(board, pos.x, pos.y)) {
-          actions.push({
-            type: 'move',
-            from: p,
-            pos: { x: pos.x, y: pos.y },
-            followUp: wallAction
-          })
-        }
-      })
-    }
-    const safeActions = actions.filter(a => !isSuicideMove(gameState, a, gameState.turn))
-    const candidateActions = safeActions.length > 0 ? safeActions : actions
-    let bestScore = -Infinity
-    let bestActions: PlayerAction[] = []
-    for (const action of candidateActions) {
-      const score = scoreAction(gameState, action, gameState.turn)
-      if (score > bestScore) {
-        bestScore = score
-        bestActions = [action]
-      } else if (score === bestScore) {
-        bestActions.push(action)
-      }
-    }
-    return bestActions.length ? getRandomAction({ legalActions: bestActions })! : getRandomAction({ legalActions })!
+  constructor() {
+    this.worker = new Worker(new URL('./AIWorker.ts', import.meta.url), { type: 'module' });
   }
 
   async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
-    await new Promise(res => setTimeout(res, 200 + Math.floor(Math.random() * 50)))
+    return new Promise((resolve, reject) => {
+      this.worker.onmessage = (event: MessageEvent<{ action?: PlayerAction | null; error?: string; stack?: string; info?: string }>) => {
+        this.worker.onmessage = null;
+        this.worker.onerror = null;
+        if (event.data.error) {
+          let errMsg = 'Worker error (KillerAgent): ' + event.data.error;
+          if (event.data.stack) errMsg += '\nStack: ' + event.data.stack;
+          reject(new Error(errMsg));
+        } else if (event.data.action) {
+          resolve(event.data.action);
+        }
+        else {
+          reject(new Error('Unknown or missing action from AIWorker for KillerAgent. Info: ' + event.data.info));
+        }
+      };
 
-    const actions = getLegalActions(gameState)
-    if (actions.length === 0) throw new Error('No legal action')
+      this.worker.onerror = (error: ErrorEvent) => {
+        this.worker.onmessage = null;
+        this.worker.onerror = null;
+        reject(new Error(`AIWorker onerror (KillerAgent): ${error.message}`));
+      };
 
-    switch (gameState.phase) {
-      case 'placing':
-        return this.choosePlacement(gameState)
-      case 'playing':
-        return this.getBestMove(gameState, actions)
-      default:
-        return getRandomAction({ legalActions: actions })!
+      this.worker.postMessage({ aiType: 'killer', gameState });
+    });
+  }
+
+  public terminate(): void {
+    if (this.worker) {
+      this.worker.terminate();
     }
   }
 }

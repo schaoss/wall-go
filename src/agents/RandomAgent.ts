@@ -1,15 +1,45 @@
-// 隨機 AI 玩家代理
-import type { PlayerAgent } from './PlayerAgent'
-import type { GameSnapshot } from '../lib/types'
-import { getLegalActions, getRandomAction } from '../utils/ai'
-import type { PlayerAction } from '../lib/types'
+// src/agents/RandomAgent.ts
+import type { PlayerAgent } from './PlayerAgent';
+import type { GameSnapshot, PlayerAction } from '../lib/types';
 
 export class RandomAgent implements PlayerAgent {
+  private worker: Worker;
+
+  constructor() {
+    this.worker = new Worker(new URL('./AIWorker.ts', import.meta.url), { type: 'module' });
+  }
+
   async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
-    // 增加隨機延遲，避免 JS 卡死
-    await new Promise(res => setTimeout(res, 400 + Math.floor(Math.random() * 50)))
-    const legalActions = getLegalActions(gameState)
-    if (legalActions.length === 0) throw new Error('No legal action')
-    return getRandomAction({ legalActions })!
+    return new Promise((resolve, reject) => {
+      this.worker.onmessage = (event: MessageEvent<{ action?: PlayerAction | null; error?: string; stack?: string; info?: string }>) => {
+        this.worker.onmessage = null;
+        this.worker.onerror = null;
+        if (event.data.error) {
+          let errMsg = 'Worker error (RandomAgent): ' + event.data.error;
+          if (event.data.stack) errMsg += '\nStack: ' + event.data.stack;
+          reject(new Error(errMsg));
+        } else if (event.data.action) {
+          resolve(event.data.action);
+        }
+        else {
+          // Fallback or error if action is unexpectedly null/undefined for non-finished states
+          reject(new Error('Unknown or missing action from AIWorker for RandomAgent. Info: ' + event.data.info));
+        }
+      };
+
+      this.worker.onerror = (error: ErrorEvent) => {
+        this.worker.onmessage = null;
+        this.worker.onerror = null;
+        reject(new Error(`AIWorker onerror (RandomAgent): ${error.message}`));
+      };
+
+      this.worker.postMessage({ aiType: 'random', gameState });
+    });
+  }
+
+  public terminate(): void {
+    if (this.worker) {
+      this.worker.terminate();
+    }
   }
 }

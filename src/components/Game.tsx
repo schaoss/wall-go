@@ -14,7 +14,7 @@ export default function Game({
 }: {
   gameMode: 'pvp' | 'ai'
   aiSide: 'R' | 'B'
-  aiLevel: 'random' | 'minimax' | 'killer'
+  aiLevel: 'random' | 'minimax' | 'killer' | 'devil'
   setGameMode: (m: 'pvp' | 'ai' | null) => void
   setShowRule: (b: boolean) => void
   dark: boolean

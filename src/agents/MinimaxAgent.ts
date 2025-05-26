@@ -1,35 +1,44 @@
-// Minimax AI 玩家代理
-import type { PlayerAgent } from './PlayerAgent'
-import type { GameSnapshot } from '../lib/types'
-import type { PlayerAction } from '../lib/types'
-import { getLegalActions, getRandomAction, applyAction, isSuicideMove } from '../utils/ai'
-import { selectBestPlacingAction, minimax } from '../utils/minimaxHelpers'
+// src/agents/MinimaxAgent.ts
+import type { PlayerAgent } from './PlayerAgent';
+import type { GameSnapshot, PlayerAction } from '../lib/types';
 
 export class MinimaxAgent implements PlayerAgent {
+  private worker: Worker;
+
+  constructor() {
+    this.worker = new Worker(new URL('./AIWorker.ts', import.meta.url), { type: 'module' });
+  }
+
   async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
-    await new Promise(res => setTimeout(res, 300 + Math.floor(Math.random() * 50)))
-    const actions = getLegalActions(gameState)
-    if (actions.length === 0) throw new Error('No legal action')
-    if (gameState.phase === 'placing') {
-      return selectBestPlacingAction(gameState, actions)
-    } else if (gameState.phase === 'playing') {
-      const depth = 2
-      // 過濾自殺步
-      const safeActions = actions.filter(a => !isSuicideMove(gameState, a, gameState.turn))
-      const candidateActions = safeActions.length > 0 ? safeActions : actions
-      let bestScore = -Infinity
-      let bestActions: PlayerAction[] = []
-      for (const action of candidateActions) {
-        const score = minimax(applyAction(gameState, action), depth - 1, false, gameState.turn)
-        if (score > bestScore) {
-          bestScore = score
-          bestActions = [action]
-        } else if (score === bestScore) {
-          bestActions.push(action)
+    return new Promise((resolve, reject) => {
+      this.worker.onmessage = (event: MessageEvent<{ action?: PlayerAction | null; error?: string; stack?: string; info?: string }>) => {
+        this.worker.onmessage = null;
+        this.worker.onerror = null;
+        if (event.data.error) {
+          let errMsg = 'Worker error (MinimaxAgent): ' + event.data.error;
+          if (event.data.stack) errMsg += '\nStack: ' + event.data.stack;
+          reject(new Error(errMsg));
+        } else if (event.data.action) {
+          resolve(event.data.action);
         }
-      }
-      return getRandomAction({ legalActions: bestActions })!
+        else {
+          reject(new Error('Unknown or missing action from AIWorker for MinimaxAgent. Info: ' + event.data.info));
+        }
+      };
+
+      this.worker.onerror = (error: ErrorEvent) => {
+        this.worker.onmessage = null;
+        this.worker.onerror = null;
+        reject(new Error(`AIWorker onerror (MinimaxAgent): ${error.message}`));
+      };
+
+      this.worker.postMessage({ aiType: 'minimax', gameState });
+    });
+  }
+
+  public terminate(): void {
+    if (this.worker) {
+      this.worker.terminate();
     }
-    return getRandomAction({ legalActions: actions })!
   }
 }

@@ -17,7 +17,7 @@ export default function App() {
   const [showRule, setShowRule] = useState(false)
   const [mode, setMode] = useState<GameMode | null>(null)
   const [aiSide, setAiSide] = useState<AiSide>('B')
-  const [aiLevel, setAiLevel] = useState<'random' | 'minimax' | 'killer'>('killer')
+  const [aiLevel, setAiLevel] = useState<'random' | 'minimax' | 'killer' | 'devil'>('killer')
   const [dark, setDark] = useState(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('theme')
