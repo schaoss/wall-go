@@ -65,7 +65,6 @@ export class MinimaxAI extends BaseAI {
         (a) => a.type !== 'place' && !isSuicideMove(state, a, state.turn),
       )
       const actions = legalActions.length > 0 ? legalActions : getLegalActions(state)
-      console.log(`MinimaxAI: Starting depth ${depth} search...`)
       if (performance.now() - this.startTime > this.timeLimit) {
         break
       }
