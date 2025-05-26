@@ -3,11 +3,11 @@ import type { GameSnapshot, PlayerAction } from '../lib/types'
 import { getTerritoryMap } from './territory'
 import { getLegalActions, getRandomAction, applyAction, isInPureTerritory } from './ai'
 
-// 評分函數：領地分數 + 可走格數
+// Scoring function: territory score + number of reachable cells
 export function evaluate(gameState: GameSnapshot, player: string): number {
   const { board } = gameState
   const size = board.length
-  // 找出雙方所有棋子
+  // Find all stones for both sides
   const myStones: { x: number; y: number }[] = []
   const oppStones: { x: number; y: number }[] = []
   for (let y = 0; y < size; y++) {
@@ -19,7 +19,7 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
   if (myStones.length === 0) return -9999
   if (oppStones.length === 0) return 9999
 
-  // 領地分數（只計算「值得封閉」的區域）
+  // Territory score (only calculate for areas worth enclosing)
   const territory = getTerritoryMap(board)
   let myTerritory = 0,
     oppTerritory = 0
@@ -27,8 +27,8 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
     for (let x = 0; x < size; x++) {
       const owner = territory[y][x]
       if (!owner) continue
-      // 計算這個封閉區域的所有格子
-      // 用 flood fill 找出此區域所有格子
+      // Calculate all cells in this enclosed area
+      // Use flood fill to find all cells in this area
       const visited = Array.from({ length: size }, () => Array(size).fill(false))
       function areaCount(
         sx: number,
@@ -47,7 +47,7 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
           count++
           if (board[y][x].stone === player) myStones++
           else if (board[y][x].stone) oppStones++
-          // 四方向
+          // Four directions
           for (const [dx, dy] of [
             [1, 0],
             [-1, 0],
@@ -65,7 +65,7 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
       }
       if (!visited[y][x]) {
         const { count, myStones, oppStones } = areaCount(x, y, owner)
-        // 只計算值得封閉的區域
+        // Only count areas worth enclosing
         if (owner === player) {
           if (count > myStones * 7 - oppStones * 3) myTerritory += count
         } else {
@@ -75,7 +75,7 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
     }
   }
 
-  // flood fill 計算每方可到達的格子數
+  // Flood fill to calculate number of reachable cells for each side
   function reachable(starts: { x: number; y: number }[]): number {
     const visited = Array.from({ length: size }, () => Array(size).fill(false))
     const queue = [...starts]
@@ -85,7 +85,7 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
       if (visited[y][x]) continue
       visited[y][x] = true
       count++
-      // 四方向
+      // Four directions
       const dirs = [
         { dx: 1, dy: 0 },
         { dx: -1, dy: 0 },
@@ -102,7 +102,7 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
           ny < size &&
           !visited[ny][nx] &&
           !board[ny][nx].stone &&
-          // 判斷牆阻擋
+          // Check wall blocking
           ((dx === 1 && !board[y][x + 1].wallLeft) ||
             (dx === -1 && !board[y][x].wallLeft) ||
             (dy === 1 && !board[y + 1]?.[x]?.wallTop) ||
@@ -116,13 +116,13 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
   }
   const myReach = reachable(myStones)
   const oppReach = reachable(oppStones)
-  // 若己方所有棋子都被困住（無法移動），給極低分
+  // If all my stones are trapped (cannot move), give a very low score
   if (myReach <= myStones.length) return -9999
-  // 綜合評分：領地優先，其次可走格
+  // Combined score: prioritize territory, then reachable cells
   return (myTerritory - oppTerritory) * 10 + (myReach - oppReach)
 }
 
-// Minimax 主體
+// Minimax main function
 export function minimax(
   state: GameSnapshot,
   depth: number,
@@ -131,7 +131,7 @@ export function minimax(
 ): number {
   if (depth === 0) return evaluate(state, player)
   let actions = getLegalActions(state)
-  // 過濾掉移動純淨領地內棋子的行動
+  // Filter out moves that move stones inside pure territory
   if (state.phase === 'playing') {
     actions = actions.filter((a) => {
       if (a.type === 'move' && a.from) {
@@ -158,8 +158,8 @@ export function minimax(
   }
 }
 
-// 擺子階段：最大化可移動格數
-// 修正 getRandomAction 用法，確保傳入 { legalActions } 並保證回傳型別
+// Placing phase: maximize number of reachable cells
+// Fix getRandomAction usage, ensure passing { legalActions } and return type
 export function selectBestPlacingAction(
   gameState: GameSnapshot,
   actions: PlayerAction[],
@@ -168,12 +168,9 @@ export function selectBestPlacingAction(
   if (placeActions.length === 1) {
     return placeActions[0]
   }
-  const isRed = gameState.turn === 'R'
-  const myStoneCount = gameState.board.flat().filter((cell) => cell.stone === gameState.turn).length
-  const isRedFirst = isRed && myStoneCount === 0
-  const isRedLast = isRed && placeActions.length === 1
   const size = gameState.board.length
   // 計算可移動格數的輔助函數
+
   function calcReachable(state: GameSnapshot, player: string): number {
     const { board } = state
     const myStones: { x: number; y: number }[] = []
@@ -226,40 +223,20 @@ export function selectBestPlacingAction(
     if (x === 0 || x === size - 1 || y === 0 || y === size - 1) return -2
     return 0
   }
-  if (isRedFirst || isRedLast) {
-    let bestScore = -Infinity
-    let bestActions: PlayerAction[] = []
-    for (const action of placeActions) {
-      const nextState = applyAction(gameState, action)
-      const score = calcReachable(nextState, gameState.turn) + edgePenalty(action.pos)
-      if (score > bestScore) {
-        bestScore = score
-        bestActions = [action]
-      } else if (score === bestScore) {
-        bestActions.push(action)
-      }
+
+  // Score each placement by reachable cells (higher is better), with edge penalty
+  let bestScore = -Infinity
+  let bestActions: PlayerAction[] = []
+  for (const action of placeActions) {
+    const nextState = applyAction(gameState, action)
+    const score = calcReachable(nextState, gameState.turn) + edgePenalty(action.pos)
+    if (score > bestScore) {
+      bestScore = score
+      bestActions = [action]
+    } else if (score === bestScore) {
+      bestActions.push(action)
     }
-    return getRandomAction({ legalActions: bestActions })!
-  } else {
-    let bestScore = -Infinity
-    let bestFirstActions: PlayerAction[] = []
-    for (let i = 0; i < placeActions.length; i++) {
-      for (let j = 0; j < placeActions.length; j++) {
-        if (i === j) continue
-        const first = placeActions[i]
-        const second = placeActions[j]
-        const afterFirst = applyAction(gameState, first)
-        const afterSecond = applyAction(afterFirst, second)
-        const penalty = edgePenalty(first.pos) + edgePenalty(second.pos)
-        const score = calcReachable(afterSecond, gameState.turn) + penalty
-        if (score > bestScore) {
-          bestScore = score
-          bestFirstActions = [first]
-        } else if (score === bestScore) {
-          bestFirstActions.push(first)
-        }
-      }
-    }
-    return getRandomAction({ legalActions: bestFirstActions })!
   }
+  // Pick randomly among best
+  return getRandomAction({ legalActions: bestActions })!
 }

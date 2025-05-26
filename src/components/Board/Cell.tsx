@@ -42,7 +42,7 @@ export default function Cell({
   // --- 棋子移動動畫 ---
   const stoneRef = useRef<HTMLButtonElement>(null)
   const prevPosRef = useRef<{ x: number; y: number } | null>(null)
-  // 追蹤棋子移動
+  // Track piece movement
   useEffect(() => {
     if (cell.stone && phase === 'playing') {
       if (stoneRef.current) {
@@ -172,7 +172,7 @@ export default function Cell({
         />
       )}
 
-      {/* 擺子階段空格動畫 */}
+      {/* Empty cell animation for placing phase */}
       {placeStone && !cell.stone && phase === 'placing' && (
         <button
           className="absolute inset-0 bg-transparent hover:bg-amber-100/60 cursor-pointer transition-all duration-200 rounded-lg"
@@ -180,7 +180,7 @@ export default function Cell({
         />
       )}
 
-      {/* 合法移動格動畫 */}
+      {/* Legal move cell animation */}
       {moveTo && legal.has(posKey) && (
         <button
           className="absolute inset-0 bg-emerald-400/20 hover:bg-emerald-400/60 cursor-pointer transition-all duration-200 animate-pulse rounded-lg"
@@ -188,7 +188,7 @@ export default function Cell({
         />
       )}
 
-      {/* 建牆按鈕動畫（若此格被選中） */}
+      {/* Wall button animation (if this cell is selected) */}
       {buildWall &&
         isSel &&
         (() => {

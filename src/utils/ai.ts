@@ -178,10 +178,10 @@ export function isInPureTerritory(
 }
 
 /**
- * 回傳「玩家能抵達的格子數」：
- *  - 起點：所有屬於 player 的棋子
- *  - 可走：空格 or 同色棋子
- *  - 阻擋：牆、邊界、異色棋子
+ * Return the number of cells the player can reach:
+ *  - Start: all stones belonging to the player
+ *  - Can move: empty cell or same color stone
+ *  - Blocked: walls, boundaries, different color stones
  */
 export function reachable(board: Cell[][], player: Player): number {
   const n = board.length
