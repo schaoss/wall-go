@@ -53,7 +53,7 @@ export default function RuleDialog({ open, onClose }: RuleDialogProps) {
             {t('rule.title', 'Game Rules')}
           </div>
           <div className="mb-2 text-base text-zinc-800 dark:text-zinc-100 text-left whitespace-pre-line px-6 pb-6 overflow-y-auto h-[60vh]">
-            {ruleText}
+            <p dangerouslySetInnerHTML={{ __html: ruleText }} />
           </div>
           <div className="flex gap-4 justify-center mt-2 px-6 py-4 bg-white dark:bg-zinc-900 z-10 border-t border-zinc-100 dark:border-zinc-800 rounded-b-2xl">
             <GameButton onClick={onClose} ariaLabel={t('rule.close', 'Close')}>
