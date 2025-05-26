@@ -14,12 +14,22 @@ interface GameButtonProps {
   variant?: 'primary' | 'success' | 'warning' | 'danger' | 'neutral'
 }
 
-export default function GameButton({ onClick, disabled, ariaLabel, children, type = 'button', className, active, text, variant }: GameButtonProps) {
+export default function GameButton({
+  onClick,
+  disabled,
+  ariaLabel,
+  children,
+  type = 'button',
+  className,
+  active,
+  text,
+  variant,
+}: GameButtonProps) {
   const variantClass = text
     ? ''
     : active
-    ? COLOR.success
-    : variant && COLOR[variant] || COLOR.neutral
+      ? COLOR.success
+      : (variant && COLOR[variant]) || COLOR.neutral
 
   return (
     <button
@@ -35,7 +45,7 @@ export default function GameButton({ onClick, disabled, ariaLabel, children, typ
               'disabled:opacity-40 disabled:cursor-not-allowed',
               variantClass,
             ],
-        className // 保證自訂 className 最後套用
+        className, // 保證自訂 className 最後套用
       )}
       onClick={onClick}
       disabled={disabled}

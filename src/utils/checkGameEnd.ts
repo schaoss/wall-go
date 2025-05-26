@@ -9,19 +9,18 @@ export interface GameResult {
 }
 
 export function checkGameEnd(board: Cell[][], players: Player[]): GameResult {
-  const totals = Object.fromEntries(
-    players.map(p => [p, 0])
-  ) as Record<Player, number>
+  const totals = Object.fromEntries(players.map((p) => [p, 0])) as Record<Player, number>
 
   const remainingStones = new Set<string>()
-  board.forEach((row, y) => row.forEach((cell, x) => {
+  board.forEach((row, y) =>
+    row.forEach((cell, x) => {
       if (cell.stone) remainingStones.add(`${x},${y}`)
-    })
+    }),
   )
   if (remainingStones.size === 0) {
     return {
       finished: false,
-      score: totals
+      score: totals,
     }
   }
 

@@ -17,8 +17,15 @@ export interface BoardProps {
 }
 
 function Board({
-  board, phase, turn, selected, legal,
-  selectStone, placeStone, moveTo, buildWall
+  board,
+  phase,
+  turn,
+  selected,
+  legal,
+  selectStone,
+  placeStone,
+  moveTo,
+  buildWall,
 }: BoardProps) {
   // 領地資訊: 每次都計算
   const territoryMap = getTerritoryMap(board)
@@ -32,10 +39,10 @@ function Board({
       className={clsx(
         'relative border-4 border-zinc-300 dark:border-zinc-700 rounded-2xl shadow-xl bg-gradient-to-br from-zinc-50 to-zinc-200 dark:from-zinc-900 dark:to-zinc-800 transition-all duration-500 hover:shadow-2xl inline-block',
         phase === 'playing' || phase === 'placing'
-          ? (turn === 'R'
-              ? 'ring-4 ring-rose-400/60 animate-player-glow-red'
-              : 'ring-4 ring-indigo-400/60 animate-player-glow-blue')
-          : ''
+          ? turn === 'R'
+            ? 'ring-4 ring-rose-400/60 animate-player-glow-red'
+            : 'ring-4 ring-indigo-400/60 animate-player-glow-blue'
+          : '',
       )}
       style={{
         width: '100%',
@@ -67,20 +74,24 @@ function Board({
             key={f}
             className="pointer-events-none select-none text-xs text-zinc-400 font-mono absolute z-20"
             style={{
-              left: `calc(${(i + 0.5) * 100 / BOARD_SIZE}% - 0.5em)`,
+              left: `calc(${((i + 0.5) * 100) / BOARD_SIZE}% - 0.5em)`,
               top: '-20px',
             }}
-          >{f}</span>
+          >
+            {f}
+          </span>
         ))}
         {ranks.map((r, i) => (
           <span
             key={r}
             className="pointer-events-none select-none text-xs text-zinc-400 font-mono absolute z-20"
             style={{
-              top: `calc(${(i + 0.5) * 100 / BOARD_SIZE}% - 0.5em)`,
+              top: `calc(${((i + 0.5) * 100) / BOARD_SIZE}% - 0.5em)`,
               left: '-16px',
             }}
-          >{r}</span>
+          >
+            {r}
+          </span>
         ))}
         {/* 棋盤格子 */}
         {board.map((row, y) =>
@@ -106,7 +117,7 @@ function Board({
                 territoryOwner={territoryMap ? territoryMap[y][x] : undefined}
               />
             )
-          })
+          }),
         )}
       </div>
     </div>

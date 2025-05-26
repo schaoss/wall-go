@@ -7,7 +7,11 @@ describe('getTerritoryMap', () => {
     // 3x3 棋盤，紅方 (1,1) 四面牆
     const N = 3
     const board: Cell[][] = Array.from({ length: N }, () =>
-      Array.from({ length: N }, () => ({ stone: null, wallTop: null, wallLeft: null }))
+      Array.from({ length: N }, () => ({
+        stone: null,
+        wallTop: null,
+        wallLeft: null,
+      })),
     )
     board[1][1].stone = 'R'
     board[1][1].wallTop = 'R'
@@ -29,7 +33,11 @@ describe('getTerritoryMap', () => {
     // 4x4 棋盤，紅藍各一顆棋子，各自用牆壁圍住
     const N = 4
     const board: Cell[][] = Array.from({ length: N }, () =>
-      Array.from({ length: N }, () => ({ stone: null, wallTop: null, wallLeft: null }))
+      Array.from({ length: N }, () => ({
+        stone: null,
+        wallTop: null,
+        wallLeft: null,
+      })),
     )
     // 紅方 (0,0)
     board[0][0].stone = 'R'

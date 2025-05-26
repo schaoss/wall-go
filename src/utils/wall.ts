@@ -19,7 +19,7 @@ export function getLegalWallActions(board: Cell[][], x: number, y: number): Play
         type: 'wall',
         from: { x, y },
         pos: { x, y },
-        dir
+        dir,
       })
     }
   }

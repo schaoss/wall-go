@@ -47,7 +47,7 @@ export default function App() {
       <SeoHelmet />
       {mode === null || mode === undefined ? (
         <GameModeMenu
-          setMode={m => {
+          setMode={(m) => {
             setMode(m)
           }}
           setAiSide={setAiSide}
@@ -70,9 +70,7 @@ export default function App() {
       <ConfirmDialog
         open={showConfirm}
         title={t('menu.home', '回到首頁')}
-        message={
-          t('menu.confirmHome', '遊戲尚未結束，確定要回到首頁嗎？\n目前進度將會消失。')
-        }
+        message={t('menu.confirmHome', '遊戲尚未結束，確定要回到首頁嗎？\n目前進度將會消失。')}
         confirmText={t('common.confirm', '確定')}
         cancelText={t('common.cancel', '取消')}
         onConfirm={() => {

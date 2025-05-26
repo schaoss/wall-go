@@ -5,7 +5,9 @@ import type { Player, Cell, WallDir, Pos } from '../lib/types'
 export function getTerritoryMap(board: Cell[][]): (Player | null)[][] {
   const BOARD_SIZE = board.length
   const visited = Array.from({ length: BOARD_SIZE }, () => Array<boolean>(BOARD_SIZE).fill(false))
-  const territory = Array.from({ length: BOARD_SIZE }, () => Array<Player | null>(BOARD_SIZE).fill(null))
+  const territory = Array.from({ length: BOARD_SIZE }, () =>
+    Array<Player | null>(BOARD_SIZE).fill(null),
+  )
   const dirs: [number, number, WallDir][] = [
     [1, 0, 'left'],
     [-1, 0, 'left'],
@@ -33,8 +35,8 @@ export function getTerritoryMap(board: Cell[][]): (Player | null)[][] {
               ? board[y][x + 1].wallLeft
               : cell.wallLeft
             : dy === 1
-            ? board[ny][nx].wallTop
-            : cell.wallTop
+              ? board[ny][nx].wallTop
+              : cell.wallTop
         if (blocked) return
         if (!visited[ny][nx]) {
           visited[ny][nx] = true
@@ -45,7 +47,9 @@ export function getTerritoryMap(board: Cell[][]): (Player | null)[][] {
     // 純淨領地才標記（包含有棋子的格子）
     if (playersInArea.size === 1) {
       const owner = playersInArea.values().next().value as Player
-      cells.forEach(({ x, y }) => { territory[y][x] = owner })
+      cells.forEach(({ x, y }) => {
+        territory[y][x] = owner
+      })
     }
   }
   for (let y = 0; y < BOARD_SIZE; y++) {

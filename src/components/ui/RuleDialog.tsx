@@ -56,10 +56,9 @@ export default function RuleDialog({ open, onClose }: RuleDialogProps) {
             {ruleText}
           </div>
           <div className="flex gap-4 justify-center mt-2 px-6 py-4 bg-white dark:bg-zinc-900 z-10 border-t border-zinc-100 dark:border-zinc-800 rounded-b-2xl">
-            <GameButton
-              onClick={onClose}
-              ariaLabel={t('rule.close', 'Close')}
-            >{t('rule.close', 'Close')}</GameButton>
+            <GameButton onClick={onClose} ariaLabel={t('rule.close', 'Close')}>
+              {t('rule.close', 'Close')}
+            </GameButton>
           </div>
         </div>
       </dialog>

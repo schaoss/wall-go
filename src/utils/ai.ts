@@ -3,15 +3,16 @@ import { isLegalMove } from './isLegalMove'
 import { getLegalWallActions } from './wall'
 import { getTerritoryMap } from './territory'
 
-export function getRandomAction({ legalActions }: { legalActions: PlayerAction[] }): PlayerAction | null {
+export function getRandomAction({
+  legalActions,
+}: {
+  legalActions: PlayerAction[]
+}): PlayerAction | null {
   if (legalActions.length === 0) return null
   return legalActions[Math.floor(Math.random() * legalActions.length)]
 }
 
-export function getLegalDestinations(
-  gameState: GameSnapshot,
-  from: Pos
-): Pos[] {
+export function getLegalDestinations(gameState: GameSnapshot, from: Pos): Pos[] {
   const { board } = gameState
   const destinations: Pos[] = []
   for (let y = 0; y < board.length; y++) {
@@ -39,13 +40,13 @@ export function getLegalActions(gameState: GameSnapshot): PlayerAction[] {
         if (board[y][x].stone !== turn) continue // 只考慮自己的棋子
         // 移動+建牆
 
-        getLegalDestinations(gameState, { x, y }).forEach(pos => {
+        getLegalDestinations(gameState, { x, y }).forEach((pos) => {
           for (const wallAction of getLegalWallActions(board, pos.x, pos.y)) {
             legalActions.push({
               type: 'move',
               from: { x, y },
               pos: { x: pos.x, y: pos.y },
-              followUp: wallAction
+              followUp: wallAction,
             })
           }
         })
@@ -69,13 +70,11 @@ export function placeScore(board: Cell[][], x: number, y: number, me: Player): n
   board.forEach((row, yy) =>
     row.forEach((c, xx) => {
       if (c.stone === me) {
-        if ((xx === x && Math.abs(yy - y) <= 2) || (yy === y && Math.abs(xx - x) <= 2))
-          cut = 2
+        if ((xx === x && Math.abs(yy - y) <= 2) || (yy === y && Math.abs(xx - x) <= 2)) cut = 2
       } else if (c.stone === opp) {
-        if ((xx === x && Math.abs(yy - y) <= 2) || (yy === y && Math.abs(xx - x) <= 2))
-          oppBlock = 2
+        if ((xx === x && Math.abs(yy - y) <= 2) || (yy === y && Math.abs(xx - x) <= 2)) oppBlock = 2
       }
-    })
+    }),
   )
 
   // 3. Edge penalty (自己)
@@ -87,9 +86,9 @@ export function placeScore(board: Cell[][], x: number, y: number, me: Player): n
     row.forEach((c, xx) => {
       if (c.stone === opp) {
         const d = Math.min(xx + yy, xx + 6 - yy, 6 - xx + yy, 12 - xx - yy)
-        cornerP += Math.max(0, 2 - d)   // 角=2, 邊下一格=1, 其他=0
+        cornerP += Math.max(0, 2 - d) // 角=2, 邊下一格=1, 其他=0
       }
-    })
+    }),
   )
   // scale down
   cornerP = Math.min(2, cornerP)
@@ -104,7 +103,7 @@ export function getBestPlacement(state: GameSnapshot): PlayerAction {
 
   for (let y = 0; y < 7; y++) {
     for (let x = 0; x < 7; x++) {
-      if (board[y][x].stone) continue          // 已佔
+      if (board[y][x].stone) continue // 已佔
       const s = placeScore(board, x, y, turn)
       if (s > best) {
         best = s
@@ -148,7 +147,11 @@ export function applyAction(state: GameSnapshot, action: PlayerAction): GameSnap
 }
 
 // 自殺步判斷
-export function isSuicideMove(gameState: GameSnapshot, action: PlayerAction, player: string): boolean {
+export function isSuicideMove(
+  gameState: GameSnapshot,
+  action: PlayerAction,
+  player: string,
+): boolean {
   const nextState = applyAction(gameState, action)
   const oppActions = getLegalActions(nextState)
   for (const oppAction of oppActions) {
@@ -162,14 +165,17 @@ export function isSuicideMove(gameState: GameSnapshot, action: PlayerAction, pla
   return false
 }
 
-export function isInPureTerritory(gameState: GameSnapshot, pos: { x: number, y: number }, player: string): boolean {
+export function isInPureTerritory(
+  gameState: GameSnapshot,
+  pos: { x: number; y: number },
+  player: string,
+): boolean {
   const { board } = gameState
   const territory = getTerritoryMap(board)
   if (territory[pos.y][pos.x] !== player) return false
 
   return true
 }
-
 
 /**
  * 回傳「玩家能抵達的格子數」：
@@ -201,11 +207,7 @@ export function reachable(board: Cell[][], player: Player): number {
  * @param seen A 2D boolean array marking visited cells.
  * @returns A Set of strings representing the coordinates of reachable empty cells (e.g., "x,y").
  */
-function bfsForReachableSet(
-  board: Cell[][],
-  queue: Pos[],
-  seen: boolean[][],
-): Set<string> {
+function bfsForReachableSet(board: Cell[][], queue: Pos[], seen: boolean[][]): Set<string> {
   const n = board.length
   const reachableEmptyCells = new Set<string>()
 
@@ -270,13 +272,13 @@ export function getReachableSet(board: Cell[][], player: Player): Set<string> {
             dir === 'left'
               ? dx === 1
                 ? board[y][x + 1].wallLeft // Wall on the right of current stone (left of neighbor)
-                : board[y][x].wallLeft     // Wall on the left of current stone
+                : board[y][x].wallLeft // Wall on the left of current stone
               : dy === 1
-                ? board[y + 1][x].wallTop  // Wall below current stone (top of neighbor)
-                : board[y][x].wallTop      // Wall above current stone
+                ? board[y + 1][x].wallTop // Wall below current stone (top of neighbor)
+                : board[y][x].wallTop // Wall above current stone
           if (blockedByWall) continue
 
-          if (seen[ny][nx]) continue      // Already visited or is another player stone
+          if (seen[ny][nx]) continue // Already visited or is another player stone
           if (board[ny][nx].stone) continue // Neighbor is not an empty cell
 
           // If we reach here, {nx, ny} is an empty, non-walled-off, unvisited neighbor
@@ -291,7 +293,6 @@ export function getReachableSet(board: Cell[][], player: Player): Set<string> {
   // bfsForReachableSet will add these initial cells to the result AND explore from them.
   return bfsForReachableSet(board, queue, seen)
 }
-
 
 /**
  * 某顆棋在目前版面是否「被完全孤立」（可走格 = 1 → 只有自己）
@@ -309,10 +310,10 @@ export function isIsolated(board: Cell[][], x: number, y: number): boolean {
 /* ---------- private helpers ---------- */
 
 const DIRS: [dx: number, dy: number, wallKey: 'left' | 'top'][] = [
-  [1, 0, 'left'],  // 往右要看右格的 left 牆
+  [1, 0, 'left'], // 往右要看右格的 left 牆
   [-1, 0, 'left'], // 往左看自身 left 牆
-  [0, 1, 'top'],   // 往下看下格 top 牆
-  [0, -1, 'top'],  // 往上看自身 top 牆
+  [0, 1, 'top'], // 往下看下格 top 牆
+  [0, -1, 'top'], // 往上看自身 top 牆
 ]
 
 /** 計算指定座標(石)的“氣”數 = 四方向尚未被牆封且目標格為空 */
@@ -337,11 +338,7 @@ function totalLiberties(board: Cell[][], player: Player): number {
   return sum
 }
 
-function bfs(
-  board: Cell[][],
-  queue: Pos[],
-  seen: boolean[][],
-): number {
+function bfs(board: Cell[][], queue: Pos[], seen: boolean[][]): number {
   const n = board.length
   let count = 0
 
@@ -377,39 +374,35 @@ function bfs(
   return count
 }
 
-export function scoreAction(
-  state: GameSnapshot,
-  action: PlayerAction,
-  me: Player
-): number {
+export function scoreAction(state: GameSnapshot, action: PlayerAction, me: Player): number {
   const opp = me === 'R' ? 'B' : 'R'
 
   const myBefore = reachable(state.board, me)
   const oppBefore = reachable(state.board, opp)
 
   // 用你現有的 clone+applyAction 產生下一個 board
-  const next = applyAction(state, action)        // <== 直接呼叫你檔案裡的函式
+  const next = applyAction(state, action) // <== 直接呼叫你檔案裡的函式
   const myAfter = reachable(next.board, me)
   const oppAfter = reachable(next.board, opp)
 
   /** 1) ΔReach */
-  const deltaReach = (myAfter - myBefore) - (oppAfter - oppBefore)
+  const deltaReach = myAfter - myBefore - (oppAfter - oppBefore)
 
   /** 2) Isolate bonus：堵死一顆對手棋 +50 */
   let iso = 0
   next.board.forEach((row, y) =>
     row.forEach((c, x) => {
       if (c.stone === opp && isIsolated(next.board, x, y)) iso++
-    })
+    }),
   )
 
   /** 2.5) opponent liberties reduction */
   const oppLibBefore = totalLiberties(state.board, opp)
   const oppLibAfter = totalLiberties(next.board, opp)
-  const deltaLib = oppLibBefore - oppLibAfter   // 正數 = 壓對手氣
+  const deltaLib = oppLibBefore - oppLibAfter // 正數 = 壓對手氣
 
   /** 3) 自殘懲罰 */
-  const selfLoss = Math.max(0, myBefore - myAfter)   // 正數 = 自己可走格減少
+  const selfLoss = Math.max(0, myBefore - myAfter) // 正數 = 自己可走格減少
 
   /* 4) 若落在最外邊框且沒隔絕對手，給額外負分 */
   let edgePenalty = 0
@@ -419,9 +412,11 @@ export function scoreAction(
     if (onEdge && iso === 0) edgePenalty = -12
   }
 
-  return 8 * deltaReach
-    + 100 * iso          // 完全封死價值更高
-    + 20 * deltaLib      // 每減一口氣 +20
-    - 10 * selfLoss      // 強力懲罰自斷氣
-    + edgePenalty
+  return (
+    8 * deltaReach +
+    100 * iso + // 完全封死價值更高
+    20 * deltaLib - // 每減一口氣 +20
+    10 * selfLoss + // 強力懲罰自斷氣
+    edgePenalty
+  )
 }

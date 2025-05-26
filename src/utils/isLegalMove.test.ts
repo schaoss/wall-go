@@ -4,7 +4,11 @@ import { BOARD_SIZE, type Cell, type Pos } from '../lib/types'
 
 function makeBoardWithStone(from: Pos, to?: Pos): Cell[][] {
   const board: Cell[][] = Array.from({ length: BOARD_SIZE }, () =>
-    Array.from({ length: BOARD_SIZE }, () => ({ stone: null, wallTop: null, wallLeft: null }))
+    Array.from({ length: BOARD_SIZE }, () => ({
+      stone: null,
+      wallTop: null,
+      wallLeft: null,
+    })),
   )
   board[from.y][from.x].stone = 'R'
   if (to) board[to.y][to.x].stone = 'B'

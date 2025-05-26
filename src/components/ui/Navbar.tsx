@@ -31,19 +31,22 @@ export default function Navbar({
           onClick={onUndo}
           disabled={!canUndo || phase === 'finished'}
           ariaLabel={t('nav.undoAria', 'Undo')}
-        >↶ {t('nav.undo', 'Undo')}</GameButton>
+        >
+          ↶ {t('nav.undo', 'Undo')}
+        </GameButton>
         <GameButton
           onClick={onRedo}
           disabled={!canRedo || phase === 'finished'}
           ariaLabel={t('nav.redoAria', 'Redo')}
-        >↷ {t('nav.redo', 'Redo')}</GameButton>
+        >
+          ↷ {t('nav.redo', 'Redo')}
+        </GameButton>
       </div>
       <div className="flex gap-2 items-center">
-        <GameButton
-          onClick={onHome}
-          ariaLabel={t('nav.menu', 'Menu')}
-        >
-          <span role="img" aria-label={t('nav.menu', 'Menu')} className="text-xl">🏠</span>
+        <GameButton onClick={onHome} ariaLabel={t('nav.menu', 'Menu')}>
+          <span role="img" aria-label={t('nav.menu', 'Menu')} className="text-xl">
+            🏠
+          </span>
         </GameButton>
         <LanguageThemeSwitcher dark={dark} setDark={setDark} />
       </div>

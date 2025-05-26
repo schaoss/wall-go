@@ -19,12 +19,20 @@ export const useGame = create<State>((_set, get) => {
     } else {
       _set((state) => {
         const next = typeof partial === 'function' ? partial(state) : partial
-        const _history = (typeof next === 'object' && next && '_history' in next && Array.isArray((next as Partial<State>)._history))
-          ? (next as Partial<State>)._history!
-          : state._history
-        const _future = (typeof next === 'object' && next && '_future' in next && Array.isArray((next as Partial<State>)._future))
-          ? (next as Partial<State>)._future!
-          : state._future
+        const _history =
+          typeof next === 'object' &&
+          next &&
+          '_history' in next &&
+          Array.isArray((next as Partial<State>)._history)
+            ? (next as Partial<State>)._history!
+            : state._history
+        const _future =
+          typeof next === 'object' &&
+          next &&
+          '_future' in next &&
+          Array.isArray((next as Partial<State>)._future)
+            ? (next as Partial<State>)._future!
+            : state._future
         return {
           ...state,
           ...next,
@@ -40,11 +48,19 @@ export const useGame = create<State>((_set, get) => {
     set,
     (state) => {
       // snapshot 只存遊戲狀態，不存 _history/_future/undo/redo/canUndo/canRedo
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { _history: _, _future: __, undo: ___, redo: ____, canUndo: _____, canRedo: ______, ...rest } = state
+
+      const {
+        _history: _,
+        _future: __,
+        undo: ___,
+        redo: ____,
+        canUndo: _____,
+        canRedo: ______,
+        ...rest
+      } = state
       return snapshotFromState(rest)
     },
-    restoreSnapshot
+    restoreSnapshot,
   )
   const PLAYERS = [...PLAYER_LIST]
 
@@ -87,7 +103,7 @@ export const useGame = create<State>((_set, get) => {
       set({ humanSide: side })
     },
     placeStone(pos: Pos) {
-      set(state => {
+      set((state) => {
         const { board, players, stonesPlaced, stonesLimit, phase } = state
         if (phase !== 'placing') return state
         const totalPlaced = Object.values(stonesPlaced).reduce((a, b) => a + b, 0)
@@ -101,7 +117,7 @@ export const useGame = create<State>((_set, get) => {
         const newTotal = totalPlaced + 1
         const nextIdx = placingTurnIndex(newTotal, players.length)
         const nextPlayer = players[nextIdx]
-        const allDone = Object.values(next.stonesPlaced).every(c => c === stonesLimit)
+        const allDone = Object.values(next.stonesPlaced).every((c) => c === stonesLimit)
         next.turn = nextPlayer
         next.phase = (allDone ? 'playing' : 'placing') as import('../lib/types').Phase
         next.selected = undefined
@@ -119,7 +135,7 @@ export const useGame = create<State>((_set, get) => {
       })
     },
     selectStone(pos: Pos) {
-      set(state => {
+      set((state) => {
         const { board, turn, stepsTaken, phase } = state
         if (phase !== 'playing') return state
         if (stepsTaken > 0) return state
@@ -132,11 +148,17 @@ export const useGame = create<State>((_set, get) => {
             }
           }
         }
-        return { ...state, selected: pos, legal, stepsTaken: 0, skipReason: undefined }
+        return {
+          ...state,
+          selected: pos,
+          legal,
+          stepsTaken: 0,
+          skipReason: undefined,
+        }
       })
     },
     moveTo(to: Pos) {
-      set(state => {
+      set((state) => {
         const { selected, board, legal, stepsTaken, phase } = state
         if (phase !== 'playing') return state
         if (!selected) return state
@@ -173,7 +195,7 @@ export const useGame = create<State>((_set, get) => {
       })
     },
     buildWall(pos: Pos, dir: WallDir) {
-      set(state => {
+      set((state) => {
         const { board, turn, selected, phase } = state
         if (phase !== 'playing') return state
         if (!selected || selected.x !== pos.x || selected.y !== pos.y) return state
@@ -263,9 +285,11 @@ export const useGame = create<State>((_set, get) => {
         }
       })
     },
-    setPhase(phase) { set({ phase }) },
+    setPhase(phase) {
+      set({ phase })
+    },
     setPlayers(players: import('../lib/types').Player[]) {
-      set(state => ({
+      set((state) => ({
         ...state,
         players,
         turn: players[0],
@@ -275,7 +299,7 @@ export const useGame = create<State>((_set, get) => {
         legal: new Set(),
         result: undefined,
         skipReason: undefined,
-        stonesPlaced: Object.fromEntries(players.map(p => [p, 0])) as Record<string, number>,
+        stonesPlaced: Object.fromEntries(players.map((p) => [p, 0])) as Record<string, number>,
       }))
     },
   }

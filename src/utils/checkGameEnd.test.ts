@@ -4,7 +4,11 @@ import { BOARD_SIZE, PLAYER_LIST, type Cell } from '../lib/types'
 
 function makeEmptyBoard(): Cell[][] {
   return Array.from({ length: BOARD_SIZE }, () =>
-    Array.from({ length: BOARD_SIZE }, () => ({ stone: null, wallTop: null, wallLeft: null }))
+    Array.from({ length: BOARD_SIZE }, () => ({
+      stone: null,
+      wallTop: null,
+      wallLeft: null,
+    })),
   )
 }
 
@@ -58,21 +62,21 @@ describe('checkGameEnd', () => {
     board[1][2].wallLeft = 'R'
     // 藍方區域
     const N = BOARD_SIZE
-    board[N-2][N-2].stone = 'B'
-    board[N-2][N-1].stone = 'B'
-    board[N-1][N-2].stone = 'B'
-    board[N-1][N-1].stone = 'B'
+    board[N - 2][N - 2].stone = 'B'
+    board[N - 2][N - 1].stone = 'B'
+    board[N - 1][N - 2].stone = 'B'
+    board[N - 1][N - 1].stone = 'B'
     // 藍方牆壁（上、左）
-    board[N-2][N-2].wallTop = 'B'
-    board[N-2][N-1].wallTop = 'B'
-    board[N-2][N-2].wallLeft = 'B'
-    board[N-1][N-2].wallLeft = 'B'
+    board[N - 2][N - 2].wallTop = 'B'
+    board[N - 2][N - 1].wallTop = 'B'
+    board[N - 2][N - 2].wallLeft = 'B'
+    board[N - 1][N - 2].wallLeft = 'B'
     // 藍方下牆（6,5/6,6 的 wallTop）
-    board[N-1][N-2].wallTop = 'B'
-    board[N-1][N-1].wallTop = 'B'
+    board[N - 1][N - 2].wallTop = 'B'
+    board[N - 1][N - 1].wallTop = 'B'
     // 藍方右牆（5,6/6,6 的 wallLeft）
-    board[N-2][N-1].wallLeft = 'B'
-    board[N-1][N-1].wallLeft = 'B'
+    board[N - 2][N - 1].wallLeft = 'B'
+    board[N - 1][N - 1].wallLeft = 'B'
     const result = checkGameEnd(board, [...PLAYER_LIST])
     expect(result.finished).toBe(true)
     expect(result.tie).toBe(true)
@@ -82,7 +86,11 @@ describe('checkGameEnd', () => {
     // 測試 4x4 棋盤，紅藍各一顆棋子，各自用牆壁圍住
     const N = 4
     const board: Cell[][] = Array.from({ length: N }, () =>
-      Array.from({ length: N }, () => ({ stone: null, wallTop: null, wallLeft: null }))
+      Array.from({ length: N }, () => ({
+        stone: null,
+        wallTop: null,
+        wallLeft: null,
+      })),
     )
     // 紅方 (0,0)
     board[0][0].stone = 'R'

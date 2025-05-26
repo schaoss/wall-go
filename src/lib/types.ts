@@ -1,11 +1,14 @@
 export const BOARD_SIZE = 7 as const
 export type Player = 'R' | 'B'
-export interface Pos { x: number; y: number }
+export interface Pos {
+  x: number
+  y: number
+}
 
 export interface Cell {
-  stone: Player | null          // 棋子
-  wallTop: Player | null        // 上邊牆
-  wallLeft: Player | null       // 左邊牆
+  stone: Player | null // 棋子
+  wallTop: Player | null // 上邊牆
+  wallLeft: Player | null // 左邊牆
 }
 
 export type Phase = 'selecting' | 'placing' | 'playing' | 'finished'
@@ -18,7 +21,7 @@ export const WallDirArray = ['top', 'left', 'right', 'bottom'] as const
 export interface PlayerAction {
   type: 'place' | 'move' | 'wall'
   from?: Pos // 僅 playing 階段需要
-  pos: Pos   // 目標座標（move: to, wall: 牆座標, place: 落子）
+  pos: Pos // 目標座標（move: to, wall: 牆座標, place: 落子）
   dir?: WallDir
   followUp?: PlayerAction // 若有，代表移動後自動建牆
 }

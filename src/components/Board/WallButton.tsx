@@ -14,10 +14,26 @@ interface WallButtonProps {
   divClass: string
 }
 
-export default function WallButton({ dir, show, x, y, turn, onBuild, btnClass, divClass }: WallButtonProps) {
+export default function WallButton({
+  dir,
+  show,
+  x,
+  y,
+  turn,
+  onBuild,
+  btnClass,
+  divClass,
+}: WallButtonProps) {
   const { t } = useTranslation()
   if (!show) return null
-  const dirLabel = dir === 'top' ? t('game.wall.top', 'top') : dir === 'bottom' ? t('game.wall.bottom', 'bottom') : dir === 'left' ? t('game.wall.left', 'left') : t('game.wall.right', 'right')
+  const dirLabel =
+    dir === 'top'
+      ? t('game.wall.top', 'top')
+      : dir === 'bottom'
+        ? t('game.wall.bottom', 'bottom')
+        : dir === 'left'
+          ? t('game.wall.left', 'left')
+          : t('game.wall.right', 'right')
   return (
     <button
       onClick={() => onBuild(dir)}
@@ -27,7 +43,12 @@ export default function WallButton({ dir, show, x, y, turn, onBuild, btnClass, d
         'transition-all duration-200',
         'hover:scale-110',
       )}
-      aria-label={t('game.wall.aria', { x, y, dir: dirLabel, defaultValue: `Build ${dirLabel} wall at (${x},${y})` })}
+      aria-label={t('game.wall.aria', {
+        x,
+        y,
+        dir: dirLabel,
+        defaultValue: `Build ${dirLabel} wall at (${x},${y})`,
+      })}
       type="button"
     >
       <div

@@ -8,8 +8,8 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
   const { board } = gameState
   const size = board.length
   // 找出雙方所有棋子
-  const myStones: { x: number, y: number }[] = []
-  const oppStones: { x: number, y: number }[] = []
+  const myStones: { x: number; y: number }[] = []
+  const oppStones: { x: number; y: number }[] = []
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       if (board[y][x].stone === player) myStones.push({ x, y })
@@ -21,7 +21,8 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
 
   // 領地分數（只計算「值得封閉」的區域）
   const territory = getTerritoryMap(board)
-  let myTerritory = 0, oppTerritory = 0
+  let myTerritory = 0,
+    oppTerritory = 0
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const owner = territory[y][x]
@@ -29,8 +30,14 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
       // 計算這個封閉區域的所有格子
       // 用 flood fill 找出此區域所有格子
       const visited = Array.from({ length: size }, () => Array(size).fill(false))
-      function areaCount(sx: number, sy: number, player: string): { count: number, myStones: number, oppStones: number } {
-        let count = 0, myStones = 0, oppStones = 0
+      function areaCount(
+        sx: number,
+        sy: number,
+        player: string,
+      ): { count: number; myStones: number; oppStones: number } {
+        let count = 0,
+          myStones = 0,
+          oppStones = 0
         const q = [{ x: sx, y: sy }]
         while (q.length) {
           const { x, y } = q.pop()!
@@ -41,8 +48,14 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
           if (board[y][x].stone === player) myStones++
           else if (board[y][x].stone) oppStones++
           // 四方向
-          for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
-            const nx = x + dx, ny = y + dy
+          for (const [dx, dy] of [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1],
+          ]) {
+            const nx = x + dx,
+              ny = y + dy
             if (nx >= 0 && nx < size && ny >= 0 && ny < size && !visited[ny][nx]) {
               q.push({ x: nx, y: ny })
             }
@@ -63,7 +76,7 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
   }
 
   // flood fill 計算每方可到達的格子數
-  function reachable(starts: { x: number, y: number }[]): number {
+  function reachable(starts: { x: number; y: number }[]): number {
     const visited = Array.from({ length: size }, () => Array(size).fill(false))
     const queue = [...starts]
     let count = 0
@@ -80,15 +93,20 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
         { dx: 0, dy: -1 },
       ]
       for (const { dx, dy } of dirs) {
-        const nx = x + dx, ny = y + dy
+        const nx = x + dx,
+          ny = y + dy
         if (
-          nx >= 0 && nx < size && ny >= 0 && ny < size &&
-          !visited[ny][nx] && !board[ny][nx].stone &&
+          nx >= 0 &&
+          nx < size &&
+          ny >= 0 &&
+          ny < size &&
+          !visited[ny][nx] &&
+          !board[ny][nx].stone &&
           // 判斷牆阻擋
           ((dx === 1 && !board[y][x + 1].wallLeft) ||
-           (dx === -1 && !board[y][x].wallLeft) ||
-           (dy === 1 && !board[y + 1]?.[x]?.wallTop) ||
-           (dy === -1 && !board[y][x].wallTop))
+            (dx === -1 && !board[y][x].wallLeft) ||
+            (dy === 1 && !board[y + 1]?.[x]?.wallTop) ||
+            (dy === -1 && !board[y][x].wallTop))
         ) {
           queue.push({ x: nx, y: ny })
         }
@@ -105,12 +123,17 @@ export function evaluate(gameState: GameSnapshot, player: string): number {
 }
 
 // Minimax 主體
-export function minimax(state: GameSnapshot, depth: number, maximizing: boolean, player: string): number {
+export function minimax(
+  state: GameSnapshot,
+  depth: number,
+  maximizing: boolean,
+  player: string,
+): number {
   if (depth === 0) return evaluate(state, player)
   let actions = getLegalActions(state)
   // 過濾掉移動純淨領地內棋子的行動
   if (state.phase === 'playing') {
-    actions = actions.filter(a => {
+    actions = actions.filter((a) => {
       if (a.type === 'move' && a.from) {
         return !isInPureTerritory(state, a.from, state.turn)
       }
@@ -137,20 +160,23 @@ export function minimax(state: GameSnapshot, depth: number, maximizing: boolean,
 
 // 擺子階段：最大化可移動格數
 // 修正 getRandomAction 用法，確保傳入 { legalActions } 並保證回傳型別
-export function selectBestPlacingAction(gameState: GameSnapshot, actions: PlayerAction[]): PlayerAction {
-  const placeActions = actions.filter(a => a.type === 'place')
+export function selectBestPlacingAction(
+  gameState: GameSnapshot,
+  actions: PlayerAction[],
+): PlayerAction {
+  const placeActions = actions.filter((a) => a.type === 'place')
   if (placeActions.length === 1) {
     return placeActions[0]
   }
   const isRed = gameState.turn === 'R'
-  const myStoneCount = gameState.board.flat().filter(cell => cell.stone === gameState.turn).length
+  const myStoneCount = gameState.board.flat().filter((cell) => cell.stone === gameState.turn).length
   const isRedFirst = isRed && myStoneCount === 0
   const isRedLast = isRed && placeActions.length === 1
   const size = gameState.board.length
   // 計算可移動格數的輔助函數
   function calcReachable(state: GameSnapshot, player: string): number {
     const { board } = state
-    const myStones: { x: number, y: number }[] = []
+    const myStones: { x: number; y: number }[] = []
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
         if (board[y][x].stone === player) myStones.push({ x, y })
@@ -172,14 +198,19 @@ export function selectBestPlacingAction(gameState: GameSnapshot, actions: Player
         { dx: 0, dy: -1 },
       ]
       for (const { dx, dy } of dirs) {
-        const nx = x + dx, ny = y + dy
+        const nx = x + dx,
+          ny = y + dy
         if (
-          nx >= 0 && nx < size && ny >= 0 && ny < size &&
-          !visited[ny][nx] && !board[ny][nx].stone &&
+          nx >= 0 &&
+          nx < size &&
+          ny >= 0 &&
+          ny < size &&
+          !visited[ny][nx] &&
+          !board[ny][nx].stone &&
           ((dx === 1 && !board[y][x + 1].wallLeft) ||
-           (dx === -1 && !board[y][x].wallLeft) ||
-           (dy === 1 && !board[y + 1]?.[x]?.wallTop) ||
-           (dy === -1 && !board[y][x].wallTop))
+            (dx === -1 && !board[y][x].wallLeft) ||
+            (dy === 1 && !board[y + 1]?.[x]?.wallTop) ||
+            (dy === -1 && !board[y][x].wallTop))
         ) {
           queue.push({ x: nx, y: ny })
         }
@@ -188,7 +219,7 @@ export function selectBestPlacingAction(gameState: GameSnapshot, actions: Player
     return count
   }
   // 計算邊緣/角落懲罰
-  function edgePenalty(pos: {x: number, y: number}): number {
+  function edgePenalty(pos: { x: number; y: number }): number {
     const { x, y } = pos
     const isCorner = (x === 0 || x === size - 1) && (y === 0 || y === size - 1)
     if (isCorner) return -3

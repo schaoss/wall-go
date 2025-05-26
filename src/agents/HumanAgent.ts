@@ -18,7 +18,7 @@ export class HumanAgent implements PlayerAgent {
   // 遊戲主流程呼叫，等待玩家操作
   getAction(): Promise<PlayerAction> {
     this.waiting = true
-    return new Promise<PlayerAction>(resolve => {
+    return new Promise<PlayerAction>((resolve) => {
       this.actionResolver = resolve
     })
   }
