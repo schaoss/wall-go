@@ -1,5 +1,3 @@
-
-
 {
   "menu": {
     "title": "Wall Go · Go de Muros",
@@ -51,5 +49,12 @@
     "title": "Wall Go | Juego de Estrategia Online | Inspirado en Devil’s Plan",
     "description": "Wall Go – Juego de estrategia gratuito inspirado en Devil’s Plan. Juega solo o con amigos, puntuación por territorio, deshacer/rehacer y una interfaz moderna. ¡Sin registro, solo juega!",
     "keywords": "Wall Go, Devil's Plan, juego de mesa, juego de estrategia, deshacer rehacer, territorio, código abierto, juego navegador, wallgo, juego del plan del diablo, wall go un jugador"
+  },
+  "nav": {
+    "undo": "Deshacer",
+    "redo": "Rehacer",
+    "undoAria": "Deshacer",
+    "redoAria": "Rehacer",
+    "menu": "Menú"
   }
 }

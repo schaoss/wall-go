@@ -49,5 +49,12 @@
     "title": "Wall Go（墙壁围棋）| 在线策略桌游 | Devil's Plan 同款游戏",
     "description": "Wall Go（墙壁围棋）－免费在线策略桌游，支持单人/双人、领地计分、撤销重做、现代化 UI。《Devil’s Plan 2》同款游戏，开源、免注册、直接开玩！",
     "keywords": "Wall Go, 墙壁围棋, Devil's Plan, board game, strategy game, undo redo, territory, GitHub, 开源, 桌游, 在线游戏, 小游戏, browser game, 围棋, wallgo, devil's plan game, wall go single player"
+  },
+  "nav": {
+    "undo": "撤销",
+    "redo": "重做",
+    "undoAria": "撤销",
+    "redoAria": "重做",
+    "menu": "主菜单"
   }
 }

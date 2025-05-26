@@ -49,5 +49,12 @@
     "title": "Wall Go | Online Strategy Board Game | Devil's Plan Inspired",
     "description": "Wall Go – Free online strategy board game inspired by Devil’s Plan. Play solo or with friends, territory scoring, undo/redo, and a modern UI. No signup needed, just play!",
     "keywords": "Wall Go, Devil's Plan, board game, strategy game, undo redo, territory, open source, browser game, wallgo, devil's plan game, wall go single player"
+  },
+  "nav": {
+    "undo": "Undo",
+    "redo": "Redo",
+    "undoAria": "Undo",
+    "redoAria": "Redo",
+    "menu": "Menu"
   }
 }
