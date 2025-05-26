@@ -50,7 +50,7 @@ export default function RuleDialog({ open, onClose }: RuleDialogProps) {
         <div className="fixed inset-0 bg-black/40 z-0" />
         <div className="relative max-w-2xl w-[90vw] rounded-2xl shadow-2xl bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 animate-fade-in">
           <div className="text-lg font-extrabold mb-1 text-center tracking-tight px-6 py-4 sticky top-0 bg-white dark:bg-zinc-900 z-10 border-b border-zinc-100 dark:border-zinc-800 rounded-t-2xl">
-            {t('rule.title', '遊戲規則說明')}
+            {t('rule.title', 'Game Rules')}
           </div>
           <div className="mb-2 text-base text-zinc-800 dark:text-zinc-100 text-left whitespace-pre-line px-6 pb-6 overflow-y-auto h-[60vh]">
             {ruleText}
@@ -58,8 +58,8 @@ export default function RuleDialog({ open, onClose }: RuleDialogProps) {
           <div className="flex gap-4 justify-center mt-2 px-6 py-4 bg-white dark:bg-zinc-900 z-10 border-t border-zinc-100 dark:border-zinc-800 rounded-b-2xl">
             <GameButton
               onClick={onClose}
-              ariaLabel={t('rule.close', '關閉規則說明')}
-            >{t('rule.close', '關閉')}</GameButton>
+              ariaLabel={t('rule.close', 'Close')}
+            >{t('rule.close', 'Close')}</GameButton>
           </div>
         </div>
       </dialog>
