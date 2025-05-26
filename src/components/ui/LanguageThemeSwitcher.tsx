@@ -2,6 +2,15 @@ import GameButton from './GameButton'
 import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
 
+const LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Español' },
+  { code: 'ko', label: '한국어' },
+  { code: 'ja', label: '日本語' },
+  { code: 'zh-Hans', label: '简体中文' },
+  { code: 'zh-Hant', label: '繁體中文' },
+]
+
 export default function LanguageThemeSwitcher({
   dark,
   setDark,
@@ -24,15 +33,6 @@ export default function LanguageThemeSwitcher({
     return () => document.removeEventListener('mousedown', handleClick)
   }, [open])
 
-  const languages = [
-    { code: 'en', label: 'English' },
-    { code: 'es', label: 'Español' },
-    { code: 'ko', label: '한국어' },
-    { code: 'ja', label: '日本語' },
-    { code: 'zh-Hans', label: '简体中文' },
-    { code: 'zh-Hant', label: '繁體中文' },
-  ]
-
   return (
     <div className={`flex gap-2 items-center ${className}`}>
       <GameButton
@@ -53,7 +53,7 @@ export default function LanguageThemeSwitcher({
         </GameButton>
         {open && (
           <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded shadow-lg z-50 animate-fade-in">
-            {languages.map(lang => (
+            {LANGUAGES.map(lang => (
               <button
                 key={lang.code}
                 className="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors text-zinc-800 dark:text-zinc-100 cursor-pointer"
