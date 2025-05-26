@@ -4,7 +4,7 @@ import { JSDOM } from 'jsdom'
 beforeAll(() => {
   if (typeof window === 'undefined') {
     const dom = new JSDOM('<!doctype html><html><body></body></html>')
-    globalThis.window = dom.window as any
+    globalThis.window = dom.window as DOMWindow & typeof globalThis
     globalThis.document = dom.window.document
     globalThis.navigator = dom.window.navigator
   }
@@ -14,6 +14,7 @@ import { act, renderHook } from '@testing-library/react'
 import { useGame } from './index'
 import { BOARD_SIZE, PLAYER_LIST, STONES_PER_PLAYER, type Pos } from '../lib/types'
 import { describe, it, expect } from 'vitest'
+import type { DOMWindow } from 'jsdom'
 
 describe('Game Store', () => {
   it('placeStone: 正確擺子與換手', () => {
