@@ -49,7 +49,7 @@ export default function GameModeMenu({
       localStorage.setItem('theme', 'light')
     }
   }, [dark])
-  // 語言切換下拉
+  // Language switcher dropdown
   const [open, setOpen] = useState(false)
   const selectRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function GameModeMenu({
     if (open) document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [open])
-  // 移除原本的切換按鈕與語言下拉，改用共用元件
+  // Removed the original toggle button and language dropdown, replaced with a shared component
   return (
     <div className="flex flex-col items-center justify-center min-h-dvh bg-gradient-to-br from-rose-50 via-indigo-50 to-amber-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 p-4">
       <div className="fixed top-0 w-full flex justify-end gap-2 mb-2 p-4">
@@ -84,7 +84,7 @@ export default function GameModeMenu({
           </GameButton>
         ))}
       </div>
-      {/* AI 難度與先後手合併選擇（難度為下拉選單） */}
+      {/* AI difficulty and turn order selection merged (difficulty is a dropdown menu) */}
       <div
         style={{ transition: 'opacity 0.3s, max-height 0.3s, margin 0.3s' }}
         className={

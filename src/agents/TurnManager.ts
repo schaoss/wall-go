@@ -1,4 +1,4 @@
-// TurnManager: 控制遊戲主循環，依序等待每位玩家代理行動
+// TurnManager: controls the main game loop, sequentially waits for each player agent's action
 import type { GameSnapshot } from '../lib/types'
 import type { Player } from '../lib/types'
 import type { PlayerAgent } from './PlayerAgent'

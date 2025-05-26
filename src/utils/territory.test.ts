@@ -4,7 +4,6 @@ import type { Cell } from '../lib/types'
 
 describe('getTerritoryMap', () => {
   it('one stone, fully walled, territory belongs to owner', () => {
-    // 3x3 棋盤，紅方 (1,1) 四面牆
     const N = 3
     const board: Cell[][] = Array.from({ length: N }, () =>
       Array.from({ length: N }, () => ({
@@ -19,7 +18,6 @@ describe('getTerritoryMap', () => {
     board[1][2].wallLeft = 'R'
     board[2][1].wallTop = 'R'
     const territory = getTerritoryMap(board)
-    // 只有 (1,1) 是紅方領地
     expect(territory[1][1]).toBe('R')
     for (let y = 0; y < N; y++) {
       for (let x = 0; x < N; x++) {
@@ -30,7 +28,6 @@ describe('getTerritoryMap', () => {
   })
 
   it('two stones, two regions, both fully walled', () => {
-    // 4x4 棋盤，紅藍各一顆棋子，各自用牆壁圍住
     const N = 4
     const board: Cell[][] = Array.from({ length: N }, () =>
       Array.from({ length: N }, () => ({
@@ -39,13 +36,11 @@ describe('getTerritoryMap', () => {
         wallLeft: null,
       })),
     )
-    // 紅方 (0,0)
     board[0][0].stone = 'R'
     board[0][0].wallTop = 'R'
     board[0][0].wallLeft = 'R'
     board[1][0].wallTop = 'R'
     board[0][1].wallLeft = 'R'
-    // 藍方 (3,3)
     board[3][3].stone = 'B'
     board[3][3].wallLeft = 'B'
     board[3][3].wallTop = 'B'
@@ -54,7 +49,6 @@ describe('getTerritoryMap', () => {
     const territory = getTerritoryMap(board)
     expect(territory[0][0]).toBe('R')
     expect(territory[3][3]).toBe('B')
-    // 其他格都不是領地
     for (let y = 0; y < N; y++) {
       for (let x = 0; x < N; x++) {
         if ((x === 0 && y === 0) || (x === 3 && y === 3)) continue

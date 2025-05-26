@@ -14,7 +14,7 @@ export class RandomAgent implements PlayerAgent {
   }
 
   async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
-    await sleep(200 + Math.floor(Math.random() * 200)) // 模擬思考延遲 200~400ms
+    await sleep(200 + Math.floor(Math.random() * 200)) // Simulate thinking delay 200~400ms
     return new Promise((resolve, reject) => {
       this.worker.onmessage = (
         event: MessageEvent<{

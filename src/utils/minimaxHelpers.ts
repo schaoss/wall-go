@@ -169,7 +169,6 @@ export function selectBestPlacingAction(
     return placeActions[0]
   }
   const size = gameState.board.length
-  // 計算可移動格數的輔助函數
 
   function calcReachable(state: GameSnapshot, player: string): number {
     const { board } = state
@@ -215,7 +214,7 @@ export function selectBestPlacingAction(
     }
     return count
   }
-  // 計算邊緣/角落懲罰
+
   function edgePenalty(pos: { x: number; y: number }): number {
     const { x, y } = pos
     const isCorner = (x === 0 || x === size - 1) && (y === 0 || y === size - 1)

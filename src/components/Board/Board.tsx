@@ -27,10 +27,10 @@ function Board({
   moveTo,
   buildWall,
 }: BoardProps) {
-  // 領地資訊: 每次都計算
+  // Territory information: calculated every time
   const territoryMap = getTerritoryMap(board)
 
-  // 棋盤邊緣標籤
+  // Chessboard edge labels
   const files = Array.from({ length: BOARD_SIZE }, (_, i) => String.fromCharCode(65 + i)) // A-G
   const ranks = Array.from({ length: BOARD_SIZE }, (_, i) => BOARD_SIZE - i) // 7-1
 
@@ -54,7 +54,7 @@ function Board({
         boxSizing: 'border-box',
       }}
     >
-      {/* 棋盤本體 */}
+      {/* Chessboard body */}
       <div
         className={clsx(
           'relative',
@@ -93,7 +93,7 @@ function Board({
             {r}
           </span>
         ))}
-        {/* 棋盤格子 */}
+        {/* Chessboard squares */}
         {board.map((row, y) =>
           row.map((cell, x) => {
             const posKey = `${x},${y}`

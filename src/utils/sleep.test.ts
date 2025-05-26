@@ -6,6 +6,6 @@ describe('sleep', () => {
     const start = Date.now()
     await sleep(100)
     const elapsed = Date.now() - start
-    expect(elapsed).toBeGreaterThanOrEqual(95) // allow some timer inaccuracy
+    expect(elapsed).toBeGreaterThanOrEqual(95)
   })
 })

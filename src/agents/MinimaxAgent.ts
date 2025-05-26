@@ -3,7 +3,7 @@ import type { PlayerAgent } from './PlayerAgent'
 import type { GameSnapshot, PlayerAction } from '../lib/types'
 import { toSerializableSnapshot } from './serialize'
 
-// 簡單 sleep function，模擬 AI 思考延遲
+// Simple sleep function to simulate AI thinking delay
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -18,7 +18,7 @@ export class MinimaxAgent implements PlayerAgent {
   }
 
   async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
-    await sleep(400 + Math.floor(Math.random() * 200)) // 模擬思考延遲 300~500ms
+    await sleep(400 + Math.floor(Math.random() * 200)) // Simulate thinking delay 300~500ms
     return new Promise((resolve, reject) => {
       this.worker.onmessage = (
         event: MessageEvent<{

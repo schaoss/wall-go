@@ -14,7 +14,7 @@ export class KillerAgent implements PlayerAgent {
   }
 
   async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
-    await sleep(300 + Math.floor(Math.random() * 200)) // 模擬思考延遲 250~450ms
+    await sleep(300 + Math.floor(Math.random() * 200)) // Simulate thinking delay 250~450ms
     return new Promise((resolve, reject) => {
       this.worker.onmessage = (
         event: MessageEvent<{

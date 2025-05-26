@@ -13,7 +13,6 @@ type AiSide = 'R' | 'B'
 export default function App() {
   const { t } = useTranslation()
 
-  // 只保留全域 UI 狀態與頁面切換
   const [showRule, setShowRule] = useState(false)
   const [mode, setMode] = useState<GameMode | null>(null)
   const [aiSide, setAiSide] = useState<AiSide>('B')
@@ -28,7 +27,6 @@ export default function App() {
     return false
   })
 
-  // 深色模式切換
   useEffect(() => {
     const root = document.documentElement
     if (dark) {

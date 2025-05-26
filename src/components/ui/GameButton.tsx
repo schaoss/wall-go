@@ -10,7 +10,7 @@ interface GameButtonProps {
   type?: 'button' | 'submit' | 'reset'
   className?: string
   active?: boolean
-  text?: boolean // 純文字按鈕
+  text?: boolean // Text-only button
   variant?: 'primary' | 'success' | 'warning' | 'danger' | 'neutral'
 }
 
@@ -45,7 +45,7 @@ export default function GameButton({
               'disabled:opacity-40 disabled:cursor-not-allowed',
               variantClass,
             ],
-        className, // 保證自訂 className 最後套用
+        className, // Ensure custom className is applied last
       )}
       onClick={onClick}
       disabled={disabled}

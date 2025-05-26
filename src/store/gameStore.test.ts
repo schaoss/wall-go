@@ -41,15 +41,12 @@ describe('Game Store', () => {
 
   it('moveTo: 棋子移動與步數', () => {
     const { result } = renderHook(() => useGame())
-    // 擺子到 (0,0)
     act(() => {
       result.current.placeStone({ x: 0, y: 0 })
     })
-    // 擺子到 (1,0)
     act(() => {
       result.current.placeStone({ x: 1, y: 0 })
     })
-    // 進入 playing
     for (let i = 2; i < PLAYER_LIST.length * STONES_PER_PLAYER; i++) {
       act(() => {
         result.current.placeStone({
@@ -58,11 +55,9 @@ describe('Game Store', () => {
         })
       })
     }
-    // 選擇 (0,0)
     act(() => {
       result.current.selectStone({ x: 0, y: 0 })
     })
-    // 移動到 (0,1)
     act(() => {
       result.current.moveTo({ x: 0, y: 1 })
     })
@@ -72,11 +67,9 @@ describe('Game Store', () => {
 
   it('buildWall: 能建牆', () => {
     const { result } = renderHook(() => useGame())
-    // 擺子到 (0,0)
     act(() => {
       result.current.placeStone({ x: 0, y: 0 })
     })
-    // 擺子到 (1,0)
     act(() => {
       result.current.placeStone({ x: 1, y: 0 })
     })
@@ -88,11 +81,9 @@ describe('Game Store', () => {
         })
       })
     }
-    // 選擇 (0,0)
     act(() => {
       result.current.selectStone({ x: 0, y: 0 })
     })
-    // 建上牆
     act(() => {
       result.current.buildWall({ x: 0, y: 0 }, 'top')
     })
@@ -166,7 +157,6 @@ describe('Game Store', () => {
     act(() => {
       result.current.placeStone({ x: 0, y: 0 })
     })
-    // 只會有一顆
     expect(result.current.board[0][0].stone).toBe(PLAYER_LIST[0])
   })
 
@@ -183,11 +173,9 @@ describe('Game Store', () => {
     act(() => {
       result.current.selectStone({ x: 0, y: 0 })
     })
-    // 嘗試移動到遠處
     act(() => {
       result.current.moveTo({ x: 6, y: 6 })
     })
-    // 位置未變
     expect(result.current.board[0][0].stone).toBe(PLAYER_LIST[0])
     expect(result.current.board[6][6].stone).toBe(null)
   })
@@ -205,11 +193,9 @@ describe('Game Store', () => {
     act(() => {
       result.current.selectStone({ x: 0, y: 0 })
     })
-    // 先建一次
     act(() => {
       result.current.buildWall({ x: 0, y: 0 }, 'top')
     })
-    // 再建一次（應無效）
     act(() => {
       result.current.buildWall({ x: 0, y: 0 }, 'top')
     })
@@ -218,7 +204,6 @@ describe('Game Store', () => {
 
   it('遊戲結束後操作無效', () => {
     const { result } = renderHook(() => useGame())
-    // 模擬進入 finished
     act(() => {
       result.current.placeStone({ x: 0, y: 0 })
     })
@@ -237,7 +222,6 @@ describe('Game Store', () => {
     act(() => {
       result.current.undo()
     })
-    // 不會 throw
     expect(result.current.canUndo).toBe(false)
     act(() => {
       result.current.placeStone({ x: 0, y: 0 })
