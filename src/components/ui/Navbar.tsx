@@ -2,6 +2,7 @@
 import GameButton from './GameButton'
 import type { Phase } from '../../lib/types'
 import LanguageThemeSwitcher from './LanguageThemeSwitcher'
+import { useTranslation } from 'react-i18next'
 
 export default function Navbar({
   onUndo,
@@ -22,26 +23,27 @@ export default function Navbar({
   dark: boolean
   setDark: (d: boolean | ((d: boolean) => boolean)) => void
 }) {
+  const { t } = useTranslation()
   return (
-    <div className="w-full flex justify-between px-4">
+    <div className="w-full flex justify-between">
       <div className="flex gap-2 items-center">
         <GameButton
           onClick={onUndo}
           disabled={!canUndo || phase === 'finished'}
-          ariaLabel="復原 (Undo)"
-        >↶ Undo</GameButton>
+          ariaLabel={t('nav.undoAria', 'Undo')}
+        >↶ {t('nav.undo', 'Undo')}</GameButton>
         <GameButton
           onClick={onRedo}
           disabled={!canRedo || phase === 'finished'}
-          ariaLabel="重做 (Redo)"
-        >↷ Redo</GameButton>
+          ariaLabel={t('nav.redoAria', 'Redo')}
+        >↷ {t('nav.redo', 'Redo')}</GameButton>
       </div>
       <div className="flex gap-2 items-center">
         <GameButton
           onClick={onHome}
-          ariaLabel="回到模式選擇"
+          ariaLabel={t('nav.menu', 'Menu')}
         >
-          <span role="img" aria-label="主選單" className="text-xl">🏠</span>
+          <span role="img" aria-label={t('nav.menu', 'Menu')} className="text-xl">🏠</span>
         </GameButton>
         <LanguageThemeSwitcher dark={dark} setDark={setDark} />
       </div>
