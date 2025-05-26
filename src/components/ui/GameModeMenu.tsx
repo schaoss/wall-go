@@ -12,7 +12,7 @@ const AI_LEVELS = [
   { key: 'random' },
   { key: 'minimax' },
   { key: 'killer' },
-  // { key: 'devil' },
+  { key: 'devil' },
 ] as const
 
 type GameMode = typeof GAME_MODES[number]['key']
@@ -105,7 +105,6 @@ export default function GameModeMenu({
                 {AI_LEVELS.map(l => (
                   <option className="cursor-pointer" key={l.key} value={l.key}>{t(`menu.ai.levels.${l.key}`)}</option>
                 ))}
-                <option value="devil" disabled>{t('menu.ai.levels.devil', '👾 Hard')}</option>
               </select>
             </label>
             <div className="flex gap-4 justify-center w-full">

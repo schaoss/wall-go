@@ -190,7 +190,7 @@ export function reachable(board: Cell[][], player: Player): number {
         q.push({ x, y })
       }
 
-  return bfs(board, q, seen, player)
+  return bfs(board, q, seen)
 }
 
 /**
@@ -202,7 +202,7 @@ export function isIsolated(board: Cell[][], x: number, y: number): boolean {
   const n = board.length
   const seen = Array.from({ length: n }, () => Array<boolean>(n).fill(false))
   seen[y][x] = true
-  const cnt = bfs(board, [{ x, y }], seen, owner)
+  const cnt = bfs(board, [{ x, y }], seen)
   return cnt === 1
 }
 
@@ -241,7 +241,6 @@ function bfs(
   board: Cell[][],
   queue: Pos[],
   seen: boolean[][],
-  player: Player
 ): number {
   const n = board.length
   let count = 0
@@ -268,8 +267,8 @@ function bfs(
 
       if (seen[ny][nx]) continue
       const target = board[ny][nx]
-      // 不能踩對手棋子
-      if (target.stone && target.stone !== player) continue
+      // 不能踩棋子
+      if (target.stone) continue
 
       seen[ny][nx] = true
       queue.push({ x: nx, y: ny })

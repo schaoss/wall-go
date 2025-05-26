@@ -7,7 +7,7 @@ import { useGame } from '../store/index'
 import { checkGameEnd } from '../utils/checkGameEnd'
 import { useRef, useEffect, useCallback } from 'react'
 import { TurnManager } from '../agents/TurnManager'
-import { HumanAgent, RandomAiAgent, MinimaxAiAgent, KillerAgent } from '../agents'
+import { HumanAgent, RandomAgent, MinimaxAgent, KillerAgent, DevilAgent } from '../agents'
 
 export default function Game({
   gameMode, aiSide, aiLevel, setGameMode, setShowRule, dark, setDark
@@ -45,9 +45,10 @@ export default function Game({
     const human = new HumanAgent()
     humanAgentRef.current = human
     const aiMap = {
-      random: RandomAiAgent,
-      minimax: MinimaxAiAgent,
-      killer: KillerAgent
+      random: RandomAgent,
+      minimax: MinimaxAgent,
+      killer: KillerAgent,
+      devil: DevilAgent,
     }
     const ai = new aiMap[aiLevel]()
     const agents =
