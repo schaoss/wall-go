@@ -25,8 +25,12 @@ export default function LanguageThemeSwitcher({
   }, [open])
 
   const languages = [
-    { code: 'zh-Hant', label: '繁體中文' },
     { code: 'en', label: 'English' },
+    { code: 'es', label: 'Español' },
+    { code: 'ko', label: '한국어' },
+    { code: 'ja', label: '日本語' },
+    { code: 'zh-Hans', label: '简体中文' },
+    { code: 'zh-Hant', label: '繁體中文' },
   ]
 
   return (

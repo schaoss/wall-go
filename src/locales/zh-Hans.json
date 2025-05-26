@@ -1,0 +1,53 @@
+{
+  "menu": {
+    "title": "Wall Go · 墙壁围棋",
+    "mode": {
+      "pvp": "🤝 双人对战",
+      "ai": "🤖 vs AI"
+    },
+    "rule": "游戏规则",
+    "ai": {
+      "select": "选择难度与先后手：",
+      "level": "AI 强度：",
+      "levels": {
+        "random": "🎲 练习",
+        "minimax": "🌱 初阶",
+        "killer": "🐵 中阶",
+        "devil": "👾 高阶"
+      },
+      "first": "🐰 先手",
+      "second": "🐢 后手",
+      "random": "🎲 随机",
+      "back": "返回"
+    }
+  },
+  "rule": {
+    "title": "游戏规则说明",
+    "content": "【游戏目标】\n在 7×7 棋盘上移动棋子并建造墙壁，划分自己的“领地”（封闭且只包含己方棋子的区域）。游戏结束时统计各玩家领地内的格子数，格数多者获胜。\n\n【棋具与人数】\n・棋盘：7×7 格  \n・玩家：2 人（红、蓝），各 4 枚棋子  \n・墙壁：不限数量，归属玩家颜色  \n\n【游戏流程】\n一、摆子阶段  \n双方依 红、蓝、蓝、红、红、... 顺序轮流放完 4 枚棋子。  \n\n二、行动阶段（轮流进行）  \n1. 选择己方任一仍可行动的棋子。  \n2. 移动 0、1 或 2 步；每步只能上下左右，不能穿墙、越墙，也不能穿过其他棋子。  \n3. 移动结束后，必须在该棋子四周仍无墙的位置放置一段墙（0 步亦需放墙）。  \n\n【墙壁与边界】\n・棋盘边框视为墙壁。  \n・双人游戏中墙壁放置后不可移除。  \n\n【终局条件】\n棋盘上所有封闭区域仅包含单一玩家棋子。  \n\n【计分方式】\n统计领地的格子数，每格一分。\n\n【胜负判定】\n得分高者胜；若得分相同则为平局。  \n\n── 祝游戏愉快！",
+    "close": "关闭"
+  },
+  "game": {
+    "phase": {
+      "placing": "摆子阶段",
+      "playing": "行动阶段",
+      "finished": "结算阶段"
+    },
+    "winner": "🥇 胜者：",
+    "tie": "🤜🤛 平局！",
+    "again": "再玩一次",
+    "red": "红方",
+    "blue": "蓝方",
+    "wall": {
+      "top": "上",
+      "bottom": "下",
+      "left": "左",
+      "right": "右",
+      "aria": "在({{x}},{{y}})建{{dir}}墙"
+    }
+  },
+  "seo": {
+    "title": "Wall Go（墙壁围棋）| 在线策略桌游 | Devil's Plan 同款游戏",
+    "description": "Wall Go（墙壁围棋）－免费在线策略桌游，支持单人/双人、领地计分、撤销重做、现代化 UI。《Devil’s Plan 2》同款游戏，开源、免注册、直接开玩！",
+    "keywords": "Wall Go, 墙壁围棋, Devil's Plan, board game, strategy game, undo redo, territory, GitHub, 开源, 桌游, 在线游戏, 小游戏, browser game, 围棋, wallgo, devil's plan game, wall go single player"
+  }
+}

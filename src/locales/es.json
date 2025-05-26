@@ -1,0 +1,55 @@
+
+
+{
+  "menu": {
+    "title": "Wall Go · Go de Muros",
+    "mode": {
+      "pvp": "🤝 Dos jugadores",
+      "ai": "🤖 vs IA"
+    },
+    "rule": "Reglas del Juego",
+    "ai": {
+      "select": "Selecciona nivel y turno de IA:",
+      "level": "Nivel de IA:",
+      "levels": {
+        "random": "🎲 Práctica",
+        "minimax": "🌱 Fácil",
+        "killer": "🐵 Medio",
+        "devil": "👾 Difícil"
+      },
+      "first": "🐰 Primero",
+      "second": "🐢 Segundo",
+      "random": "🎲 Aleatorio",
+      "back": "Volver"
+    }
+  },
+  "rule": {
+    "title": "Reglas del Juego",
+    "content": "【Objetivo del juego】\nMueve tus piezas en un tablero de 7×7 y construye muros para delimitar tu propio “territorio” (una zona cerrada que solo contiene tus piezas). Al finalizar el juego, cuenta los cuadros en el territorio de cada jugador; quien tenga más cuadros gana.\n\n【Tablero y jugadores】\n・Tablero: 7×7 casillas  \n・Jugadores: 2 (Rojo y Azul), 4 piezas cada uno  \n・Muros: sin límite, según el color del jugador  \n\n【Flujo del juego】\n1. Fase de colocación  \nLos jugadores colocan sus 4 piezas por turnos: Rojo, Azul, Azul, Rojo, Rojo... hasta completar.  \n\n2. Fase de acción (por turnos)  \n1. Selecciona una de tus piezas que aún pueda moverse.  \n2. Muévela 0, 1 o 2 pasos; cada paso debe ser recto (arriba, abajo, izquierda, derecha), sin atravesar muros ni otras piezas.  \n3. Tras moverte, debes construir un segmento de muro en un lado libre de la casilla actual (incluso si no te moviste).  \n\n【Muros y bordes】\n・Los bordes exteriores del tablero cuentan como muros.  \n・En un juego de dos jugadores, los muros no se pueden quitar una vez colocados.  \n\n【Final del juego】\nTodas las zonas cerradas del tablero deben contener piezas de un solo jugador.  \n\n【Puntuación】\nCuenta los cuadros en cada territorio; cada cuadro vale un punto.\n\n【Victoria】\nGana quien tenga mayor puntuación; si hay empate, es un empate.  \n\n── ¡Disfruta del juego!",
+    "close": "Cerrar"
+  },
+  "game": {
+    "phase": {
+      "placing": "Fase de colocación",
+      "playing": "Fase de acción",
+      "finished": "Fase de puntuación"
+    },
+    "winner": "🥇 Ganador:",
+    "tie": "🤜🤛 ¡Empate!",
+    "again": "Jugar de nuevo",
+    "red": "Rojo",
+    "blue": "Azul",
+    "wall": {
+      "top": "arriba",
+      "bottom": "abajo",
+      "left": "izquierda",
+      "right": "derecha",
+      "aria": "Construir muro {{dir}} en ({{x}},{{y}})"
+    }
+  },
+  "seo": {
+    "title": "Wall Go | Juego de Estrategia Online | Inspirado en Devil’s Plan",
+    "description": "Wall Go – Juego de estrategia gratuito inspirado en Devil’s Plan. Juega solo o con amigos, puntuación por territorio, deshacer/rehacer y una interfaz moderna. ¡Sin registro, solo juega!",
+    "keywords": "Wall Go, Devil's Plan, juego de mesa, juego de estrategia, deshacer rehacer, territorio, código abierto, juego navegador, wallgo, juego del plan del diablo, wall go un jugador"
+  }
+}
