@@ -27,7 +27,7 @@ export default function GameButton({ onClick, disabled, ariaLabel, children, typ
         text
           ? 'bg-transparent border-0 shadow-none px-2 py-1 text-sm text-zinc-500 hover:underline hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer'
           : [
-              'px-3 py-1 rounded font-semibold border',
+              'px-3 py-1 rounded font-semibold border whitespace-nowrap',
               'shadow',
               'transition-all duration-200',
               'cursor-pointer',
