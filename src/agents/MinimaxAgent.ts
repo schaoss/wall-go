@@ -5,7 +5,7 @@ import type { PlayerAction } from '../lib/types'
 import { getLegalActions, getRandomAction, applyAction, isSuicideMove } from '../utils/ai'
 import { selectBestPlacingAction, minimax } from '../utils/minimaxHelpers'
 
-export class MinimaxAiAgent implements PlayerAgent {
+export class MinimaxAgent implements PlayerAgent {
   async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
     await new Promise(res => setTimeout(res, 300 + Math.floor(Math.random() * 50)))
     const actions = getLegalActions(gameState)

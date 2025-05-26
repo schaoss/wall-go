@@ -4,7 +4,7 @@ import type { GameSnapshot } from '../lib/types'
 import { getLegalActions, getRandomAction } from '../utils/ai'
 import type { PlayerAction } from '../lib/types'
 
-export class RandomAiAgent implements PlayerAgent {
+export class RandomAgent implements PlayerAgent {
   async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
     // 增加隨機延遲，避免 JS 卡死
     await new Promise(res => setTimeout(res, 400 + Math.floor(Math.random() * 50)))
