@@ -6,6 +6,7 @@ import GameModeMenu from './components/ui/GameModeMenu'
 import ConfirmDialog from './components/ui/ConfirmDialog'
 import RuleDialog from './components/ui/RuleDialog'
 import SeoHelmet from './components/SeoHelmet'
+import type { AiLevel } from './lib/types'
 
 type GameMode = 'pvp' | 'ai'
 type AiSide = 'R' | 'B'
@@ -16,7 +17,7 @@ export default function App() {
   const [showRule, setShowRule] = useState(false)
   const [mode, setMode] = useState<GameMode | null>(null)
   const [aiSide, setAiSide] = useState<AiSide>('B')
-  const [aiLevel, setAiLevel] = useState<'random' | 'minimax' | 'killer' | 'devil'>('killer')
+  const [aiLevel, setAiLevel] = useState<AiLevel>('middle')
   const [dark, setDark] = useState(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('theme')

@@ -2,19 +2,11 @@ import LanguageThemeSwitcher from './LanguageThemeSwitcher'
 import { useState, useRef, useEffect } from 'react'
 import GameButton from './GameButton'
 import { useTranslation } from 'react-i18next'
+import type { AiLevel, GameMode, AiSide } from '../../lib/types'
 
-const GAME_MODES = [{ key: 'pvp' }, { key: 'ai' }] as const
+const GAME_MODES: GameMode[] = ['pvp', 'ai']
 
-const AI_LEVELS = [
-  { key: 'random' },
-  { key: 'minimax' },
-  { key: 'killer' },
-  { key: 'devil' },
-] as const
-
-type GameMode = (typeof GAME_MODES)[number]['key']
-type AiLevel = (typeof AI_LEVELS)[number]['key']
-type AiSide = 'R' | 'B'
+const AI_LEVELS: AiLevel[] = ['practice', 'easy', 'middle', 'hard']
 
 export default function GameModeMenu({
   setMode,
@@ -29,7 +21,7 @@ export default function GameModeMenu({
 }) {
   const { t } = useTranslation()
   const [showAiSelect, setShowAiSelect] = useState(false)
-  const [selectedLevel, setSelectedLevel] = useState<AiLevel>('killer')
+  const [selectedLevel, setSelectedLevel] = useState<AiLevel>('middle')
   const [dark, setDark] = useState(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('theme')
@@ -73,14 +65,12 @@ export default function GameModeMenu({
       <div className="flex flex-col gap-4 w-full max-w-xs animate-fade-in min-h-[120px] transition-all duration-500">
         {GAME_MODES.map((m) => (
           <GameButton
-            key={m.key}
-            onClick={
-              m.key === 'ai' ? () => setShowAiSelect(true) : () => setMode(m.key as GameMode)
-            }
+            key={m}
+            onClick={m === 'ai' ? () => setShowAiSelect(true) : () => setMode(m as GameMode)}
             className="text-lg py-3"
-            active={m.key === 'ai' && showAiSelect}
+            active={m === 'ai' && showAiSelect}
           >
-            {t(`menu.mode.${m.key}`)}
+            {t(`menu.mode.${m}`)}
           </GameButton>
         ))}
       </div>
@@ -107,8 +97,8 @@ export default function GameModeMenu({
                 className="rounded border border-zinc-300 dark:border-zinc-600 px-2 py-1 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
               >
                 {AI_LEVELS.map((l) => (
-                  <option className="cursor-pointer" key={l.key} value={l.key}>
-                    {t(`menu.ai.levels.${l.key}`)}
+                  <option className="cursor-pointer" key={l} value={l}>
+                    {t(`menu.ai.levels.${l}`)}
                   </option>
                 ))}
               </select>

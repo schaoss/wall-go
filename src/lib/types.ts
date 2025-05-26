@@ -11,6 +11,9 @@ export interface Cell {
   wallLeft: Player | null // left wall
 }
 
+export type GameMode = 'pvp' | 'ai'
+export type AiSide = 'R' | 'B'
+export type AiLevel = 'practice' | 'easy' | 'middle' | 'hard'
 export type Phase = 'selecting' | 'placing' | 'playing' | 'finished'
 export type WallDir = 'top' | 'left' | 'right' | 'bottom'
 export const PLAYER_LIST = ['R', 'B'] as readonly Player[]

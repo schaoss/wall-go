@@ -10,10 +10,10 @@
       "select": "Selecciona nivel y turno de IA:",
       "level": "Nivel de IA:",
       "levels": {
-        "random": "🎲 Práctica",
-        "minimax": "🌱 Fácil",
-        "killer": "🐵 Medio",
-        "devil": "👾 Difícil"
+        "practice": "🎲 Práctica",
+        "easy": "🌱 Fácil",
+        "middle": "🐵 Medio",
+        "hard": "👾 Difícil"
       },
       "first": "🐰 Primero",
       "second": "🐢 Segundo",

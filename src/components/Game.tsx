@@ -1,4 +1,4 @@
-import { PLAYER_LIST, type PlayerAction, type State } from '../lib/types'
+import { PLAYER_LIST, type AiLevel, type PlayerAction, type State } from '../lib/types'
 import GameButton from './ui/GameButton'
 import Navbar from './ui/Navbar'
 import Board from './Board/Board'
@@ -7,7 +7,7 @@ import { useGame } from '../store/index'
 import { checkGameEnd } from '../utils/checkGameEnd'
 import { useRef, useEffect, useCallback } from 'react'
 import { TurnManager } from '../agents/TurnManager'
-import { HumanAgent, RandomAgent, MinimaxAgent, KillerAgent, DevilAgent } from '../agents'
+import { HumanAgent, RandomAgent, MinimaxAgent } from '../agents'
 import { snapshotFromState } from '../store/gameState'
 
 export default function Game({
@@ -21,7 +21,7 @@ export default function Game({
 }: {
   gameMode: 'pvp' | 'ai'
   aiSide: 'R' | 'B'
-  aiLevel: 'random' | 'minimax' | 'killer' | 'devil'
+  aiLevel: AiLevel
   setGameMode: (m: 'pvp' | 'ai' | null) => void
   setShowRule: (b: boolean) => void
   dark: boolean
@@ -65,12 +65,12 @@ export default function Game({
     const human = new HumanAgent()
     humanAgentRef.current = human
     const aiMap = {
-      random: RandomAgent,
-      minimax: MinimaxAgent,
-      killer: KillerAgent,
-      devil: DevilAgent,
+      practice: new RandomAgent(),
+      easy: new MinimaxAgent(2),
+      middle: new MinimaxAgent(4),
+      hard: new MinimaxAgent(6),
     }
-    const ai = new aiMap[aiLevel]()
+    const ai = aiMap[aiLevel]
     const agents =
       gameMode === 'ai'
         ? aiSide === 'R'

@@ -1,24 +1,27 @@
-// src/agents/MinimaxAgent.ts
 import type { PlayerAgent } from './PlayerAgent'
 import type { GameSnapshot, PlayerAction } from '../lib/types'
 import { toSerializableSnapshot } from './serialize'
-
-// Simple sleep function to simulate AI thinking delay
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
+import { sleep } from '../utils/sleep'
 
 export class MinimaxAgent implements PlayerAgent {
   private worker: Worker
+  private depth: number
+  private startTime: number = 0
+  private timeLimit: number = 5000
 
-  constructor() {
+  constructor(depth: number = 2) {
     this.worker = new Worker(new URL('./AIWorker.ts', import.meta.url), {
       type: 'module',
     })
+    this.depth = depth
   }
 
   async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
-    await sleep(400 + Math.floor(Math.random() * 200)) // Simulate thinking delay 300~500ms
+    if (gameState.phase === 'placing') await sleep(300 + Math.floor(Math.random() * 50)) // Simulate thinking delay 300~500ms
+
+    this.startTime = performance.now()
+    this.timeLimit = 3000
+
     return new Promise((resolve, reject) => {
       this.worker.onmessage = (
         event: MessageEvent<{
@@ -54,6 +57,7 @@ export class MinimaxAgent implements PlayerAgent {
       this.worker.postMessage({
         aiType: 'minimax',
         gameState: toSerializableSnapshot(gameState),
+        config: { depth: this.depth, startTime: this.startTime, timeLimit: this.timeLimit },
       })
     })
   }
