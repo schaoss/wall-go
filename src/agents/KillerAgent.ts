@@ -1,6 +1,7 @@
 // src/agents/KillerAgent.ts
 import type { PlayerAgent } from './PlayerAgent';
 import type { GameSnapshot, PlayerAction } from '../lib/types';
+import { toSerializableSnapshot } from './serialize';
 
 export class KillerAgent implements PlayerAgent {
   private worker: Worker;
@@ -32,7 +33,7 @@ export class KillerAgent implements PlayerAgent {
         reject(new Error(`AIWorker onerror (KillerAgent): ${error.message}`));
       };
 
-      this.worker.postMessage({ aiType: 'killer', gameState });
+      this.worker.postMessage({ aiType: 'killer', gameState: toSerializableSnapshot(gameState) });
     });
   }
 

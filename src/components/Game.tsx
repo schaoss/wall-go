@@ -8,6 +8,7 @@ import { checkGameEnd } from '../utils/checkGameEnd'
 import { useRef, useEffect, useCallback } from 'react'
 import { TurnManager } from '../agents/TurnManager'
 import { HumanAgent, RandomAgent, MinimaxAgent, KillerAgent, DevilAgent } from '../agents'
+import { snapshotFromState } from '../store/gameState'
 
 export default function Game({
   gameMode, aiSide, aiLevel, setGameMode, setShowRule, dark, setDark
@@ -57,7 +58,7 @@ export default function Game({
         : { R: human, B: human }
     turnManagerRef.current = new TurnManager({
       agents,
-      getGameState: () => latestStateRef.current!,
+      getGameState: () => snapshotFromState(latestStateRef.current!),
       applyAction: async (action: PlayerAction) => {
         if (action.type === 'place') {
           placeStone(action.pos)

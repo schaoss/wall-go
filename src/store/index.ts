@@ -59,7 +59,7 @@ export const useGame = create<State>((_set, get) => {
     humanSide: null,
     undo() {
       // 快轉直到回到 human 玩家
-      const { _history, humanSide } = get()
+      const { _future, _history, humanSide } = get()
       if (_history.length <= 1) return
       let idx = _history.length - 2
       while (idx > 0 && !isHumanTurnSnap(_history[idx], humanSide)) idx--
@@ -67,7 +67,7 @@ export const useGame = create<State>((_set, get) => {
       set({
         ...restoreSnapshot(prev),
         _history: _history.slice(0, idx + 1),
-        _future: _history.slice(idx + 1).reverse(),
+        _future: [..._history.slice(idx + 1).reverse(), ..._future],
       })
     },
     redo() {
@@ -79,7 +79,7 @@ export const useGame = create<State>((_set, get) => {
       const next = _future[idx]
       set({
         ...restoreSnapshot(next),
-        _history: [..._history, ..._future.slice(0, idx + 1)],
+        _history: [..._history, ..._future.slice(0, idx + 1).reverse()],
         _future: _future.slice(idx + 1),
       })
     },
@@ -89,7 +89,7 @@ export const useGame = create<State>((_set, get) => {
     placeStone(pos: Pos) {
       set(state => {
         const { board, players, stonesPlaced, stonesLimit, phase } = state
-        if (phase === 'finished') return state
+        if (phase !== 'placing') return state
         const totalPlaced = Object.values(stonesPlaced).reduce((a, b) => a + b, 0)
         const currentIdx = placingTurnIndex(totalPlaced, players.length)
         const currentPlayer = players[currentIdx]

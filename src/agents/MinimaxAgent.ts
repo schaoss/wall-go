@@ -1,6 +1,7 @@
 // src/agents/MinimaxAgent.ts
 import type { PlayerAgent } from './PlayerAgent';
 import type { GameSnapshot, PlayerAction } from '../lib/types';
+import { toSerializableSnapshot } from './serialize';
 
 export class MinimaxAgent implements PlayerAgent {
   private worker: Worker;
@@ -32,7 +33,7 @@ export class MinimaxAgent implements PlayerAgent {
         reject(new Error(`AIWorker onerror (MinimaxAgent): ${error.message}`));
       };
 
-      this.worker.postMessage({ aiType: 'minimax', gameState });
+      this.worker.postMessage({ aiType: 'minimax', gameState: toSerializableSnapshot(gameState) });
     });
   }
 

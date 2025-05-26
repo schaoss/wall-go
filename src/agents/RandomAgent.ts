@@ -1,6 +1,7 @@
 // src/agents/RandomAgent.ts
 import type { PlayerAgent } from './PlayerAgent';
 import type { GameSnapshot, PlayerAction } from '../lib/types';
+import { toSerializableSnapshot } from './serialize';
 
 export class RandomAgent implements PlayerAgent {
   private worker: Worker;
@@ -33,7 +34,7 @@ export class RandomAgent implements PlayerAgent {
         reject(new Error(`AIWorker onerror (RandomAgent): ${error.message}`));
       };
 
-      this.worker.postMessage({ aiType: 'random', gameState });
+      this.worker.postMessage({ aiType: 'random', gameState: toSerializableSnapshot(gameState) });
     });
   }
 

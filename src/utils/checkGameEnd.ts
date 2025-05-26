@@ -18,7 +18,6 @@ export function checkGameEnd(board: Cell[][], players: Player[]): GameResult {
       if (cell.stone) remainingStones.add(`${x},${y}`)
     })
   )
-  // 若棋盤上沒有任何棋子，遊戲尚未開始，不應該 finished
   if (remainingStones.size === 0) {
     return {
       finished: false,

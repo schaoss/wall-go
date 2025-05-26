@@ -1,5 +1,6 @@
 import type { PlayerAgent } from './PlayerAgent';
 import type { GameSnapshot, PlayerAction } from '../lib/types';
+import { toSerializableSnapshot } from './serialize';
 // No longer need utils like reachable, applyAction, getLegalActions, getRandomAction, getBestPlacement, getReachableSet here
 // as all that logic is now in DevilWorker.ts
 
@@ -46,7 +47,7 @@ export class DevilAgent implements PlayerAgent {
       };
 
       // Post the gameState and aiType to the worker to start processing
-      this.worker.postMessage({ aiType: 'devil', gameState });
+      this.worker.postMessage({ aiType: 'devil', gameState: toSerializableSnapshot(gameState) });
     });
   }
 
