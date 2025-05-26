@@ -10,10 +10,10 @@
       "select": "Select AI level and side:",
       "level": "AI Level:",
       "levels": {
-        "random": "🎲 Practice",
-        "minimax": "🌱 Easy",
-        "killer": "🐵 Medium",
-        "devil": "👾 Hard"
+        "practice": "🎲 Practice",
+        "easy": "🌱 Easy",
+        "middle": "🐵 Medium",
+        "hard": "👾 Hard"
       },
       "first": "🐰 First",
       "second": "🐢 Second",
@@ -23,7 +23,7 @@
   },
   "rule": {
     "title": "Game Rules",
-    "content": "【Objective】\nMove your pieces on a 7×7 board and build walls to carve out your own “territory” (a closed area that contains only your pieces). When the game ends, count the squares in each player’s territory; the one with more squares wins.\n\n【Equipment & Players】\n・Board: 7×7 squares\n・Players: 2 (Red and Blue), 4 pieces each\n・Walls: unlimited, colored by player\n\n【Game Flow】\n1.Placement Phase:\nPlayers alternate placing their 4 pieces in the order Red, Blue, Blue, Red, Red, … until all pieces are on the board.\n\n2.Action Phase (turn-based):\n (a). Choose any of your pieces that can still act.\n (b). Move 0, 1, or 2 steps; each step must be straight (up, down, left, right) and may not cross or pass through walls or other pieces.\n (c). After moving, you must place one wall segment on an empty side of that piece’s square (also required if you moved 0 steps).\n\n【Walls & Borders】\n・The outer border of the board counts as a wall.\n・In a two-player game, walls cannot be removed once placed.\n\n【End Condition】\nAll closed areas on the board contain pieces of only one player.\n\n【Scoring】\nCount the squares in each player’s territory; each square is worth one point.\n\n【Victory】\nThe player with the higher score wins; if scores are tied, the game is a draw.\n\n── Enjoy the game!",
+    "content": "【Objective】\n\nMove your pieces on a 7×7 board and build walls to carve out your own ‘territory’ (an enclosed area containing only your pieces). When the game ends, count the squares in each player’s territory; the player with the most wins.\n\n【Equipment & Players】\n&nbsp;•&nbsp;Board: 7×7 squares\n&nbsp;•&nbsp;Players:\n&nbsp;&nbsp;&nbsp;•&nbsp;2-player: Red and Blue, each with 4 pieces\n&nbsp;&nbsp;&nbsp;•&nbsp;3/4-player: Add Yellow/Light Blue, each color has 2 pieces\n&nbsp;•&nbsp;Walls: Unlimited, color-coded by player\n\n【Game Flow】\nPlacement Phase\n&nbsp;•&nbsp;2-player: Starting positions fixed: Red [1,1],[5,5]; Blue [1,5],[5,1]. The other two are placed alternately: Red, Blue, Blue, Red\n&nbsp;•&nbsp;3/4-player: Each player places 2 pieces, in alternating order (e.g. A→B→C→C→B→A)\n\nAction Phase (turn-based)\n&nbsp;1.&nbsp;Choose any of your pieces that can still act\n&nbsp;2.&nbsp;Move 0, 1, or 2 steps:\n&nbsp;&nbsp;&nbsp;•&nbsp;Each step must be up, down, left, or right\n&nbsp;&nbsp;&nbsp;•&nbsp;Cannot cross or pass through walls or other pieces\n&nbsp;3.&nbsp;After moving, you must place a wall on an open side of that piece’s square (even if you moved 0 steps)\n\n【Walls & Borders】\n&nbsp;•&nbsp;The board’s outer edge counts as a wall\n&nbsp;•&nbsp;2-player: Walls cannot be removed once placed\n&nbsp;•&nbsp;3/4-player: Each player gets one “wall break” per game, usable on their turn\n\n【Time Limit】\n&nbsp;•&nbsp;90 seconds per turn\n&nbsp;•&nbsp;If time runs out, a wall is placed randomly and the turn ends\n\n【End Condition】\n&nbsp;•&nbsp;The game ends when all players’ pieces are in separate territories\n\n【Scoring】\n&nbsp;•&nbsp;Each square in a territory is worth 1 point\n&nbsp;•&nbsp;If total scores are tied, the player with the largest single territory wins\n\n【Victory】\n&nbsp;•&nbsp;Highest score wins\n&nbsp;•&nbsp;If both total and largest territory are tied, it’s a draw\n\n──&nbsp;Enjoy the game!",
     "close": "Close"
   },
   "game": {

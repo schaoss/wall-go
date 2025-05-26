@@ -1,5 +1,5 @@
 // src/lib/colors.ts
-// 全站 semantic color class（含 hover/focus 狀態）
+// Global semantic color classes (including hover/focus states)
 export const COLOR = {
   primary: [
     'bg-indigo-500 text-white border-indigo-400',

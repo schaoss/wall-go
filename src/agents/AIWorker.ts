@@ -1,0 +1,84 @@
+// src/agents/AIWorker.ts
+import type { GameSnapshot, PlayerAction } from '../lib/types'
+import { getLegalActions, getRandomAction } from '../utils/ai'
+import { selectBestPlacingAction as selectMinimaxBestPlacingActionUtil } from '../utils/minimaxHelpers'
+import { MinimaxAI } from '../ai/minimax-ai'
+
+// --- Minimax AI Logic ---
+function calculateMinimaxPlayingMove(gameState: GameSnapshot, depth = 2): PlayerAction {
+  const ai = new MinimaxAI(depth)
+  ai.startTime = performance.now()
+  ai.timeLimit = 3000
+  return ai.getBestMove(gameState)
+}
+
+// --- Worker message handler ---
+self.onmessage = (
+  event: MessageEvent<{ aiType: string; gameState: GameSnapshot; config: Record<string, unknown> }>,
+) => {
+  const { aiType, gameState } = event.data
+  let action: PlayerAction | null = null
+
+  try {
+    const legalActions = getLegalActions(gameState)
+
+    // Handle case where game is finished first
+    if (gameState.phase === 'finished') {
+      self.postMessage({
+        action: null,
+        info: 'Game finished, no action taken.',
+      })
+      return
+    }
+
+    if (legalActions.length === 0) {
+      self.postMessage({
+        error: 'No legal actions available but game is not finished.',
+      })
+      return
+    }
+
+    if (gameState.phase === 'placing') {
+      switch (aiType) {
+        case 'minimax':
+          action = selectMinimaxBestPlacingActionUtil(gameState, legalActions)
+          break
+        case 'random':
+        default:
+          action = getRandomAction({ legalActions })!
+          break
+      }
+    } else if (gameState.phase === 'playing') {
+      switch (aiType) {
+        case 'minimax':
+          action = calculateMinimaxPlayingMove(gameState, (event.data.config?.depth as number) ?? 2)
+          break
+        case 'random':
+        default:
+          action = getRandomAction({ legalActions })!
+          break
+      }
+    } else {
+      // Fallback for unexpected phase, though 'finished' is handled above
+      self.postMessage({ error: `Unexpected game phase: ${gameState.phase}` })
+      return
+    }
+
+    if (action) {
+      self.postMessage({ action })
+    } else {
+      // If action is null here, it implies an issue in decision logic for non-finished phases
+      // or a specific AI logic failed to return an action.
+      // As a robust fallback, if legal actions were available, pick a random one.
+      self.postMessage({
+        action: getRandomAction({ legalActions })!,
+        info: 'Fell back to random action.',
+      })
+    }
+  } catch (e) {
+    self.postMessage({
+      error: (e as Error).message,
+      stack: (e as Error).stack,
+    })
+  }
+}

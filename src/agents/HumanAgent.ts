@@ -1,4 +1,4 @@
-// 真人玩家代理，等待 UI 輸入
+// Human player agent, waits for UI input
 import type { PlayerAgent } from './PlayerAgent'
 import type { PlayerAction } from '../lib/types'
 
@@ -6,7 +6,7 @@ export class HumanAgent implements PlayerAgent {
   private actionResolver: ((action: PlayerAction) => void) | null = null
   private waiting: boolean = false
 
-  // 由 UI 呼叫此方法，傳入玩家操作
+  // Called by UI to submit player action
   submitAction(action: PlayerAction) {
     if (this.waiting && this.actionResolver) {
       this.actionResolver(action)
@@ -15,10 +15,10 @@ export class HumanAgent implements PlayerAgent {
     }
   }
 
-  // 遊戲主流程呼叫，等待玩家操作
+  // Called by main game loop, waits for player action
   getAction(): Promise<PlayerAction> {
     this.waiting = true
-    return new Promise<PlayerAction>(resolve => {
+    return new Promise<PlayerAction>((resolve) => {
       this.actionResolver = resolve
     })
   }

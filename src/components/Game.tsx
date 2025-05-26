@@ -1,4 +1,4 @@
-import { PLAYER_LIST, type PlayerAction, type State } from '../lib/types'
+import { PLAYER_LIST, type AiLevel, type PlayerAction, type State } from '../lib/types'
 import GameButton from './ui/GameButton'
 import Navbar from './ui/Navbar'
 import Board from './Board/Board'
@@ -7,14 +7,21 @@ import { useGame } from '../store/index'
 import { checkGameEnd } from '../utils/checkGameEnd'
 import { useRef, useEffect, useCallback } from 'react'
 import { TurnManager } from '../agents/TurnManager'
-import { HumanAgent, RandomAiAgent, MinimaxAiAgent, KillerAgent } from '../agents'
+import { HumanAgent, RandomAgent, MinimaxAgent } from '../agents'
+import { snapshotFromState } from '../store/gameState'
 
 export default function Game({
-  gameMode, aiSide, aiLevel, setGameMode, setShowRule, dark, setDark
+  gameMode,
+  aiSide,
+  aiLevel,
+  setGameMode,
+  setShowRule,
+  dark,
+  setDark,
 }: {
   gameMode: 'pvp' | 'ai'
   aiSide: 'R' | 'B'
-  aiLevel: 'random' | 'minimax' | 'killer'
+  aiLevel: AiLevel
   setGameMode: (m: 'pvp' | 'ai' | null) => void
   setShowRule: (b: boolean) => void
   dark: boolean
@@ -22,9 +29,22 @@ export default function Game({
 }) {
   // 內部自行管理 useGame 狀態與 AI 流程
   const {
-    board, turn, phase, result, selected, legal,
-    placeStone, selectStone, moveTo, buildWall, setPhase, resetGame,
-    undo, redo, canUndo, canRedo,
+    board,
+    turn,
+    phase,
+    result,
+    selected,
+    legal,
+    placeStone,
+    selectStone,
+    moveTo,
+    buildWall,
+    setPhase,
+    resetGame,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   } = useGame()
   const live = checkGameEnd(board, [...PLAYER_LIST])
   const { t } = useTranslation()
@@ -45,18 +65,21 @@ export default function Game({
     const human = new HumanAgent()
     humanAgentRef.current = human
     const aiMap = {
-      random: RandomAiAgent,
-      minimax: MinimaxAiAgent,
-      killer: KillerAgent
+      practice: new RandomAgent(),
+      easy: new MinimaxAgent(2),
+      middle: new MinimaxAgent(4),
+      hard: new MinimaxAgent(6),
     }
-    const ai = new aiMap[aiLevel]()
+    const ai = aiMap[aiLevel]
     const agents =
       gameMode === 'ai'
-        ? (aiSide === 'R' ? { R: ai, B: human } : { R: human, B: ai })
+        ? aiSide === 'R'
+          ? { R: ai, B: human }
+          : { R: human, B: ai }
         : { R: human, B: human }
     turnManagerRef.current = new TurnManager({
       agents,
-      getGameState: () => latestStateRef.current!,
+      getGameState: () => snapshotFromState(latestStateRef.current!),
       applyAction: async (action: PlayerAction) => {
         if (action.type === 'place') {
           placeStone(action.pos)
@@ -152,21 +175,20 @@ export default function Game({
           ) : null
         ) : (
           <>
-            Wall Go · {
-              phase === 'placing'
-                ? t('game.phase.placing', 'Placement Phase')
-                : phase === 'playing'
+            Wall Go ·{' '}
+            {phase === 'placing'
+              ? t('game.phase.placing', 'Placement Phase')
+              : phase === 'playing'
                 ? t('game.phase.playing', 'Action Phase')
-                : t('game.phase.finished', 'Scoring Phase')
-            }
+                : t('game.phase.finished', 'Scoring Phase')}
           </>
         )}
       </h1>
       <div className="flex gap-4 mb-2 animate-fade-in items-center">
         {(phase === 'placing'
-          ? PLAYER_LIST.map(p => [p, 0])
-          : Object.entries(live.score ?? {}))
-        .map(([p, s]) => (
+          ? PLAYER_LIST.map((p) => [p, 0])
+          : Object.entries(live.score ?? {})
+        ).map(([p, s]) => (
           <span
             key={p}
             className="flex items-center gap-2 font-mono text-lg px-2 py-1 rounded bg-white/70 dark:bg-zinc-800/80 shadow-sm border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 transition-all duration-300"
@@ -190,8 +212,10 @@ export default function Game({
               setPhase('selecting')
             }}
             ariaLabel={t('game.again', 'Play Again')}
-            variant='success'
-          >{t('game.again', 'Play Again')}</GameButton>
+            variant="success"
+          >
+            {t('game.again', 'Play Again')}
+          </GameButton>
         )}
       </div>
       <Board
@@ -200,10 +224,22 @@ export default function Game({
         turn={turn}
         selected={selected ?? null}
         legal={legal}
-        placeStone={phase === 'placing' || isHumanTurn ? (pos => handlePlayerAction({ type: 'place', pos })) : undefined}
-        selectStone={isHumanTurn && phase === 'playing' ? (pos => selectStone(pos)) : undefined}
-        moveTo={isHumanTurn && phase === 'playing' ? (pos => handlePlayerAction({ type: 'move', pos })) : undefined}
-        buildWall={isHumanTurn && phase === 'playing' ? ((pos, dir) => handlePlayerAction({ type: 'wall', pos, dir })) : undefined}
+        placeStone={
+          phase === 'placing' || isHumanTurn
+            ? (pos) => handlePlayerAction({ type: 'place', pos })
+            : undefined
+        }
+        selectStone={isHumanTurn && phase === 'playing' ? (pos) => selectStone(pos) : undefined}
+        moveTo={
+          isHumanTurn && phase === 'playing'
+            ? (pos) => handlePlayerAction({ type: 'move', pos })
+            : undefined
+        }
+        buildWall={
+          isHumanTurn && phase === 'playing'
+            ? (pos, dir) => handlePlayerAction({ type: 'wall', pos, dir })
+            : undefined
+        }
       />
       <div className="w-full flex justify-center mt-3 animate-fade-in">
         <GameButton onClick={() => setShowRule(true)} text ariaLabel={t('menu.rule', '遊戲規則')}>

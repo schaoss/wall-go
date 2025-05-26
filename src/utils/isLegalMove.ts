@@ -32,8 +32,8 @@ export function isLegalMove(from: Pos, to: Pos, board: Cell[][], maxSteps = 2) {
             ? board[y][x + 1].wallLeft
             : board[y][x].wallLeft
           : dy === 1
-          ? board[y + 1][x].wallTop
-          : board[y][x].wallTop
+            ? board[y + 1][x].wallTop
+            : board[y][x].wallTop
       if (blocked) return
       if (board[ny][nx].stone) return
       const key = `${nx},${ny}`

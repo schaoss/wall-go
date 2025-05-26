@@ -13,7 +13,7 @@ export function createHistoryHandlers(
   get: () => State,
   set: (partial: Partial<State>) => void,
   snapshotFromState: (s: State) => GameSnapshot,
-  restoreSnapshot: (s: GameSnapshot) => Partial<State>
+  restoreSnapshot: (s: GameSnapshot) => Partial<State>,
 ) {
   function pushHistory(snapshot: GameSnapshot) {
     set({

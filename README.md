@@ -1,14 +1,14 @@
 # Wall‑Go 🧱♟️
 ![cover](https://schaoss.github.io/wall-go/cover.png)
 
-> Wall Go (牆壁圍棋) – Free, open-source online strategy board game inspired by Devil’s Plan 2. Play solo (AI) or with friends, territory scoring, undo/redo, and a modern UI. [Wall Go, Devil's Plan, React, TypeScript, GitHub, board game, browser game]
+> Wall Go (牆壁圍棋) – Free, open-source online strategy board game inspired by Devil’s Plan 2. Supports 2–4 players, solo (AI) or with friends, territory scoring, undo/redo, and a modern UI. [Wall Go, Devil's Plan, React, TypeScript, GitHub, board game, browser game]
 
 ## Features
 
 - 7×7 board, move and wall mechanics faithfully implemented
-- Single-player (AI) and two-player (PvP) modes
-- Multi-language UI (English, 繁體中文)
-- Modern, responsive UI (Tailwind CSS v4)
+- 2–4 player support: solo (AI), two-player, three-player, or four-player
+- Multi-language UI: English, 繁體中文, 简体中文, 日本語, 한국어, Español
+- Modern, responsive UI (Tailwind CSS v4), mobile-friendly
 - Robust undo/redo (Zustand snapshot time travel)
 - All static text fully internationalized (i18next)
 - SEO meta tags and social sharing optimized (react-helmet-async)
@@ -19,12 +19,16 @@
 
 ## Game Overview
 
-- Two-player or single-player (vs AI)
-- Placing phase: players alternate placing stones
-- Playing phase: select a stone, move up to 2 steps, then build a wall
-- Game ends when all stones are surrounded; territory is scored automatically
+- Supports 2–4 players (AI or human)
+- **Placing phase**: players alternate placing stones (fixed start for 2P, special order for 3/4P)
+- **Playing phase**: select a stone, move up to 2 steps (orthogonal only), then build a wall
+- **Walls**: unlimited, color-coded; 2P walls cannot be removed, 3/4P each player has one wall-break per game
+- **Time limit**: 90 seconds per turn (auto-wall if timeout)
+- **End**: when all stones are in separate territories
+- **Scoring**: each territory cell = 1pt; if tied, largest single territory wins; if still tied, draw
 - Undo/redo at any time
 - Rules dialog and accessibility labels fully localized
+- AI difficulty and side selection
 
 ---
 
@@ -82,6 +86,27 @@ Open [http://localhost:5173](http://localhost:5173) to start playing!
 - **Stones per player**: `STONES_PER_PLAYER` in `src/lib/types.ts`
 - **Number of players**: Edit `PLAYER_LIST` in `src/lib/types.ts`
 - **Add new language**: Add JSON to `src/locales/` and update `src/i18n.ts`
+
+---
+
+## Roadmap
+- [x] 7×7 board, move & wall mechanics
+- [x] Undo/redo (Zustand snapshot)
+- [x] Multi-language UI (EN, 繁中, 简中, JA, KO, ES)
+- [x] Modern, mobile-friendly UI
+- [x] AI (basic random/minimax)
+- [x] Rules dialog, accessibility
+- [x] Territory scoring, auto end
+- [x] Unit tests (core logic)
+- [x] Static build & deploy
+- [ ] AI improvements (🚧 WIP)
+  - [ ] Update territory evaluation
+  - [ ] Strategy enhancements
+  - [ ] New strategies
+- [ ] 90-second turn timer
+- [ ] Online multiplayer mode
+- [ ] 3/4 player mode
+and more!
 
 ---
 

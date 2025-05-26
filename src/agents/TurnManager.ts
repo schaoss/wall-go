@@ -1,4 +1,4 @@
-// TurnManager: 控制遊戲主循環，依序等待每位玩家代理行動
+// TurnManager: controls the main game loop, sequentially waits for each player agent's action
 import type { GameSnapshot } from '../lib/types'
 import type { Player } from '../lib/types'
 import type { PlayerAgent } from './PlayerAgent'
@@ -25,10 +25,10 @@ export class TurnManager {
     this.onTurnStart = params.onTurnStart
   }
 
-  // 遞迴執行 action 及其 followUp
+  // Recursively execute action and its followUp
   private async executeAction(action: PlayerAction) {
     if (!action) return
-    // 依 action.type 執行對應 store 方法（需由外部傳入）
+    // Execute corresponding store method based on action.type (must be provided externally)
     await this.applyAction(action)
     if (action.followUp) {
       await this.executeAction(action.followUp)

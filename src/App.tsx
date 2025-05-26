@@ -6,6 +6,7 @@ import GameModeMenu from './components/ui/GameModeMenu'
 import ConfirmDialog from './components/ui/ConfirmDialog'
 import RuleDialog from './components/ui/RuleDialog'
 import SeoHelmet from './components/SeoHelmet'
+import type { AiLevel } from './lib/types'
 
 type GameMode = 'pvp' | 'ai'
 type AiSide = 'R' | 'B'
@@ -13,11 +14,10 @@ type AiSide = 'R' | 'B'
 export default function App() {
   const { t } = useTranslation()
 
-  // 只保留全域 UI 狀態與頁面切換
   const [showRule, setShowRule] = useState(false)
   const [mode, setMode] = useState<GameMode | null>(null)
   const [aiSide, setAiSide] = useState<AiSide>('B')
-  const [aiLevel, setAiLevel] = useState<'random' | 'minimax' | 'killer'>('killer')
+  const [aiLevel, setAiLevel] = useState<AiLevel>('middle')
   const [dark, setDark] = useState(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('theme')
@@ -28,7 +28,6 @@ export default function App() {
     return false
   })
 
-  // 深色模式切換
   useEffect(() => {
     const root = document.documentElement
     if (dark) {
@@ -47,7 +46,7 @@ export default function App() {
       <SeoHelmet />
       {mode === null || mode === undefined ? (
         <GameModeMenu
-          setMode={m => {
+          setMode={(m) => {
             setMode(m)
           }}
           setAiSide={setAiSide}
@@ -70,9 +69,7 @@ export default function App() {
       <ConfirmDialog
         open={showConfirm}
         title={t('menu.home', '回到首頁')}
-        message={
-          t('menu.confirmHome', '遊戲尚未結束，確定要回到首頁嗎？\n目前進度將會消失。')
-        }
+        message={t('menu.confirmHome', '遊戲尚未結束，確定要回到首頁嗎？\n目前進度將會消失。')}
         confirmText={t('common.confirm', '確定')}
         cancelText={t('common.cancel', '取消')}
         onConfirm={() => {
