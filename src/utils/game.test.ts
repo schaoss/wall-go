@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { checkGameEnd } from './checkGameEnd'
+import { checkGameEnd } from './game'
 import { BOARD_SIZE, PLAYER_LIST, type Cell } from '../lib/types'
 
 function makeEmptyBoard(): Cell[][] {
