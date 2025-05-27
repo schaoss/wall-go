@@ -20,6 +20,7 @@ export class MinimaxAI extends BaseAI {
   maxDepth: number
   startTime: number = 0
   timeLimit: number = 5000
+  private zocCache = new Map<string, { redDist: number[][]; blueDist: number[][] }>()
 
   evaluate(state: GameSnapshot): number {
     // 計算ZOC，紅正藍負
@@ -97,29 +98,16 @@ export class MinimaxAI extends BaseAI {
       return this.evaluate(state)
     }
     if (depth === 0) {
-      // Quiescence search: evaluate current state and all wall-only follow-ups
-      let staticEval = this.evaluate(state)
-      const quietActions = getLegalActions(state).filter((a) => a.type === 'wall')
-      for (const action of quietActions) {
-        const qState = applyAction(cloneGameState(state), action)
-        const qEval = this.evaluate(qState)
-        staticEval = Math.max(staticEval, qEval)
-      }
-      return staticEval
+      return this.evaluate(state)
     }
 
     const actions = getLegalActions(state)
-    const currentState = cloneGameState(state)
     if (maximizing) {
       let maxEval = -Infinity
       for (const action of actions) {
-        const evalScore = this.minimax(
-          applyAction(currentState, action),
-          depth - 1,
-          false,
-          alpha,
-          beta,
-        )
+        const nextState = cloneGameState(state)
+        applyAction(nextState, action)
+        const evalScore = this.minimax(nextState, depth - 1, false, alpha, beta)
         maxEval = Math.max(maxEval, evalScore)
         alpha = Math.max(alpha, evalScore)
         if (beta <= alpha) {
@@ -130,13 +118,9 @@ export class MinimaxAI extends BaseAI {
     } else {
       let minEval = Infinity
       for (const action of actions) {
-        const evalScore = this.minimax(
-          applyAction(currentState, action),
-          depth - 1,
-          true,
-          alpha,
-          beta,
-        )
+        const nextState = cloneGameState(state)
+        applyAction(nextState, action)
+        const evalScore = this.minimax(nextState, depth - 1, true, alpha, beta)
         minEval = Math.min(minEval, evalScore)
         beta = Math.min(beta, evalScore)
         if (beta <= alpha) {
@@ -154,53 +138,65 @@ export class MinimaxAI extends BaseAI {
    * @returns {number}
    */
   private evaluateZOCDistance(state: GameSnapshot): number {
-    const board = state.board
-    // 收集雙方棋子位置
-    const redPositions: [number, number][] = []
-    const bluePositions: [number, number][] = []
-    for (let y = 0; y < BOARD_SIZE; y++) {
-      for (let x = 0; x < BOARD_SIZE; x++) {
-        if (board[y][x].stone === 'R') redPositions.push([x, y])
-        if (board[y][x].stone === 'B') bluePositions.push([x, y])
-      }
-    }
-    // 若某方無子，避免無窮距離
-    if (redPositions.length === 0 || bluePositions.length === 0) return 0
-    let score = 0
-    // BFS 計算從所有紅/藍子到每格的最短距離
-    function bfsAll(starts: [number, number][]): number[][] {
-      const dist = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(Infinity))
-      const queue: [number, number, number][] = []
-      for (const [x, y] of starts) {
-        dist[y][x] = 0
-        queue.push([x, y, 0])
-      }
-      while (queue.length > 0) {
-        const [cx, cy, d] = queue.shift()!
-        for (const [dx, dy] of DIRECTIONS) {
-          const nx = cx + dx
-          const ny = cy + dy
-          if (nx < 0 || ny < 0 || nx >= BOARD_SIZE || ny >= BOARD_SIZE) continue
-          // 若有牆則不可通過
-          if (dx === -1 && cx > 0 && board[cy][cx].wallLeft !== null) continue
-          if (dx === 1 && cx < BOARD_SIZE - 1 && board[cy][cx + 1].wallLeft !== null) continue
-          if (dy === -1 && cy > 0 && board[cy][cx].wallTop !== null) continue
-          if (dy === 1 && cy < BOARD_SIZE - 1 && board[cy + 1][cx].wallTop !== null) continue
-          if (dist[ny][nx] > d + 1) {
-            dist[ny][nx] = d + 1
-            queue.push([nx, ny, d + 1])
-          }
+    // Generate a simple key for the board to reuse BFS results
+    const boardKey = state.board
+      .flatMap((row) => row.map((cell) => `${cell.stone}:${cell.wallTop}:${cell.wallLeft}`))
+      .join(',')
+    let redDist: number[][], blueDist: number[][]
+    if (this.zocCache.has(boardKey)) {
+      const cached = this.zocCache.get(boardKey)!
+      redDist = cached.redDist
+      blueDist = cached.blueDist
+    } else {
+      const board = state.board
+      // 收集雙方棋子位置
+      const redPositions: [number, number][] = []
+      const bluePositions: [number, number][] = []
+      for (let y = 0; y < BOARD_SIZE; y++) {
+        for (let x = 0; x < BOARD_SIZE; x++) {
+          if (board[y][x].stone === 'R') redPositions.push([x, y])
+          if (board[y][x].stone === 'B') bluePositions.push([x, y])
         }
       }
-      return dist
+      // 若某方無子，避免無窮距離
+      if (redPositions.length === 0 || bluePositions.length === 0) return 0
+      // BFS 計算從所有紅/藍子到每格的最短距離
+      function bfsAll(starts: [number, number][]): number[][] {
+        const dist = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(Infinity))
+        const queue: [number, number, number][] = []
+        for (const [x, y] of starts) {
+          dist[y][x] = 0
+          queue.push([x, y, 0])
+        }
+        while (queue.length > 0) {
+          const [cx, cy, d] = queue.shift()!
+          for (const [dx, dy] of DIRECTIONS) {
+            const nx = cx + dx
+            const ny = cy + dy
+            if (nx < 0 || ny < 0 || nx >= BOARD_SIZE || ny >= BOARD_SIZE) continue
+            // 若有牆則不可通過
+            if (dx === -1 && cx > 0 && board[cy][cx].wallLeft !== null) continue
+            if (dx === 1 && cx < BOARD_SIZE - 1 && board[cy][cx + 1].wallLeft !== null) continue
+            if (dy === -1 && cy > 0 && board[cy][cx].wallTop !== null) continue
+            if (dy === 1 && cy < BOARD_SIZE - 1 && board[cy + 1][cx].wallTop !== null) continue
+            if (dist[ny][nx] > d + 1) {
+              dist[ny][nx] = d + 1
+              queue.push([nx, ny, d + 1])
+            }
+          }
+        }
+        return dist
+      }
+      redDist = bfsAll(redPositions)
+      blueDist = bfsAll(bluePositions)
+      this.zocCache.set(boardKey, { redDist, blueDist })
     }
-    const redDist = bfsAll(redPositions)
-    const blueDist = bfsAll(bluePositions)
     // 對每格計算距離差
+    let score = 0
     for (let y = 0; y < BOARD_SIZE; y++) {
       for (let x = 0; x < BOARD_SIZE; x++) {
         // 只考慮空格
-        if (board[y][x].stone !== null) continue
+        if (state.board[y][x].stone !== null) continue
         const dRed = redDist[y][x]
         const dBlue = blueDist[y][x]
         if (!isFinite(dRed) && !isFinite(dBlue)) continue
@@ -225,8 +221,7 @@ export class MinimaxAI extends BaseAI {
   private evaluateTerritoryPotential(state: GameSnapshot): number {
     const board = state.board
     const visited = new Set<string>()
-    let myScore = 0
-    let oppScore = 0
+    let score = 0
 
     for (let y = 0; y < BOARD_SIZE; y++) {
       for (let x = 0; x < BOARD_SIZE; x++) {
@@ -281,27 +276,22 @@ export class MinimaxAI extends BaseAI {
           }
         }
 
-        if (borderingPlayers.has('R') && borderingPlayers.has('B')) {
-          continue
-        }
+        if (borderingPlayers.size !== 1) continue
 
-        if (borderingPlayers.size === 1) {
-          // Region fully enclosed by exactly one player
-          const player = [...borderingPlayers][0]
-          const area = region.length
-          const stonesCount = borderStonePositions.size
-          const regionScore = area - stonesCount * 10
-          if (player === 'R') {
-            myScore += regionScore
-          } else {
-            oppScore += regionScore
-          }
+        // Region fully enclosed by exactly one player
+        const player = [...borderingPlayers][0]
+        const area = region.length
+        const stonesCount = borderStonePositions.size
+        const regionScore = area - stonesCount * 10
+        if (player === 'R') {
+          score += regionScore
+        } else {
+          score -= regionScore
         }
       }
     }
 
-    // Return net territory: red minus blue
-    return myScore - oppScore
+    return score
   }
 
   /**
