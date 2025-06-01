@@ -133,15 +133,10 @@ export default function Game({
       className={[
         'flex flex-col items-center gap-4 py-4 min-h-dvh min-w-0',
         'bg-gradient-to-br from-rose-50 via-indigo-50 to-amber-50 dark:from-zinc-900 dark:via-zinc-700 dark:to-zinc-900',
-        'transition-all duration-500',
+        'transition-color',
         'box-border',
-        'p-4',
+        'p-4 pb-12',
       ].join(' ')}
-      style={{
-        maxWidth: '100vw',
-        minHeight: '100dvh',
-        paddingBottom: '80px',
-      }}
     >
       <Navbar
         onUndo={undo}
@@ -156,7 +151,7 @@ export default function Game({
         dark={dark}
         setDark={setDark}
       />
-      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 drop-shadow mb-2 animate-fade-in flex items-center gap-2">
+      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 drop-shadow animate-fade-in flex items-center gap-2">
         {phase === 'finished' && result ? (
           result.tie ? (
             <>{t('game.tie', '🤜🤛 Draw!')}</>
@@ -184,7 +179,7 @@ export default function Game({
           </>
         )}
       </h1>
-      <div className="flex gap-4 mb-2 animate-fade-in items-center">
+      <div className="flex gap-4 animate-fade-in items-center">
         {(phase === 'placing'
           ? PLAYER_LIST.map((p) => [p, 0])
           : Object.entries(live.score ?? {})
@@ -218,29 +213,31 @@ export default function Game({
           </GameButton>
         )}
       </div>
-      <Board
-        board={board}
-        phase={phase}
-        turn={turn}
-        selected={selected ?? null}
-        legal={legal}
-        placeStone={
-          phase === 'placing' || isHumanTurn
-            ? (pos) => handlePlayerAction({ type: 'place', pos })
-            : undefined
-        }
-        selectStone={isHumanTurn && phase === 'playing' ? (pos) => selectStone(pos) : undefined}
-        moveTo={
-          isHumanTurn && phase === 'playing'
-            ? (pos) => handlePlayerAction({ type: 'move', pos })
-            : undefined
-        }
-        buildWall={
-          isHumanTurn && phase === 'playing'
-            ? (pos, dir) => handlePlayerAction({ type: 'wall', pos, dir })
-            : undefined
-        }
-      />
+      <div className="board-container flex flex-col aspect-ratio-1 items-center w-[min(800px,100dvh-280px)] max-w-[calc(100dvw-32px)] transition-all">
+        <Board
+          board={board}
+          phase={phase}
+          turn={turn}
+          selected={selected ?? null}
+          legal={legal}
+          placeStone={
+            phase === 'placing' || isHumanTurn
+              ? (pos) => handlePlayerAction({ type: 'place', pos })
+              : undefined
+          }
+          selectStone={isHumanTurn && phase === 'playing' ? (pos) => selectStone(pos) : undefined}
+          moveTo={
+            isHumanTurn && phase === 'playing'
+              ? (pos) => handlePlayerAction({ type: 'move', pos })
+              : undefined
+          }
+          buildWall={
+            isHumanTurn && phase === 'playing'
+              ? (pos, dir) => handlePlayerAction({ type: 'wall', pos, dir })
+              : undefined
+          }
+        />
+      </div>
       <div className="w-full flex justify-center mt-3 animate-fade-in">
         <GameButton onClick={() => setShowRule(true)} text ariaLabel={t('menu.rule', '遊戲規則')}>
           {t('menu.rule', '遊戲規則')}
