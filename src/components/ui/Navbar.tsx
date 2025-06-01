@@ -25,7 +25,7 @@ export default function Navbar({
 }) {
   const { t } = useTranslation()
   return (
-    <div className="w-full flex justify-between">
+    <div className="w-full flex justify-between transition-all duration-500">
       <div className="flex gap-2 items-center">
         <GameButton
           onClick={onUndo}
