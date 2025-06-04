@@ -4,9 +4,9 @@ import { PLAYER_LIST, type Pos, type WallDir, type State } from '../lib/types'
 import { makeInitialState, snapshotFromState, restoreSnapshot } from './gameState'
 import { createHistoryHandlers } from './history'
 import { placingTurnIndex, advanceTurn } from './actions'
-import { isLegalMove } from '../utils/isLegalMove'
-import { checkGameEnd } from '../utils/checkGameEnd'
-import { isHumanTurnSnap } from '../utils/humanTurn'
+import { isLegalMove } from '../utils/move'
+import { checkGameEnd } from '../utils/game'
+import { isHumanTurn } from '../utils/player'
 
 // This store uses a functional set pattern for all mutating actions.
 // Each mutation pushes a deep copy of the current state to history BEFORE mutation.
@@ -78,12 +78,12 @@ export const useGame = create<State>((_set, get) => {
       const { _future, _history, humanSide } = get()
       if (_history.length <= 1) return
       let idx = _history.length - 2
-      while (idx > 0 && !isHumanTurnSnap(_history[idx], humanSide)) idx--
+      while (idx > 0 && !isHumanTurn(_history[idx], humanSide)) idx--
       const prev = _history[idx]
       set({
         ...restoreSnapshot(prev),
         _history: _history.slice(0, idx + 1),
-        _future: [..._history.slice(idx + 1).reverse(), ..._future],
+        _future: [..._history.slice(idx + 1), ..._future],
       })
     },
     redo() {
@@ -91,11 +91,11 @@ export const useGame = create<State>((_set, get) => {
       const { _future, _history, humanSide } = get()
       if (_future.length === 0) return
       let idx = 0
-      while (idx < _future.length - 1 && !isHumanTurnSnap(_future[idx], humanSide)) idx++
+      while (idx < _future.length - 1 && !isHumanTurn(_future[idx], humanSide)) idx++
       const next = _future[idx]
       set({
         ...restoreSnapshot(next),
-        _history: [..._history, ..._future.slice(0, idx + 1).reverse()],
+        _history: [..._history, ..._future.slice(0, idx + 1)],
         _future: _future.slice(idx + 1),
       })
     },

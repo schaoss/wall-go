@@ -24,7 +24,7 @@ export function isLegalMove(from: Pos, to: Pos, board: Cell[][], maxSteps = 2) {
     dirs.forEach(([dx, dy, dir]) => {
       const nx = x + (dx as number),
         ny = y + (dy as number)
-      if (nx < 0 || ny < 0 || nx >= BOARD_SIZE || ny >= BOARD_SIZE) return
+      if (isOutbound(nx, ny)) return
       // 牆判斷
       const blocked =
         dir === 'left'
@@ -43,4 +43,8 @@ export function isLegalMove(from: Pos, to: Pos, board: Cell[][], maxSteps = 2) {
     })
   }
   return false
+}
+
+export function isOutbound(x: number, y: number): boolean {
+  return x < 0 || y < 0 || x >= BOARD_SIZE || y >= BOARD_SIZE
 }
