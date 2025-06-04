@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import Game from './components/Game'
 import Footer from './components/ui/Footer'
 import GameModeMenu from './components/ui/GameModeMenu'
-import ConfirmDialog from './components/ui/ConfirmDialog'
 import RuleDialog from './components/ui/RuleDialog'
 import SeoHelmet from './components/SeoHelmet'
 import type { AiLevel } from './lib/types'
@@ -12,8 +10,6 @@ type GameMode = 'pvp' | 'ai'
 type AiSide = 'R' | 'B'
 
 export default function App() {
-  const { t } = useTranslation()
-
   const [showRule, setShowRule] = useState(false)
   const [mode, setMode] = useState<GameMode | null>(null)
   const [aiSide, setAiSide] = useState<AiSide>('B')
@@ -38,8 +34,6 @@ export default function App() {
       localStorage.setItem('theme', 'light')
     }
   }, [dark])
-
-  const [showConfirm, setShowConfirm] = useState(false)
 
   return (
     <>
@@ -66,18 +60,6 @@ export default function App() {
       )}
       <Footer />
       <RuleDialog open={showRule} onClose={() => setShowRule(false)} />
-      <ConfirmDialog
-        open={showConfirm}
-        title={t('menu.home', '回到首頁')}
-        message={t('menu.confirmHome', '遊戲尚未結束，確定要回到首頁嗎？\n目前進度將會消失。')}
-        confirmText={t('common.confirm', '確定')}
-        cancelText={t('common.cancel', '取消')}
-        onConfirm={() => {
-          setShowConfirm(false)
-          setMode(null)
-        }}
-        onCancel={() => setShowConfirm(false)}
-      />
     </>
   )
 }

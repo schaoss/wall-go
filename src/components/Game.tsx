@@ -5,10 +5,11 @@ import Board from './Board/Board'
 import { useTranslation } from 'react-i18next'
 import { useGame } from '@/store/index'
 import { checkGameEnd } from '@/utils/game'
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 import { TurnManager } from '@/agents/TurnManager'
 import { HumanAgent, RandomAgent, MinimaxAgent } from '@/agents'
 import { snapshotFromState } from '@/store/gameState'
+import ConfirmDialog from './ui/ConfirmDialog'
 
 export default function Game({
   gameMode,
@@ -48,6 +49,7 @@ export default function Game({
   } = useGame()
   const live = checkGameEnd(board, [...PLAYER_LIST])
   const { t } = useTranslation()
+  const [showConfirm, setShowConfirm] = useState(false)
 
   // --- 代理主流程整合 ---
   const turnManagerRef = useRef<TurnManager | null>(null)
@@ -92,9 +94,22 @@ export default function Game({
         }
       },
       isGameOver: (state) => state.phase === 'finished' || !!state.result,
+      turnTimeLimit: 90_000,
     })
     turnManagerStartedRef.current = false
   }, [gameMode, aiSide, aiLevel, buildWall, moveTo, placeStone, selectStone])
+
+  useEffect(() => {
+    if (!gameMode) {
+      useGame.getState().setHumanSide(null)
+      return
+    }
+    if (gameMode === 'ai') {
+      useGame.getState().setHumanSide(aiSide === 'R' ? 'B' : 'R')
+    } else {
+      useGame.getState().setHumanSide(null)
+    }
+  }, [gameMode, aiSide])
 
   useEffect(() => {
     if (!gameMode) return
@@ -145,8 +160,13 @@ export default function Game({
         canRedo={canRedo}
         phase={phase}
         onHome={() => {
-          setGameMode(null)
-          resetGame()
+          const inProgress =
+            phase !== 'finished' && board.some((row) => row.some((c) => c.stone !== null))
+          if (inProgress) setShowConfirm(true)
+          else {
+            setGameMode(null)
+            resetGame()
+          }
         }}
         dark={dark}
         setDark={setDark}
@@ -243,6 +263,19 @@ export default function Game({
           {t('menu.rule', '遊戲規則')}
         </GameButton>
       </div>
+      <ConfirmDialog
+        open={showConfirm}
+        title={t('menu.home', '回到首頁')}
+        message={t('menu.confirmHome', '遊戲尚未結束，確定要回到首頁嗎？\n目前進度將會消失。')}
+        confirmText={t('common.confirm', '確定')}
+        cancelText={t('common.cancel', '取消')}
+        onConfirm={() => {
+          setShowConfirm(false)
+          setGameMode(null)
+          resetGame()
+        }}
+        onCancel={() => setShowConfirm(false)}
+      />
     </div>
   )
 }

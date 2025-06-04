@@ -22,4 +22,11 @@ export class HumanAgent implements PlayerAgent {
       this.actionResolver = resolve
     })
   }
+
+  cancel() {
+    if (this.waiting) {
+      this.actionResolver = null
+      this.waiting = false
+    }
+  }
 }

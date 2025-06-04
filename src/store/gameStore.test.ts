@@ -235,4 +235,21 @@ describe('Game Store', () => {
     })
     expect(result.current.canRedo).toBe(false)
   })
+
+  it('undo 時應跳過 AI 回合', () => {
+    const { result } = renderHook(() => useGame())
+    act(() => {
+      result.current.setHumanSide('R')
+    })
+    act(() => {
+      result.current.placeStone({ x: 0, y: 0 })
+    })
+    act(() => {
+      result.current.placeStone({ x: 1, y: 0 })
+    })
+    act(() => {
+      result.current.undo()
+    })
+    expect(result.current.turn).toBe('R')
+  })
 })

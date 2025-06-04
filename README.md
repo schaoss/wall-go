@@ -1,4 +1,5 @@
 # Wall‑Go 🧱♟️
+
 ![cover](https://schaoss.github.io/wall-go/cover.png)
 
 > Wall Go (牆壁圍棋) – Free, open-source online strategy board game inspired by Devil’s Plan 2. Supports 2–4 players, solo (AI) or with friends, territory scoring, undo/redo, and a modern UI. [Wall Go, Devil's Plan, React, TypeScript, GitHub, board game, browser game]
@@ -90,6 +91,7 @@ Open [http://localhost:5173](http://localhost:5173) to start playing!
 ---
 
 ## Roadmap
+
 - [x] 7×7 board, move & wall mechanics
 - [x] Undo/redo (Zustand snapshot)
 - [x] Multi-language UI (EN, 繁中, 简中, JA, KO, ES)
@@ -99,14 +101,14 @@ Open [http://localhost:5173](http://localhost:5173) to start playing!
 - [x] Territory scoring, auto end
 - [x] Unit tests (core logic)
 - [x] Static build & deploy
-- [ ] AI improvements (🚧 WIP)
+- [x] AI improvements (🚧 WIP)
   - [ ] Update territory evaluation
   - [ ] Strategy enhancements
   - [ ] New strategies
-- [ ] 90-second turn timer
+- [x] 90-second turn timer
 - [ ] Online multiplayer mode
 - [ ] 3/4 player mode
-and more!
+      and more!
 
 ---
 
