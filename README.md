@@ -102,13 +102,13 @@ Open [http://localhost:5173](http://localhost:5173) to start playing!
 - [x] Unit tests (core logic)
 - [x] Static build & deploy
 - [x] AI improvements (🚧 WIP)
-  - [ ] Update territory evaluation
-  - [ ] Strategy enhancements
+  - [x] Update territory evaluation
+  - [x] Strategy enhancements
   - [ ] New strategies
 - [x] 90-second turn timer
 - [ ] Online multiplayer mode
 - [ ] 3/4 player mode
-      and more!
+and more!
 
 ---
 
