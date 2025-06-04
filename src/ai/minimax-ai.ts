@@ -33,7 +33,7 @@ export class MinimaxAI extends BaseAI {
     // 計算領土潛力，紅正藍負
     const territoryScore = this.evaluateTerritoryPotential(state)
 
-    return zocScore + territoryScore
+    return 1.5 * zocScore + territoryScore
   }
 
   getBestPlace(state: GameSnapshot): PlayerAction {
@@ -54,6 +54,7 @@ export class MinimaxAI extends BaseAI {
       return !claimedPositions.has(getPosKey(action.from!))
     })
     const candidateActions = filteredActions.length > 0 ? filteredActions : actions
+    candidateActions.sort((a, b) => this.actionHeuristic(b, state) - this.actionHeuristic(a, state))
 
     let bestScore = -Infinity
     let bestActions: PlayerAction[] = []
@@ -75,9 +76,6 @@ export class MinimaxAI extends BaseAI {
         bestActions = actions
       }
     }
-    console.log(
-      `MinimaxAI: Best score at depth ${this.maxDepth} is ${bestScore}, actions: ${bestActions.length}, isMaximizing: ${meIsRed}`,
-    )
     if (!bestActions.length) bestActions = candidateActions
     return getRandomAction(bestActions)!
   }
@@ -90,16 +88,13 @@ export class MinimaxAI extends BaseAI {
   ): FindBestActionsResult {
     const defaultScore = isMaximizing ? -Infinity : Infinity
     const result: FindBestActionsResult = { actions: [], score: defaultScore }
-    const isBetterResult = (score: number) =>
-      isMaximizing ? score > defaultScore : score < defaultScore
+    const isBetterResult = (newScore: number, bestScore: number) =>
+      isMaximizing ? newScore > bestScore : newScore < bestScore
 
     for (const action of actions) {
-      const newScore = evaluateFn(isMaximizing)(applyAction(state, action))
+      const newScore = evaluateFn(!isMaximizing)(applyAction(state, action))
       if (!isFinite(newScore) || isNaN(newScore)) continue
-      if (isBetterResult(newScore)) {
-        console.log(
-          `MinimaxAI: New best score: ${newScore}, isMaximizing: ${isMaximizing}, action: ${JSON.stringify(action)}`,
-        )
+      if (isBetterResult(newScore, result.score)) {
         result.score = newScore
         result.actions.length = 0 // Clear previous actions
         result.actions.push(action)
@@ -285,6 +280,18 @@ export class MinimaxAI extends BaseAI {
     }
 
     return score
+  }
+
+  private actionHeuristic(action: PlayerAction, state: GameSnapshot): number {
+    if (action.type !== 'move') return 0
+    const opponent = state.turn === 'R' ? 'B' : 'R'
+    const oppStones = getAllPlayerStones(state.board).filter((s) => s.player === opponent)
+    let best = Infinity
+    for (const s of oppStones) {
+      const d = Math.abs(s.position.x - action.pos.x) + Math.abs(s.position.y - action.pos.y)
+      if (d < best) best = d
+    }
+    return -best
   }
 
   /**
