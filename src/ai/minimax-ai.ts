@@ -1,6 +1,6 @@
 // src/ai/MinimaxAI.ts
 import { BaseAI } from './base-ai'
-import { BOARD_SIZE } from '../lib/types'
+import { BOARD_SIZE } from '@/lib/types'
 import type {
   GameSnapshot,
   PlayerAction,
@@ -8,12 +8,12 @@ import type {
   Player,
   Cell,
   Pos,
-} from '../lib/types'
-import { getLegalActions, getRandomAction, applyAction } from '../utils/ai'
-import { isWallBetween, DIRS } from '../utils/wall'
-import { getAllPlayerStones } from '../utils/player'
-import { isOutbound } from '../utils/move'
-import { floodRegions } from '../utils/region'
+} from '@/lib/types'
+import { getLegalActions, getRandomAction, applyAction } from '@/utils/ai'
+import { isWallBetween, DIRS } from '@/utils/wall'
+import { getAllPlayerStones } from '@/utils/player'
+import { isOutbound } from '@/utils/move'
+import { floodRegions, getPosKey } from '@/utils/region'
 
 export class MinimaxAI extends BaseAI {
   constructor(maxDepth = 2) {
@@ -33,7 +33,7 @@ export class MinimaxAI extends BaseAI {
     // 計算領土潛力，紅正藍負
     const territoryScore = this.evaluateTerritoryPotential(state)
 
-    return 2 * zocScore + territoryScore
+    return zocScore + territoryScore
   }
 
   getBestPlace(state: GameSnapshot): PlayerAction {
@@ -50,20 +50,10 @@ export class MinimaxAI extends BaseAI {
     const meIsRed = state.turn === 'R'
     const claimedPositions = this.getClaimedTerritoryPositions(state, state.turn)
     const actions = getLegalActions(state)
-    const noWallActions = actions.filter((action) => action.type === 'move')
-    const filteredActions = noWallActions.filter((action) => {
-      if (action.type === 'move') {
-        const key = `${action.from!.x},${action.from!.y}`
-        return !claimedPositions.has(key)
-      }
-      return true
+    const filteredActions = actions.filter((action) => {
+      return !claimedPositions.has(getPosKey(action.from!))
     })
-    const candidateActions =
-      filteredActions.length > 0
-        ? filteredActions
-        : noWallActions.length > 0
-          ? noWallActions
-          : actions
+    const candidateActions = filteredActions.length > 0 ? filteredActions : actions
 
     let bestScore = -Infinity
     let bestActions: PlayerAction[] = []
@@ -104,7 +94,7 @@ export class MinimaxAI extends BaseAI {
       isMaximizing ? score > defaultScore : score < defaultScore
 
     for (const action of actions) {
-      const newScore = evaluateFn(!isMaximizing)(applyAction(state, action))
+      const newScore = evaluateFn(isMaximizing)(applyAction(state, action))
       if (!isFinite(newScore) || isNaN(newScore)) continue
       if (isBetterResult(newScore)) {
         console.log(
@@ -127,7 +117,6 @@ export class MinimaxAI extends BaseAI {
     alpha: number = -Infinity,
     beta: number = Infinity,
   ): number {
-    console.log('maximizing???', maximizing, 'depth', depth, 'turn', state.turn)
     const ttKey = getTranspositionKey(state, depth, maximizing)
     if (this.tt.has(ttKey)) return this.tt.get(ttKey)!
 
