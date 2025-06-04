@@ -1,8 +1,8 @@
 // TurnManager: controls the main game loop, sequentially waits for each player agent's action
-import type { GameSnapshot } from '../lib/types'
-import type { Player } from '../lib/types'
+import type { GameSnapshot } from '@/lib/types'
+import type { Player } from '@/lib/types'
 import type { PlayerAgent } from './PlayerAgent'
-import type { PlayerAction } from '../lib/types'
+import type { PlayerAction } from '@/lib/types'
 
 export class TurnManager {
   private agents: Record<Player, PlayerAgent>

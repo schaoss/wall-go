@@ -1,11 +1,9 @@
 // src/agents/AIWorker.ts
-import type { GameSnapshot, PlayerAction } from '../lib/types'
-import { getLegalActions, getRandomAction } from '../utils/ai'
-import { selectBestPlacingAction as selectMinimaxBestPlacingActionUtil } from '../utils/minimaxHelpers'
-import { MinimaxAI } from '../ai/minimax-ai'
+import type { GameSnapshot, PlayerAction } from '@/lib/types'
+import { getLegalActions, getRandomAction, getBestPlacement } from '@/utils/ai'
+import { MinimaxAI } from '@/ai/minimax-ai'
 
-// --- Minimax AI Logic ---
-function calculateMinimaxPlayingMove(gameState: GameSnapshot, depth = 2): PlayerAction {
+function calculateMinimaxPlayingAction(gameState: GameSnapshot, depth = 2): PlayerAction {
   const ai = new MinimaxAI(depth)
   ai.startTime = performance.now()
   ai.timeLimit = 3000
@@ -41,21 +39,24 @@ self.onmessage = (
     if (gameState.phase === 'placing') {
       switch (aiType) {
         case 'minimax':
-          action = selectMinimaxBestPlacingActionUtil(gameState, legalActions)
+          action = getBestPlacement(gameState)
           break
         case 'random':
         default:
-          action = getRandomAction({ legalActions })!
+          action = getRandomAction(legalActions)!
           break
       }
     } else if (gameState.phase === 'playing') {
       switch (aiType) {
         case 'minimax':
-          action = calculateMinimaxPlayingMove(gameState, (event.data.config?.depth as number) ?? 2)
+          action = calculateMinimaxPlayingAction(
+            gameState,
+            (event.data.config?.depth as number) ?? 2,
+          )
           break
         case 'random':
         default:
-          action = getRandomAction({ legalActions })!
+          action = getRandomAction(legalActions)!
           break
       }
     } else {
@@ -71,7 +72,7 @@ self.onmessage = (
       // or a specific AI logic failed to return an action.
       // As a robust fallback, if legal actions were available, pick a random one.
       self.postMessage({
-        action: getRandomAction({ legalActions })!,
+        action: getRandomAction(legalActions)!,
         info: 'Fell back to random action.',
       })
     }

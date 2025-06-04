@@ -1,6 +1,6 @@
 import React from 'react'
 import clsx from 'clsx'
-import { COLOR } from '../../lib/colors'
+import { COLOR } from '@/lib/colors'
 
 interface GameButtonProps {
   onClick: () => void

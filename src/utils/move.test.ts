@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { isLegalMove } from './isLegalMove'
-import { BOARD_SIZE, type Cell, type Pos } from '../lib/types'
+import { isLegalMove } from './move'
+import { BOARD_SIZE, type Cell, type Pos } from '@/lib/types'
 
 function makeBoardWithStone(from: Pos, to?: Pos): Cell[][] {
   const board: Cell[][] = Array.from({ length: BOARD_SIZE }, () =>

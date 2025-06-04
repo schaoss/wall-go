@@ -1,14 +1,14 @@
-import { PLAYER_LIST, type AiLevel, type PlayerAction, type State } from '../lib/types'
+import { PLAYER_LIST, type AiLevel, type PlayerAction, type State } from '@/lib/types'
 import GameButton from './ui/GameButton'
 import Navbar from './ui/Navbar'
 import Board from './Board/Board'
 import { useTranslation } from 'react-i18next'
-import { useGame } from '../store/index'
-import { checkGameEnd } from '../utils/checkGameEnd'
+import { useGame } from '@/store/index'
+import { checkGameEnd } from '@/utils/game'
 import { useRef, useEffect, useCallback } from 'react'
-import { TurnManager } from '../agents/TurnManager'
-import { HumanAgent, RandomAgent, MinimaxAgent } from '../agents'
-import { snapshotFromState } from '../store/gameState'
+import { TurnManager } from '@/agents/TurnManager'
+import { HumanAgent, RandomAgent, MinimaxAgent } from '@/agents'
+import { snapshotFromState } from '@/store/gameState'
 
 export default function Game({
   gameMode,

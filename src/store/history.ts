@@ -1,4 +1,4 @@
-import type { GameSnapshot, State } from '../lib/types'
+import type { GameSnapshot, State } from '@/lib/types'
 
 export interface HistoryState {
   _history: GameSnapshot[]

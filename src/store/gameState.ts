@@ -5,7 +5,7 @@ import {
   type Player,
   type Cell,
   type GameSnapshot,
-} from '../lib/types'
+} from '@/lib/types'
 
 export function createEmptyBoard(): Cell[][] {
   const emptyCell = (): Cell => ({

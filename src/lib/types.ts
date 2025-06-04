@@ -29,6 +29,16 @@ export interface PlayerAction {
   followUp?: PlayerAction // if present, means auto-build wall after move
 }
 
+export interface Stone {
+  player: Player
+  position: Pos
+}
+
+export interface FindBestActionsResult {
+  actions: PlayerAction[]
+  score: number
+}
+
 export interface GameSnapshot {
   board: Cell[][]
   turn: Player
@@ -39,7 +49,7 @@ export interface GameSnapshot {
   players: Player[]
   stonesLimit: number
   stonesPlaced: Record<Player, number>
-  result?: import('../utils/checkGameEnd').GameResult
+  result?: import('@/utils/game').GameResult
   skipReason?: string
 }
 

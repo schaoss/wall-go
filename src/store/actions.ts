@@ -1,5 +1,5 @@
-import { playerHasMove } from '../utils/player'
-import type { Player, Cell } from '../lib/types'
+import { playerHasMove } from '@/utils/player'
+import type { Player, Cell } from '@/lib/types'
 
 export function placingTurnIndex(totalPlaced: number, playerCount: number) {
   const round = Math.floor(totalPlaced / playerCount)
