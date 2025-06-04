@@ -1,4 +1,8 @@
 {
+  "common": {
+    "confirm": "Confirmar",
+    "cancel": "Cancelar"
+  },
   "menu": {
     "title": "Wall Go · Go de Muros",
     "mode": {
@@ -19,7 +23,9 @@
       "second": "🐢 Segundo",
       "random": "🎲 Aleatorio",
       "back": "Volver"
-    }
+    },
+    "confirmHome": "El juego no ha terminado. ¿Seguro que quieres volver al inicio?\nEl progreso actual se perderá.",
+    "home": "Inicio"
   },
   "rule": {
     "title": "Reglas del Juego",

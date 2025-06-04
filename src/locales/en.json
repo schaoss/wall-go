@@ -19,7 +19,13 @@
       "second": "🐢 Second",
       "random": "🎲 Random",
       "back": "Back"
-    }
+    },
+    "confirmHome": "The game is not finished. Are you sure you want to return to the home screen?\nYour current progress will be lost.",
+    "home": "Home"
+  },
+  "common": {
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   },
   "rule": {
     "title": "Game Rules",

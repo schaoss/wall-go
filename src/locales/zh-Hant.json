@@ -1,4 +1,8 @@
 {
+  "common": {
+    "confirm": "確定",
+    "cancel": "取消"
+  },
   "menu": {
     "title": "Wall Go · 牆壁圍棋",
     "mode": {
@@ -19,7 +23,9 @@
       "second": "🐢 後手",
       "random": "🎲 隨機",
       "back": "返回"
-    }
+    },
+    "confirmHome": "遊戲尚未結束，確定要回到首頁嗎？\n目前進度將會消失。",
+    "home": "回到首頁"
   },
   "rule": {
     "title": "遊戲規則說明",

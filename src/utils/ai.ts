@@ -7,6 +7,21 @@ export function getRandomAction(actions: PlayerAction[] = []): PlayerAction | nu
   return actions[Math.floor(Math.random() * actions.length)]
 }
 
+export function getRandomWallActionForPlayer(
+  state: GameSnapshot,
+  player: Player,
+): PlayerAction | null {
+  const actions: PlayerAction[] = []
+  const { board } = state
+  for (let y = 0; y < board.length; y++) {
+    for (let x = 0; x < board.length; x++) {
+      if (board[y][x].stone !== player) continue
+      actions.push(...getLegalWallActions(board, x, y))
+    }
+  }
+  return getRandomAction(actions)
+}
+
 export function getLegalDestinations(gameState: GameSnapshot, from: Pos): Pos[] {
   const { board } = gameState
   const destinations: Pos[] = []

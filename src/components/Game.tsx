@@ -5,10 +5,12 @@ import Board from './Board/Board'
 import { useTranslation } from 'react-i18next'
 import { useGame } from '@/store/index'
 import { checkGameEnd } from '@/utils/game'
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 import { TurnManager } from '@/agents/TurnManager'
 import { HumanAgent, RandomAgent, MinimaxAgent } from '@/agents'
 import { snapshotFromState } from '@/store/gameState'
+import ConfirmDialog from './ui/ConfirmDialog'
+import TurnTimer from './ui/TurnTimer'
 
 export default function Game({
   gameMode,
@@ -48,6 +50,10 @@ export default function Game({
   } = useGame()
   const live = checkGameEnd(board, [...PLAYER_LIST])
   const { t } = useTranslation()
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [timeLeft, setTimeLeft] = useState(90_000)
+  const turnTimeLimit = 90_000
+  const [turnStart, setTurnStart] = useState<number | null>(null)
 
   // --- 代理主流程整合 ---
   const turnManagerRef = useRef<TurnManager | null>(null)
@@ -92,9 +98,27 @@ export default function Game({
         }
       },
       isGameOver: (state) => state.phase === 'finished' || !!state.result,
+      turnTimeLimit,
+      onTurnStart: (state) => {
+        if (state.phase !== 'playing') return
+        setTurnStart(Date.now())
+        setTimeLeft(turnTimeLimit)
+      },
     })
     turnManagerStartedRef.current = false
   }, [gameMode, aiSide, aiLevel, buildWall, moveTo, placeStone, selectStone])
+
+  useEffect(() => {
+    if (!gameMode) {
+      useGame.getState().setHumanSide(null)
+      return
+    }
+    if (gameMode === 'ai') {
+      useGame.getState().setHumanSide(aiSide === 'R' ? 'B' : 'R')
+    } else {
+      useGame.getState().setHumanSide(null)
+    }
+  }, [gameMode, aiSide])
 
   useEffect(() => {
     if (!gameMode) return
@@ -123,6 +147,31 @@ export default function Game({
     }, 0)
   }, [phase, live, setPhase])
 
+  // Turn timer update
+  useEffect(() => {
+    if (turnStart === null) return
+    let frame: number
+    let stopped = false
+    const update = () => {
+      if (stopped) return
+      setTimeLeft(Math.max(0, turnTimeLimit - (Date.now() - turnStart)))
+      frame = requestAnimationFrame(update)
+    }
+    frame = requestAnimationFrame(update)
+    return () => {
+      stopped = true
+      cancelAnimationFrame(frame)
+    }
+  }, [turnStart])
+
+  // 只要 phase 進入 playing（不論是 redo/undo 或正常下棋），timer 就 reset
+  useEffect(() => {
+    if (phase === 'finished') {
+      setTurnStart(null)
+      setTimeLeft(0)
+    }
+  }, [phase])
+
   // 每當遊戲狀態變化時檢查是否需要結束回合
   useEffect(() => {
     onTurnEnd()
@@ -138,6 +187,7 @@ export default function Game({
         'p-4 pb-12',
       ].join(' ')}
     >
+      <TurnTimer timeLeft={timeLeft} timeLimit={turnTimeLimit} turn={turn} phase={phase} />
       <Navbar
         onUndo={undo}
         onRedo={redo}
@@ -145,8 +195,13 @@ export default function Game({
         canRedo={canRedo}
         phase={phase}
         onHome={() => {
-          setGameMode(null)
-          resetGame()
+          const inProgress =
+            phase !== 'finished' && board.some((row) => row.some((c) => c.stone !== null))
+          if (inProgress) setShowConfirm(true)
+          else {
+            setGameMode(null)
+            resetGame()
+          }
         }}
         dark={dark}
         setDark={setDark}
@@ -239,10 +294,26 @@ export default function Game({
         />
       </div>
       <div className="w-full flex justify-center mt-3 animate-fade-in">
-        <GameButton onClick={() => setShowRule(true)} text ariaLabel={t('menu.rule', '遊戲規則')}>
-          {t('menu.rule', '遊戲規則')}
+        <GameButton onClick={() => setShowRule(true)} text ariaLabel={t('menu.rule', 'Game Rules')}>
+          {t('menu.rule', 'Game Rules')}
         </GameButton>
       </div>
+      <ConfirmDialog
+        open={showConfirm}
+        title={t('menu.home', 'Home')}
+        message={t(
+          'menu.confirmHome',
+          'The game is not finished. Are you sure you want to return to the home screen?\nYour current progress will be lost.',
+        )}
+        confirmText={t('common.confirm', 'Confirm')}
+        cancelText={t('common.cancel', 'Cancel')}
+        onConfirm={() => {
+          setShowConfirm(false)
+          setGameMode(null)
+          resetGame()
+        }}
+        onCancel={() => setShowConfirm(false)}
+      />
     </div>
   )
 }

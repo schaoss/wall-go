@@ -3,26 +3,30 @@ import type { GameSnapshot } from '@/lib/types'
 import type { Player } from '@/lib/types'
 import type { PlayerAgent } from './PlayerAgent'
 import type { PlayerAction } from '@/lib/types'
+import { getRandomWallActionForPlayer } from '@/utils/ai'
 
 export class TurnManager {
   private agents: Record<Player, PlayerAgent>
   private getGameState: () => GameSnapshot
   private applyAction: (action: PlayerAction) => Promise<void> | void
   private isGameOver: (state: GameSnapshot) => boolean
-  private onTurnStart?: (player: Player) => void
+  private onTurnStart?: (state: GameSnapshot) => void
+  private turnTimeLimit: number
 
   constructor(params: {
     agents: Record<Player, PlayerAgent>
     getGameState: () => GameSnapshot
     applyAction: (action: PlayerAction) => Promise<void> | void
     isGameOver: (state: GameSnapshot) => boolean
-    onTurnStart?: (player: Player) => void
+    onTurnStart?: (state: GameSnapshot) => void
+    turnTimeLimit?: number
   }) {
     this.agents = params.agents
     this.getGameState = params.getGameState
     this.applyAction = params.applyAction
     this.isGameOver = params.isGameOver
     this.onTurnStart = params.onTurnStart
+    this.turnTimeLimit = params.turnTimeLimit ?? 90_000
   }
 
   // Recursively execute action and its followUp
@@ -38,10 +42,27 @@ export class TurnManager {
   async startLoop() {
     while (!this.isGameOver(this.getGameState())) {
       const state = this.getGameState()
-      if (this.onTurnStart) this.onTurnStart(state.turn)
+      if (this.onTurnStart) this.onTurnStart(state)
       const agent = this.agents[state.turn]
-      const action = await agent.getAction(state)
-      await this.executeAction(action)
+      let timeoutId: ReturnType<typeof setTimeout> | null = null
+      const timeoutPromise = new Promise<PlayerAction>((resolve) => {
+        timeoutId = setTimeout(() => {
+          agent.cancel?.()
+          const auto =
+            getRandomWallActionForPlayer(state, state.turn) ??
+            ({
+              type: 'wall',
+              from: { x: 0, y: 0 },
+              pos: { x: 0, y: 0 },
+              dir: 'top',
+            } as PlayerAction)
+          resolve(auto)
+        }, this.turnTimeLimit)
+      })
+
+      const action = await Promise.race([agent.getAction(state), timeoutPromise])
+      if (timeoutId) clearTimeout(timeoutId)
+      await this.executeAction(action as PlayerAction)
     }
   }
 }
