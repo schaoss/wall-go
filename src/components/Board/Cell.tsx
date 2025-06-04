@@ -1,13 +1,14 @@
 import clsx from 'clsx'
-import { playerColorClass } from '../../lib/color'
-import type { Phase, Player, Pos, WallDir } from '../../lib/types'
+import { playerColorClass } from '@/lib/color'
+import type { Phase, Player, Pos, WallDir } from '@/lib/types'
 import WallButton from './WallButton'
 import { useRef, useEffect } from 'react'
+import { getPosKey } from '@/utils/region'
 
 export interface CellProps {
   x: number
   y: number
-  cell: import('../../lib/types').Cell
+  cell: import('@/lib/types').Cell
   isSel: boolean
   phase: Phase
   turn: Player
@@ -16,7 +17,7 @@ export interface CellProps {
   placeStone?: (pos: Pos) => void
   moveTo?: (pos: Pos) => void
   buildWall?: (pos: Pos, dir: WallDir) => void
-  board: import('../../lib/types').Cell[][]
+  board: import('@/lib/types').Cell[][]
   boardSize: number
   // 新增: 領地資訊
   territoryOwner?: Player | null
@@ -38,7 +39,7 @@ export default function Cell({
   boardSize,
   territoryOwner,
 }: CellProps) {
-  const posKey = `${x},${y}`
+  const posKey = getPosKey({ x, y })
   // --- 棋子移動動畫 ---
   const stoneRef = useRef<HTMLButtonElement>(null)
   const prevPosRef = useRef<{ x: number; y: number } | null>(null)
@@ -148,15 +149,13 @@ export default function Cell({
             'rounded-full',
             playerColorClass(cell.stone),
             'shadow-lg drop-shadow-md',
-            'transition-transform transition-shadow duration-300',
+            'transition-all duration-300',
             'hover:scale-110',
             'flex items-center justify-center',
             'border border-zinc-200 dark:border-zinc-700',
             'animate-stone-move',
             // 只有輪到該玩家時才是 pointer
-            phase === 'playing' && cell.stone === turn && selectStone
-              ? 'cursor-pointer'
-              : 'cursor-default',
+            phase === 'playing' && cell.stone === turn ? 'cursor-pointer' : 'cursor-default',
           )}
           style={{
             width: '70%',

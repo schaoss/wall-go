@@ -2,7 +2,7 @@ import LanguageThemeSwitcher from './LanguageThemeSwitcher'
 import { useState, useRef, useEffect } from 'react'
 import GameButton from './GameButton'
 import { useTranslation } from 'react-i18next'
-import type { AiLevel, GameMode, AiSide } from '../../lib/types'
+import type { AiLevel, GameMode, AiSide } from '@/lib/types'
 
 const GAME_MODES: GameMode[] = ['pvp', 'ai']
 

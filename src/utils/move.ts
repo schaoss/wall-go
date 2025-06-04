@@ -1,4 +1,4 @@
-import { BOARD_SIZE, type Pos, type Cell, type WallDir } from '../lib/types'
+import { BOARD_SIZE, type Pos, type Cell, type WallDir } from '@/lib/types'
 
 export function isLegalMove(from: Pos, to: Pos, board: Cell[][], maxSteps = 2) {
   const q: [Pos, number][] = [[from, 0]]

@@ -1,6 +1,6 @@
 // src/utils/player.ts
-import type { GameSnapshot, Cell, Player, Pos, Stone } from '../lib/types'
-import { BOARD_SIZE } from '../lib/types'
+import type { GameSnapshot, Cell, Player, Pos, Stone } from '@/lib/types'
+import { BOARD_SIZE } from '@/lib/types'
 import { isLegalMove } from './move'
 
 export function getAllPlayerStones(board: Cell[][]): Stone[] {

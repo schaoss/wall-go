@@ -1,5 +1,5 @@
 // src/utils/wall.ts
-import type { Cell, PlayerAction, Pos } from '../lib/types'
+import type { Cell, PlayerAction, Pos } from '@/lib/types'
 
 export const DIRS: [dx: number, dy: number, wallKey: 'left' | 'top'][] = [
   [1, 0, 'left'], // 往右要看右格的 left 牆

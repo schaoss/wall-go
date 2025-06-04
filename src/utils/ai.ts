@@ -1,4 +1,4 @@
-import type { PlayerAction, GameSnapshot, Cell, Player, Pos } from '../lib/types'
+import type { PlayerAction, GameSnapshot, Cell, Player, Pos } from '@/lib/types'
 import { isLegalMove } from './move'
 import { getLegalWallActions } from './wall'
 

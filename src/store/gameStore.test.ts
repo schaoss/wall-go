@@ -12,7 +12,7 @@ beforeAll(() => {
 
 import { act, renderHook } from '@testing-library/react'
 import { useGame } from './index'
-import { BOARD_SIZE, PLAYER_LIST, STONES_PER_PLAYER, type Pos } from '../lib/types'
+import { BOARD_SIZE, PLAYER_LIST, STONES_PER_PLAYER, type Pos } from '@/lib/types'
 import { describe, it, expect } from 'vitest'
 import type { DOMWindow } from 'jsdom'
 

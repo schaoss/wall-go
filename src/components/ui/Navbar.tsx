@@ -1,6 +1,6 @@
 // src/components/ui/Navbar.tsx
 import GameButton from './GameButton'
-import type { Phase } from '../../lib/types'
+import type { Phase } from '@/lib/types'
 import LanguageThemeSwitcher from './LanguageThemeSwitcher'
 import { useTranslation } from 'react-i18next'
 

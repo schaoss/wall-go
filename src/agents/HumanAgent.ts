@@ -1,6 +1,6 @@
 // Human player agent, waits for UI input
 import type { PlayerAgent } from './PlayerAgent'
-import type { PlayerAction } from '../lib/types'
+import type { PlayerAction } from '@/lib/types'
 
 export class HumanAgent implements PlayerAgent {
   private actionResolver: ((action: PlayerAction) => void) | null = null

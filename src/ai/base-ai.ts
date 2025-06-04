@@ -1,6 +1,6 @@
-import type { GameSnapshot, PlayerAction } from '../lib/types'
-import { applyAction, getLegalActions } from '../utils/ai'
-import { checkGameEnd, type GameResult } from '../utils/game'
+import type { GameSnapshot, PlayerAction } from '@/lib/types'
+import { applyAction, getLegalActions } from '@/utils/ai'
+import { checkGameEnd, type GameResult } from '@/utils/game'
 
 export abstract class BaseAI {
   constructor(name = 'BaseAI') {

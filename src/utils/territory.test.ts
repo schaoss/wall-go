@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { getTerritoryMap } from './territory'
-import type { Cell } from '../lib/types'
+import type { Cell } from '@/lib/types'
 
 describe('getTerritoryMap', () => {
   it('one stone, fully walled, territory belongs to owner', () => {

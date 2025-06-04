@@ -1,5 +1,5 @@
 // src/utils/territory.ts
-import type { GameSnapshot, Player, Cell } from '../lib/types'
+import type { GameSnapshot, Player, Cell } from '@/lib/types'
 import { floodRegions } from './region'
 
 // 回傳每格領地歸屬（純淨區域才標記，否則為 null）

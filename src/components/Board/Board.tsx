@@ -1,11 +1,11 @@
 import clsx from 'clsx'
-import { BOARD_SIZE } from '../../lib/types'
-import type { Phase, WallDir, Player, Pos } from '../../lib/types'
+import { BOARD_SIZE } from '@/lib/types'
+import type { Phase, WallDir, Player, Pos } from '@/lib/types'
 import Cell from './Cell'
-import { getTerritoryMap } from '../../utils/territory'
+import { getTerritoryMap } from '@/utils/territory'
 
 export interface BoardProps {
-  board: import('../../lib/types').Cell[][]
+  board: import('@/lib/types').Cell[][]
   phase: Phase
   turn: Player
   selected: Pos | null

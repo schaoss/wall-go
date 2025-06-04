@@ -1,4 +1,4 @@
-import { PLAYER_LIST, type Cell, type Player, type Pos } from '../lib/types'
+import { PLAYER_LIST, type Cell, type Player, type Pos } from '@/lib/types'
 import { isWallBetween, DIRS } from './wall'
 
 /**
@@ -25,7 +25,7 @@ export function floodRegions(board: Cell[][]): Region[] {
 
   for (let y = 0; y < n; y++) {
     for (let x = 0; x < n; x++) {
-      const key = getBfsKey({ x, y })
+      const key = getPosKey({ x, y })
       if (visited.has(key)) continue
 
       // flood fill: 空格和棋子都能走，全部都加入 cells
@@ -34,7 +34,7 @@ export function floodRegions(board: Cell[][]): Region[] {
       const stoneColors = new Set<Player>()
       while (queue.length > 0) {
         const pos = queue.pop()!
-        const posKey = getBfsKey(pos)
+        const posKey = getPosKey(pos)
         if (visited.has(posKey)) continue
         visited.add(posKey)
         cells.push(pos)
@@ -50,7 +50,7 @@ export function floodRegions(board: Cell[][]): Region[] {
           if (isWallBetween(board, pos, { x: nx, y: ny })) {
             continue
           }
-          const neighborKey = getBfsKey({ x: nx, y: ny })
+          const neighborKey = getPosKey({ x: nx, y: ny })
           if (!visited.has(neighborKey)) {
             queue.push({ x: nx, y: ny })
           }
@@ -71,6 +71,6 @@ export function floodRegions(board: Cell[][]): Region[] {
   return regions
 }
 
-export function getBfsKey(pos: Pos) {
+export function getPosKey(pos: Pos) {
   return `${pos.x},${pos.y}`
 }

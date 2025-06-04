@@ -1,4 +1,4 @@
-import { type Player, type Cell } from '../lib/types'
+import { type Player, type Cell } from '@/lib/types'
 import { getTerritoryMap } from './territory'
 
 export interface GameResult {

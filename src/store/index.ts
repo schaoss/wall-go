@@ -1,12 +1,12 @@
 // Zustand store for Wall Go with robust undo/redo and deep copy history pattern
 import { create } from 'zustand'
-import { PLAYER_LIST, type Pos, type WallDir, type State } from '../lib/types'
+import { PLAYER_LIST, type Pos, type WallDir, type State } from '@/lib/types'
 import { makeInitialState, snapshotFromState, restoreSnapshot } from './gameState'
 import { createHistoryHandlers } from './history'
 import { placingTurnIndex, advanceTurn } from './actions'
-import { isLegalMove } from '../utils/move'
-import { checkGameEnd } from '../utils/game'
-import { isHumanTurn } from '../utils/player'
+import { isLegalMove } from '@/utils/move'
+import { checkGameEnd } from '@/utils/game'
+import { isHumanTurn } from '@/utils/player'
 
 // This store uses a functional set pattern for all mutating actions.
 // Each mutation pushes a deep copy of the current state to history BEFORE mutation.
@@ -119,7 +119,7 @@ export const useGame = create<State>((_set, get) => {
         const nextPlayer = players[nextIdx]
         const allDone = Object.values(next.stonesPlaced).every((c) => c === stonesLimit)
         next.turn = nextPlayer
-        next.phase = (allDone ? 'playing' : 'placing') as import('../lib/types').Phase
+        next.phase = (allDone ? 'playing' : 'placing') as import('@/lib/types').Phase
         next.selected = undefined
         next.legal = new Set<string>()
         next.stepsTaken = 0
@@ -225,7 +225,7 @@ export const useGame = create<State>((_set, get) => {
         }
         const end = checkGameEnd(next.board, PLAYERS)
         if (end.finished) {
-          next.phase = 'finished' as import('../lib/types').Phase
+          next.phase = 'finished' as import('@/lib/types').Phase
           next.result = end
           next.selected = undefined
           next.legal = new Set<string>()
@@ -245,7 +245,7 @@ export const useGame = create<State>((_set, get) => {
             endB.finished = true
             endB.tie = true
           }
-          next.phase = 'finished' as import('../lib/types').Phase
+          next.phase = 'finished' as import('@/lib/types').Phase
           next.result = endB
           next.selected = undefined
           next.legal = new Set<string>()
@@ -288,7 +288,7 @@ export const useGame = create<State>((_set, get) => {
     setPhase(phase) {
       set({ phase })
     },
-    setPlayers(players: import('../lib/types').Player[]) {
+    setPlayers(players: import('@/lib/types').Player[]) {
       set((state) => ({
         ...state,
         players,

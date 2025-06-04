@@ -1,5 +1,5 @@
 // Utility to convert GameSnapshot to a structured-cloneable object for Web Workers
-import type { GameSnapshot } from '../lib/types'
+import type { GameSnapshot } from '@/lib/types'
 
 export function toSerializableSnapshot(s: GameSnapshot): object {
   return {

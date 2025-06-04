@@ -1,7 +1,7 @@
 import type { PlayerAgent } from './PlayerAgent'
-import type { GameSnapshot, PlayerAction } from '../lib/types'
+import type { GameSnapshot, PlayerAction } from '@/lib/types'
 import { toSerializableSnapshot } from './serialize'
-import { sleep } from '../utils/sleep'
+import { sleep } from '@/utils/sleep'
 
 export class MinimaxAgent implements PlayerAgent {
   private worker: Worker

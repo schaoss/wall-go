@@ -49,7 +49,7 @@ export interface GameSnapshot {
   players: Player[]
   stonesLimit: number
   stonesPlaced: Record<Player, number>
-  result?: import('../utils/game').GameResult
+  result?: import('@/utils/game').GameResult
   skipReason?: string
 }
 

@@ -1,7 +1,7 @@
 // src/agents/AIWorker.ts
-import type { GameSnapshot, PlayerAction } from '../lib/types'
-import { getLegalActions, getRandomAction, getBestPlacement } from '../utils/ai'
-import { MinimaxAI } from '../ai/minimax-ai'
+import type { GameSnapshot, PlayerAction } from '@/lib/types'
+import { getLegalActions, getRandomAction, getBestPlacement } from '@/utils/ai'
+import { MinimaxAI } from '@/ai/minimax-ai'
 
 function calculateMinimaxPlayingAction(gameState: GameSnapshot, depth = 2): PlayerAction {
   const ai = new MinimaxAI(depth)

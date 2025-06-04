@@ -1,6 +1,6 @@
 // WallButton component extracted from Cell.tsx
 import clsx from 'clsx'
-import type { WallDir, Player } from '../../lib/types'
+import type { WallDir, Player } from '@/lib/types'
 import { useTranslation } from 'react-i18next'
 
 interface WallButtonProps {
