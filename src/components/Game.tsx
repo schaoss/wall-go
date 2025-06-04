@@ -10,6 +10,7 @@ import { TurnManager } from '@/agents/TurnManager'
 import { HumanAgent, RandomAgent, MinimaxAgent } from '@/agents'
 import { snapshotFromState } from '@/store/gameState'
 import ConfirmDialog from './ui/ConfirmDialog'
+import TurnTimer from './ui/TurnTimer'
 
 export default function Game({
   gameMode,
@@ -50,6 +51,9 @@ export default function Game({
   const live = checkGameEnd(board, [...PLAYER_LIST])
   const { t } = useTranslation()
   const [showConfirm, setShowConfirm] = useState(false)
+  const [timeLeft, setTimeLeft] = useState(90_000)
+  const turnTimeLimit = 90_000
+  const [turnStart, setTurnStart] = useState<number | null>(null)
 
   // --- 代理主流程整合 ---
   const turnManagerRef = useRef<TurnManager | null>(null)
@@ -94,7 +98,11 @@ export default function Game({
         }
       },
       isGameOver: (state) => state.phase === 'finished' || !!state.result,
-      turnTimeLimit: 90_000,
+      turnTimeLimit,
+      onTurnStart: () => {
+        setTurnStart(Date.now())
+        setTimeLeft(turnTimeLimit)
+      },
     })
     turnManagerStartedRef.current = false
   }, [gameMode, aiSide, aiLevel, buildWall, moveTo, placeStone, selectStone])
@@ -138,6 +146,22 @@ export default function Game({
     }, 0)
   }, [phase, live, setPhase])
 
+  // Turn timer update
+  useEffect(() => {
+    if (turnStart === null) return
+    const id = setInterval(() => {
+      setTimeLeft(Math.max(0, turnTimeLimit - (Date.now() - turnStart)))
+    }, 100)
+    return () => clearInterval(id)
+  }, [turnStart])
+
+  useEffect(() => {
+    if (phase === 'finished') {
+      setTurnStart(null)
+      setTimeLeft(0)
+    }
+  }, [phase])
+
   // 每當遊戲狀態變化時檢查是否需要結束回合
   useEffect(() => {
     onTurnEnd()
@@ -171,6 +195,7 @@ export default function Game({
         dark={dark}
         setDark={setDark}
       />
+      <TurnTimer timeLeft={timeLeft} timeLimit={turnTimeLimit} turn={turn} />
       <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 drop-shadow animate-fade-in flex items-center gap-2">
         {phase === 'finished' && result ? (
           result.tie ? (
