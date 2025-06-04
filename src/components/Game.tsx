@@ -99,7 +99,8 @@ export default function Game({
       },
       isGameOver: (state) => state.phase === 'finished' || !!state.result,
       turnTimeLimit,
-      onTurnStart: () => {
+      onTurnStart: (state) => {
+        if (state.phase !== 'playing') return
         setTurnStart(Date.now())
         setTimeLeft(turnTimeLimit)
       },
@@ -149,12 +150,21 @@ export default function Game({
   // Turn timer update
   useEffect(() => {
     if (turnStart === null) return
-    const id = setInterval(() => {
+    let frame: number
+    let stopped = false
+    const update = () => {
+      if (stopped) return
       setTimeLeft(Math.max(0, turnTimeLimit - (Date.now() - turnStart)))
-    }, 100)
-    return () => clearInterval(id)
+      frame = requestAnimationFrame(update)
+    }
+    frame = requestAnimationFrame(update)
+    return () => {
+      stopped = true
+      cancelAnimationFrame(frame)
+    }
   }, [turnStart])
 
+  // 只要 phase 進入 playing（不論是 redo/undo 或正常下棋），timer 就 reset
   useEffect(() => {
     if (phase === 'finished') {
       setTurnStart(null)
@@ -177,6 +187,7 @@ export default function Game({
         'p-4 pb-12',
       ].join(' ')}
     >
+      <TurnTimer timeLeft={timeLeft} timeLimit={turnTimeLimit} turn={turn} phase={phase} />
       <Navbar
         onUndo={undo}
         onRedo={redo}
@@ -195,7 +206,6 @@ export default function Game({
         dark={dark}
         setDark={setDark}
       />
-      <TurnTimer timeLeft={timeLeft} timeLimit={turnTimeLimit} turn={turn} />
       <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 drop-shadow animate-fade-in flex items-center gap-2">
         {phase === 'finished' && result ? (
           result.tie ? (
@@ -284,16 +294,19 @@ export default function Game({
         />
       </div>
       <div className="w-full flex justify-center mt-3 animate-fade-in">
-        <GameButton onClick={() => setShowRule(true)} text ariaLabel={t('menu.rule', '遊戲規則')}>
-          {t('menu.rule', '遊戲規則')}
+        <GameButton onClick={() => setShowRule(true)} text ariaLabel={t('menu.rule', 'Game Rules')}>
+          {t('menu.rule', 'Game Rules')}
         </GameButton>
       </div>
       <ConfirmDialog
         open={showConfirm}
-        title={t('menu.home', '回到首頁')}
-        message={t('menu.confirmHome', '遊戲尚未結束，確定要回到首頁嗎？\n目前進度將會消失。')}
-        confirmText={t('common.confirm', '確定')}
-        cancelText={t('common.cancel', '取消')}
+        title={t('menu.home', 'Home')}
+        message={t(
+          'menu.confirmHome',
+          'The game is not finished. Are you sure you want to return to the home screen?\nYour current progress will be lost.',
+        )}
+        confirmText={t('common.confirm', 'Confirm')}
+        cancelText={t('common.cancel', 'Cancel')}
         onConfirm={() => {
           setShowConfirm(false)
           setGameMode(null)

@@ -10,7 +10,7 @@ export class TurnManager {
   private getGameState: () => GameSnapshot
   private applyAction: (action: PlayerAction) => Promise<void> | void
   private isGameOver: (state: GameSnapshot) => boolean
-  private onTurnStart?: (player: Player) => void
+  private onTurnStart?: (state: GameSnapshot) => void
   private turnTimeLimit: number
 
   constructor(params: {
@@ -18,7 +18,7 @@ export class TurnManager {
     getGameState: () => GameSnapshot
     applyAction: (action: PlayerAction) => Promise<void> | void
     isGameOver: (state: GameSnapshot) => boolean
-    onTurnStart?: (player: Player) => void
+    onTurnStart?: (state: GameSnapshot) => void
     turnTimeLimit?: number
   }) {
     this.agents = params.agents
@@ -42,7 +42,7 @@ export class TurnManager {
   async startLoop() {
     while (!this.isGameOver(this.getGameState())) {
       const state = this.getGameState()
-      if (this.onTurnStart) this.onTurnStart(state.turn)
+      if (this.onTurnStart) this.onTurnStart(state)
       const agent = this.agents[state.turn]
       let timeoutId: ReturnType<typeof setTimeout> | null = null
       const timeoutPromise = new Promise<PlayerAction>((resolve) => {
