@@ -1,4 +1,8 @@
 {
+  "common": {
+    "confirm": "확인",
+    "cancel": "취소"
+  },
   "menu": {
     "title": "Wall Go · 벽 바둑",
     "mode": {
@@ -19,7 +23,9 @@
       "second": "🐢 후",
       "random": "🎲 랜덤",
       "back": "뒤로"
-    }
+    },
+    "confirmHome": "게임이 아직 끝나지 않았습니다. 홈으로 돌아가시겠습니까?\n현재 진행 상황이 사라집니다.",
+    "home": "홈으로 돌아가기"
   },
   "rule": {
     "title": "게임 규칙 안내",
