@@ -14,6 +14,7 @@ import { isWallBetween, DIRS } from '@/utils/wall'
 import { getAllPlayerStones } from '@/utils/player'
 import { isOutbound } from '@/utils/move'
 import { floodRegions, getPosKey } from '@/utils/region'
+import { getTerritoryMap } from '@/utils/territory'
 
 export class MinimaxAI extends BaseAI {
   constructor(maxDepth = 2) {
@@ -245,41 +246,49 @@ export class MinimaxAI extends BaseAI {
    */
   private evaluateTerritoryPotential(state: GameSnapshot): number {
     const board = state.board
-    let score = 0
+    const territory = getTerritoryMap(board)
 
-    const regions = floodRegions(board)
-    for (const { borderingCounts, cells } of regions) {
-      const numBorderingPlayers = Object.values(borderingCounts).filter((count) => !count).length
-      if (numBorderingPlayers !== 1) continue
+    const totals: Record<Player, number> = { R: 0, B: 0 }
+    for (let y = 0; y < board.length; y++) {
+      for (let x = 0; x < board.length; x++) {
+        const owner = territory[y][x]
+        if (owner) totals[owner]++
+      }
+    }
+    const score = totals['R'] - totals['B']
+    if (score !== 0) return score
 
-      const player = borderingCounts['R'] > 0 ? 'R' : 'B'
-      const area = cells.length
+    // If total territory is tied, compare largest single territory size
+    const visited = new Set<string>()
+    const largest: Record<Player, number> = { R: 0, B: 0 }
+    for (let y = 0; y < board.length; y++) {
+      for (let x = 0; x < board.length; x++) {
+        const owner = territory[y][x]
+        const key = `${x},${y}`
+        if (!owner || visited.has(key)) continue
 
-      // Count stones on the border of the region
-      const borderStonePositions = new Set<string>()
-      for (const pos of cells) {
-        for (const [dx, dy] of DIRS) {
-          const nx = pos.x + dx
-          const ny = pos.y + dy
-          if (isOutbound(nx, ny)) continue
-          if (isWallBetween(board, pos, { x: nx, y: ny })) continue
-          const neighborCell = board[ny][nx]
-          if (neighborCell.stone !== null) {
-            borderStonePositions.add(`${nx},${ny}`)
+        let area = 0
+        const queue: Pos[] = [{ x, y }]
+        visited.add(key)
+        while (queue.length > 0) {
+          const p = queue.pop()!
+          area++
+          for (const [dx, dy] of DIRS) {
+            const nx = p.x + dx
+            const ny = p.y + dy
+            if (isOutbound(nx, ny)) continue
+            if (territory[ny][nx] !== owner) continue
+            const nKey = `${nx},${ny}`
+            if (visited.has(nKey)) continue
+            visited.add(nKey)
+            queue.push({ x: nx, y: ny })
           }
         }
-      }
-
-      const stonesCount = borderStonePositions.size
-      const regionScore = area - stonesCount * 10
-      if (player === 'R') {
-        score += regionScore
-      } else {
-        score -= regionScore
+        largest[owner] = Math.max(largest[owner], area)
       }
     }
 
-    return score
+    return largest['R'] - largest['B']
   }
 
   private actionHeuristic(action: PlayerAction, state: GameSnapshot): number {
