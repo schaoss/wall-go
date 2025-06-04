@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://schaoss.github.io/wall-go/sitemap.xml

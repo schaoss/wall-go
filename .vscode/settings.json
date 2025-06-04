@@ -1,0 +1,7 @@
+{
+  "i18n-ally.localesPaths": [
+    "src/locales"
+  ],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+}
