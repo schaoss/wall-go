@@ -1,8 +1,11 @@
-FROM node:20-alpine AS builder
+FROM oven/bun:1-alpine AS builder
+RUN adduser -D -g '' appuser
 WORKDIR /app
-COPY package.json bun.lock ./
-RUN npm install -g bun && bun install
-COPY . .
+RUN chown -R appuser:appuser /app
+USER appuser
+COPY --chown=appuser:appuser package.json bun.lock ./
+RUN bun install --frozen-lockfile
+COPY --chown=appuser:appuser . .
 RUN bun run build
 
 FROM nginx:alpine
