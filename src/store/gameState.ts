@@ -61,6 +61,7 @@ export function makeInitialState(initialPlayers: Player[] = [...PLAYER_LIST]): G
     stonesPlaced: initialStonesPlaced,
     result: undefined,
     skipReason: undefined,
+    territoryMap: undefined,
   }
 }
 
@@ -77,6 +78,7 @@ export function snapshotFromState(state: GameSnapshot): GameSnapshot {
     stonesPlaced: { ...state.stonesPlaced },
     result: state.result ? JSON.parse(JSON.stringify(state.result)) : undefined,
     skipReason: state.skipReason,
+    territoryMap: state.territoryMap ? state.territoryMap.map(row => [...row]) : undefined,
   }
 }
 
@@ -93,5 +95,6 @@ export function restoreSnapshot(s: GameSnapshot): GameSnapshot {
     stonesPlaced: { ...s.stonesPlaced },
     result: s.result ? JSON.parse(JSON.stringify(s.result)) : undefined,
     skipReason: s.skipReason,
+    territoryMap: s.territoryMap ? s.territoryMap.map(row => [...row]) : undefined,
   }
 }

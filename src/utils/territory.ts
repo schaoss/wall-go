@@ -23,13 +23,67 @@ export function getTerritoryMap(board: Cell[][]): (Player | null)[][] {
   return territory
 }
 
+/**
+ * Detects if territory has been captured by comparing the current board state with the previous territory map
+ * @param gameState Current game state
+ * @returns Object containing the new territory map and whether territory was captured
+ */
+export function detectTerritoryCapture(gameState: GameSnapshot): {
+  territoryMap: (Player | null)[][],
+  captured: boolean
+} {
+  const newTerritoryMap = getTerritoryMap(gameState.board);
+  const previousTerritoryMap = gameState.territoryMap;
+  
+  // If there's no previous territory map, just return the new one
+  if (!previousTerritoryMap) {
+    return { territoryMap: newTerritoryMap, captured: false };
+  }
+  
+  // Check if any territory has changed
+  const BOARD_SIZE = gameState.board.length;
+  let captured = false;
+  
+  for (let y = 0; y < BOARD_SIZE; y++) {
+    for (let x = 0; x < BOARD_SIZE; x++) {
+      // If a cell was not territory before but is now, territory has been captured
+      if (previousTerritoryMap[y][x] === null && newTerritoryMap[y][x] !== null) {
+        console.log(`Territory captured at ${x},${y}: null -> ${newTerritoryMap[y][x]}`);
+        captured = true;
+        break;
+      }
+      // If a cell changed ownership, territory has been captured
+      if (previousTerritoryMap[y][x] !== null &&
+          newTerritoryMap[y][x] !== null &&
+          previousTerritoryMap[y][x] !== newTerritoryMap[y][x]) {
+        console.log(`Territory changed ownership at ${x},${y}: ${previousTerritoryMap[y][x]} -> ${newTerritoryMap[y][x]}`);
+        captured = true;
+        break;
+      }
+    }
+    if (captured) break;
+  }
+  
+  return { territoryMap: newTerritoryMap, captured };
+}
+
+/**
+ * Checks if a piece is in territory captured by another player
+ * @param gameState Current game state
+ * @param pos Position to check
+ * @param player Player who owns the piece
+ * @param territoryMap Optional territory map (will be calculated if not provided)
+ * @returns true if the piece is in territory captured by another player
+ */
 export function isInPureTerritory(
   gameState: GameSnapshot,
   pos: { x: number; y: number },
   player: string,
-  territoryMap = getTerritoryMap(gameState.board),
+  territoryMap = gameState.territoryMap || getTerritoryMap(gameState.board),
 ): boolean {
-  if (territoryMap[pos.y][pos.x] !== player) return false
-
-  return true
+  // Check if the position is in territory owned by another player
+  const owner = territoryMap[pos.y][pos.x];
+  const result = owner !== null && owner !== player;
+  console.log(`isInPureTerritory: pos=${pos.x},${pos.y}, player=${player}, owner=${owner}, result=${result}`);
+  return result;
 }

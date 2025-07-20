@@ -3,6 +3,7 @@ import type { PlayerAgent } from '@/agents/PlayerAgent'
 import GameButton from './ui/GameButton'
 import Navbar from './ui/Navbar'
 import Board from './Board/Board'
+import StatusMessage from './ui/StatusMessage'
 import { useTranslation } from 'react-i18next'
 import { useGame } from '@/store/index'
 import { checkGameEnd } from '@/utils/game'
@@ -49,6 +50,7 @@ export default function Game({
     redo,
     canUndo,
     canRedo,
+    skipReason,
   } = useGame()
   const live = checkGameEnd(board, gameConfig.players)
   const { t } = useTranslation()
@@ -315,6 +317,24 @@ export default function Game({
           </GameButton>
         )}
       </div>
+      
+      {/* Status message for territory capture */}
+      {phase === 'playing' && skipReason && (
+        <div className="w-full max-w-md animate-fade-in">
+          <StatusMessage className={`bg-amber-100 dark:bg-amber-900/80 ${getPlayerColorClass(turn, 'border')}`}>
+            {skipReason === 'pieceInCapturedTerritory' && (
+              <span>
+                {t('game.pieceInCapturedTerritory', 'This piece is in captured territory and cannot move')}
+              </span>
+            )}
+            {skipReason === 'cannotMoveToTerritory' && (
+              <span>
+                {t('game.cannotMoveToTerritory', 'Cannot move to a position in captured territory')}
+              </span>
+            )}
+          </StatusMessage>
+        </div>
+      )}
       <div className="board-container flex flex-col aspect-ratio-1 items-center w-[min(800px,100dvh-280px)] max-w-[calc(100dvw-32px)] transition-all">
         <Board
           board={board}

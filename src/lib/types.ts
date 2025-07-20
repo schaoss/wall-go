@@ -51,6 +51,7 @@ export interface GameSnapshot {
   stonesPlaced: Record<Player, number>
   result?: import('@/utils/game').GameResult
   skipReason?: string
+  territoryMap?: (Player | null)[][]
 }
 
 export interface State extends GameSnapshot {

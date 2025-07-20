@@ -7,6 +7,7 @@ import { placingTurnIndex, advanceTurn } from './actions'
 import { isLegalMove } from '@/utils/move'
 import { checkGameEnd } from '@/utils/game'
 import { isHumanTurn } from '@/utils/player'
+import { detectTerritoryCapture, isInPureTerritory } from '@/utils/territory'
 
 // This store uses a functional set pattern for all mutating actions.
 // Each mutation pushes a deep copy of the current state to history BEFORE mutation.
@@ -123,6 +124,13 @@ export const useGame = create<State>((_set, get) => {
         next.stepsTaken = 0
         next.skipReason = undefined
         next.result = undefined
+        
+        // Initialize territory map when transitioning to playing phase
+        if (allDone) {
+          const { territoryMap } = detectTerritoryCapture(next);
+          next.territoryMap = territoryMap;
+        }
+        
         // Push the new state (after mutation) to history
         const newHistory = [...state._history, snapshotFromState(next)]
         return {
@@ -134,10 +142,20 @@ export const useGame = create<State>((_set, get) => {
     },
     selectStone(pos: Pos) {
       set((state) => {
-        const { board, turn, stepsTaken, phase } = state
+        const { board, turn, stepsTaken, phase, territoryMap } = state
         if (phase !== 'playing') return state
         if (stepsTaken > 0) return state
         if (board[pos.y][pos.x].stone !== turn) return state
+        
+        // Check if the piece is in captured territory
+        if (territoryMap && isInPureTerritory(state, pos, turn)) {
+          // Piece is in captured territory and cannot move
+          return {
+            ...state,
+            skipReason: "pieceInCapturedTerritory",
+          }
+        }
+        
         const legal = new Set<string>()
         for (let yy = 0; yy < board.length; yy++) {
           for (let xx = 0; xx < board.length; xx++) {
@@ -157,12 +175,22 @@ export const useGame = create<State>((_set, get) => {
     },
     moveTo(to: Pos) {
       set((state) => {
-        const { selected, board, legal, stepsTaken, phase } = state
+        const { selected, board, legal, stepsTaken, phase, turn, territoryMap } = state
         if (phase !== 'playing') return state
         if (!selected) return state
         if (!legal.has(`${to.x},${to.y}`)) return state
         const piece = board[selected.y][selected.x].stone
         if (!piece) return state
+        
+        // Check if the destination is in captured territory
+        if (territoryMap && isInPureTerritory(state, to, turn)) {
+          // Cannot move to a position in captured territory
+          return {
+            ...state,
+            skipReason: "cannotMoveToTerritory",
+          }
+        }
+        
         // Mutate a deep copy of state
         const next = snapshotFromState(state)
         next.board[selected.y][selected.x].stone = null
@@ -179,6 +207,11 @@ export const useGame = create<State>((_set, get) => {
             }
           }
         }
+        
+        // Update territory map after moving
+        const { territoryMap: newTerritoryMap } = detectTerritoryCapture(next);
+        next.territoryMap = newTerritoryMap;
+        
         next.selected = to
         next.legal = nextLegal
         next.stepsTaken = newSteps
@@ -221,6 +254,10 @@ export const useGame = create<State>((_set, get) => {
         } else if (dir === 'bottom') {
           next.board[pos.y + 1][pos.x].wallTop = turn
         }
+        
+        // Update territory map after building a wall
+        const { territoryMap, captured } = detectTerritoryCapture(next);
+        next.territoryMap = territoryMap;
         const end = checkGameEnd(next.board, next.players)
         if (end.finished) {
           next.phase = 'finished' as import('@/lib/types').Phase

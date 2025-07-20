@@ -3,6 +3,7 @@ import { BOARD_SIZE } from '@/lib/types'
 import type { Phase, WallDir, Player, Pos } from '@/lib/types'
 import Cell from './Cell'
 import { getTerritoryMap } from '@/utils/territory'
+import { useGame } from '@/store/index'
 
 export interface BoardProps {
   board: import('@/lib/types').Cell[][]
@@ -27,8 +28,9 @@ function Board({
   moveTo,
   buildWall,
 }: BoardProps) {
-  // Territory information: calculated every time
-  const territoryMap = getTerritoryMap(board)
+  // Get the territory map from the game state or calculate it if not available
+  const { territoryMap: stateTerritory } = useGame()
+  const territoryMap = stateTerritory || getTerritoryMap(board)
 
   // Chessboard edge labels
   const files = Array.from({ length: BOARD_SIZE }, (_, i) => String.fromCharCode(65 + i)) // A-G
