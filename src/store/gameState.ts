@@ -33,19 +33,32 @@ export function set2PlayerDefaultBoard(board: Cell[][]): Cell[][] {
   return board
 }
 
-export function makeInitialState(): GameSnapshot {
-  let board = createEmptyBoard()
-  if (PLAYER_LIST.length === 2) board = set2PlayerDefaultBoard(board)
+export function makeInitialState(initialPlayers: Player[] = [...PLAYER_LIST]): GameSnapshot {
+  let board = createEmptyBoard();
+  const players = [...initialPlayers];
+  const initialStonesPlaced: Record<Player, number> = Object.fromEntries(
+    PLAYER_LIST.map(p => [p, 0])
+  ) as Record<Player, number>;
+
+  // Only initialize stones for 2-player games
+  // For 3-4 player games, board stays empty and stones placed remain 0
+  if (players.length === 2 && players.every(p => p === 'R' || p === 'B')) {
+    board = set2PlayerDefaultBoard(board);
+    // Don't set stonesPlaced to 2, so players still need to place stones in the placing phase
+    // initialStonesPlaced['R'] = 2;
+    // initialStonesPlaced['B'] = 2;
+  }
+
   return {
     board,
-    turn: PLAYER_LIST[0],
+    turn: players[0],
     selected: undefined,
     legal: new Set(),
     stepsTaken: 0,
     phase: 'placing',
-    players: [...PLAYER_LIST],
+    players,
     stonesLimit: STONES_PER_PLAYER,
-    stonesPlaced: Object.fromEntries(PLAYER_LIST.map((p) => [p, 2])) as Record<Player, number>,
+    stonesPlaced: initialStonesPlaced,
     result: undefined,
     skipReason: undefined,
   }

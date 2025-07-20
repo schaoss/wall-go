@@ -248,7 +248,7 @@ export class MinimaxAI extends BaseAI {
     const board = state.board
     const territory = getTerritoryMap(board)
 
-    const totals: Record<Player, number> = { R: 0, B: 0 }
+    const totals: Record<Player, number> = { R: 0, B: 0, G: 0, Y: 0 }
     for (let y = 0; y < board.length; y++) {
       for (let x = 0; x < board.length; x++) {
         const owner = territory[y][x]
@@ -260,7 +260,7 @@ export class MinimaxAI extends BaseAI {
 
     // If total territory is tied, compare largest single territory size
     const visited = new Set<string>()
-    const largest: Record<Player, number> = { R: 0, B: 0 }
+    const largest: Record<Player, number> = { R: 0, B: 0, G: 0, Y: 0 }
     for (let y = 0; y < board.length; y++) {
       for (let x = 0; x < board.length; x++) {
         const owner = territory[y][x]

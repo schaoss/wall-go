@@ -10,9 +10,11 @@ export function getTerritoryMap(board: Cell[][]): (Player | null)[][] {
   )
   const regions = floodRegions(board)
   regions.forEach(({ borderingCounts: bc, cells }) => {
-    const numPlayers = (bc['R'] > 0 ? 1 : 0) + (bc['B'] > 0 ? 1 : 0)
-    if (numPlayers === 1) {
-      const owner = bc['R'] > 0 ? 'R' : 'B'
+    const players = (Object.keys(bc) as Player[]).filter(player => bc[player] > 0)
+    console.log(`Region has ${players.length} bordering players: ${players.join(', ')}`);
+    if (players.length === 1) {
+      const owner = players[0] as Player
+      console.log(`Assigning region to player ${owner}`);
       cells.forEach(({ x, y }) => {
         territory[y][x] = owner
       })

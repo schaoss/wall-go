@@ -38,12 +38,27 @@ export function checkGameEnd(board: Cell[][], players: Player[]): GameResult {
   }
   // Condition A: All stones are in pure territory
   if (remainingStones.size === 0) {
-    // Determine the winner
-    const [p1, p2] = players
-    if (totals[p1] > totals[p2]) return { finished: true, winner: p1, score: totals }
-    if (totals[p2] > totals[p1]) return { finished: true, winner: p2, score: totals }
-    // If scores are tied, explicitly set tie: true
-    return { finished: true, tie: true, score: totals }
+    // Determine winner by comparing all players' scores
+    let maxScore = -1
+    let winner: Player | undefined
+    let tie = false
+
+    players.forEach(player => {
+      if (totals[player] > maxScore) {
+        maxScore = totals[player]
+        winner = player
+        tie = false
+      } else if (totals[player] === maxScore) {
+        tie = true
+      }
+    })
+
+    return {
+      finished: true,
+      winner: tie ? undefined : winner,
+      tie,
+      score: totals
+    }
   }
   return { finished: false, score: totals }
 }

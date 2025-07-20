@@ -47,7 +47,7 @@ describe('Game Store', () => {
     act(() => {
       result.current.placeStone({ x: 1, y: 0 })
     })
-    for (let i = 2; i < PLAYER_LIST.length * STONES_PER_PLAYER; i++) {
+    for (let i = 2; i < 2 * STONES_PER_PLAYER; i++) {
       act(() => {
         result.current.placeStone({
           x: i % BOARD_SIZE,
@@ -73,7 +73,7 @@ describe('Game Store', () => {
     act(() => {
       result.current.placeStone({ x: 1, y: 0 })
     })
-    for (let i = 2; i < PLAYER_LIST.length * STONES_PER_PLAYER; i++) {
+    for (let i = 2; i < 2 * STONES_PER_PLAYER; i++) {
       act(() => {
         result.current.placeStone({
           x: i % BOARD_SIZE,
@@ -162,7 +162,7 @@ describe('Game Store', () => {
 
   it('moveTo: 非法移動不會改變狀態', () => {
     const { result } = renderHook(() => useGame())
-    for (let i = 0; i < PLAYER_LIST.length * STONES_PER_PLAYER; i++) {
+    for (let i = 0; i < 2 * STONES_PER_PLAYER; i++) {
       act(() => {
         result.current.placeStone({
           x: i % BOARD_SIZE,
@@ -182,7 +182,7 @@ describe('Game Store', () => {
 
   it('buildWall: 非法建牆不會改變狀態', () => {
     const { result } = renderHook(() => useGame())
-    for (let i = 0; i < PLAYER_LIST.length * STONES_PER_PLAYER; i++) {
+    for (let i = 0; i < 2 * STONES_PER_PLAYER; i++) {
       act(() => {
         result.current.placeStone({
           x: i % BOARD_SIZE,

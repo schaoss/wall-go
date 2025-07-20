@@ -1,6 +1,6 @@
 // Zustand store for Wall Go with robust undo/redo and deep copy history pattern
 import { create } from 'zustand'
-import { PLAYER_LIST, type Pos, type WallDir, type State } from '@/lib/types'
+import { type Pos, type WallDir, type State } from '@/lib/types'
 import { makeInitialState, snapshotFromState, restoreSnapshot } from './gameState'
 import { createHistoryHandlers } from './history'
 import { placingTurnIndex, advanceTurn } from './actions'
@@ -62,8 +62,6 @@ export const useGame = create<State>((_set, get) => {
     },
     restoreSnapshot,
   )
-  const PLAYERS = [...PLAYER_LIST]
-
   // 初始化時 _history 應包含初始狀態
   const initial = makeInitialState()
   return {
@@ -107,7 +105,7 @@ export const useGame = create<State>((_set, get) => {
         const { board, players, stonesPlaced, stonesLimit, phase } = state
         if (phase !== 'placing') return state
         const totalPlaced = Object.values(stonesPlaced).reduce((a, b) => a + b, 0)
-        const currentIdx = placingTurnIndex(totalPlaced, players.length)
+        const currentIdx = placingTurnIndex(totalPlaced, state.players.length)
         const currentPlayer = players[currentIdx]
         if (board[pos.y][pos.x].stone) return state
         // Mutate a deep copy of state
@@ -117,7 +115,7 @@ export const useGame = create<State>((_set, get) => {
         const newTotal = totalPlaced + 1
         const nextIdx = placingTurnIndex(newTotal, players.length)
         const nextPlayer = players[nextIdx]
-        const allDone = Object.values(next.stonesPlaced).every((c) => c === stonesLimit)
+        const allDone = players.every((player) => next.stonesPlaced[player] === stonesLimit)
         next.turn = nextPlayer
         next.phase = (allDone ? 'playing' : 'placing') as import('@/lib/types').Phase
         next.selected = undefined
@@ -223,7 +221,7 @@ export const useGame = create<State>((_set, get) => {
         } else if (dir === 'bottom') {
           next.board[pos.y + 1][pos.x].wallTop = turn
         }
-        const end = checkGameEnd(next.board, PLAYERS)
+        const end = checkGameEnd(next.board, next.players)
         if (end.finished) {
           next.phase = 'finished' as import('@/lib/types').Phase
           next.result = end
@@ -238,9 +236,9 @@ export const useGame = create<State>((_set, get) => {
             _future: [],
           }
         }
-        const { turn: nextTurn, skipReason } = advanceTurn(next.board, turn, PLAYERS)
+        const { turn: nextTurn, skipReason } = advanceTurn(next.board, turn, next.players)
         if (skipReason === 'allBlocked') {
-          const endB = checkGameEnd(next.board, PLAYERS)
+          const endB = checkGameEnd(next.board, next.players)
           if (!endB.finished) {
             endB.finished = true
             endB.tie = true
@@ -274,9 +272,9 @@ export const useGame = create<State>((_set, get) => {
       })
     },
     resetGame() {
-      set(() => {
-        // Mutate a new initial state
-        const initial = makeInitialState()
+      set((state) => {
+        // Use current players instead of default ones
+        const initial = makeInitialState(state.players)
         return {
           ...initial,
           phase: 'placing',

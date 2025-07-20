@@ -1,5 +1,5 @@
 export const BOARD_SIZE = 7 as const
-export type Player = 'R' | 'B'
+export type Player = 'R' | 'B' | 'G' | 'Y'
 export interface Pos {
   x: number
   y: number
@@ -11,13 +11,13 @@ export interface Cell {
   wallLeft: Player | null // left wall
 }
 
-export type GameMode = 'pvp' | 'ai'
+export type GameMode = 'mixed' | 'pvp' | 'ai'
 export type AiSide = 'R' | 'B'
 export type AiLevel = 'practice' | 'easy' | 'middle' | 'hard'
 export type Phase = 'selecting' | 'placing' | 'playing' | 'finished'
 export type WallDir = 'top' | 'left' | 'right' | 'bottom'
-export const PLAYER_LIST = ['R', 'B'] as readonly Player[]
-export const STONES_PER_PLAYER = 4 as const
+export const PLAYER_LIST = ['R', 'B', 'G', 'Y'] as readonly Player[]
+export const STONES_PER_PLAYER = 2 as const
 export const WallDirArray = ['top', 'left', 'right', 'bottom'] as const
 
 // Shared action type for both player and AI

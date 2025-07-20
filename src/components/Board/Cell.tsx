@@ -100,6 +100,8 @@ export default function Cell({
         // 只要 territoryOwner 有值就上色
         territoryOwner === 'R' && 'bg-rose-100 dark:bg-rose-900/60',
         territoryOwner === 'B' && 'bg-indigo-100 dark:bg-indigo-900/60',
+        territoryOwner === 'G' && 'bg-emerald-100 dark:bg-emerald-900/60',
+        territoryOwner === 'Y' && 'bg-amber-100 dark:bg-amber-900/60',
       )}
       data-cell-x={x}
       data-cell-y={y}
