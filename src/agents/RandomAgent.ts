@@ -6,7 +6,13 @@ import { sleep } from '@/utils/sleep'
 
 export class RandomAgent implements PlayerAgent {
   private worker: Worker
-  onMessage?: (message: any) => void
+  onMessage?: (message: {
+    type?: string
+    action?: PlayerAction | null
+    error?: string
+    stack?: string
+    info?: string
+  }) => void
 
   constructor() {
     this.worker = new Worker(new URL('./AIWorker.ts', import.meta.url), {

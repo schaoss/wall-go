@@ -8,7 +8,13 @@ export class MinimaxAgent implements PlayerAgent {
   private depth: number
   private startTime: number = 0
   private timeLimit: number = 5000
-  onMessage?: (message: any) => void
+  onMessage?: (message: {
+    type?: string
+    action?: PlayerAction | null
+    error?: string
+    stack?: string
+    info?: string
+  }) => void
 
   constructor(depth: number = 2) {
     this.worker = new Worker(new URL('./AIWorker.ts', import.meta.url), {

@@ -16,29 +16,38 @@ export default function PlayerSetup({ onStartGame }: PlayerSetupProps) {
   }
 
   const handleAiAssignment = (player: Player, level: string) => {
-    setAiAssignments(prev => ({
+    setAiAssignments((prev) => ({
       ...prev,
-      [player]: level
+      [player]: level,
     }))
   }
 
   const getPlayerColorClass = (player: Player, type: 'bg' | 'border' | 'text') => {
     if (type === 'bg') {
-      return player === 'R' ? 'bg-rose-500 dark:bg-rose-400' :
-             player === 'B' ? 'bg-indigo-500 dark:bg-indigo-400' :
-             player === 'G' ? 'bg-emerald-500 dark:bg-emerald-400' :
-             'bg-amber-500 dark:bg-amber-400'
+      return player === 'R'
+        ? 'bg-rose-500 dark:bg-rose-400'
+        : player === 'B'
+          ? 'bg-indigo-500 dark:bg-indigo-400'
+          : player === 'G'
+            ? 'bg-emerald-500 dark:bg-emerald-400'
+            : 'bg-amber-500 dark:bg-amber-400'
     }
     if (type === 'border') {
-      return player === 'R' ? 'border-rose-300 dark:border-rose-500' :
-             player === 'B' ? 'border-indigo-300 dark:border-indigo-500' :
-             player === 'G' ? 'border-emerald-300 dark:border-emerald-500' :
-             'border-amber-300 dark:border-amber-500'
+      return player === 'R'
+        ? 'border-rose-300 dark:border-rose-500'
+        : player === 'B'
+          ? 'border-indigo-300 dark:border-indigo-500'
+          : player === 'G'
+            ? 'border-emerald-300 dark:border-emerald-500'
+            : 'border-amber-300 dark:border-amber-500'
     }
-    return player === 'R' ? 'text-rose-500 dark:text-rose-400' :
-           player === 'B' ? 'text-indigo-500 dark:text-indigo-400' :
-           player === 'G' ? 'text-emerald-500 dark:text-emerald-400' :
-           'text-amber-500 dark:text-amber-400'
+    return player === 'R'
+      ? 'text-rose-500 dark:text-rose-400'
+      : player === 'B'
+        ? 'text-indigo-500 dark:text-indigo-400'
+        : player === 'G'
+          ? 'text-emerald-500 dark:text-emerald-400'
+          : 'text-amber-500 dark:text-amber-400'
   }
 
   return (
@@ -46,7 +55,7 @@ export default function PlayerSetup({ onStartGame }: PlayerSetupProps) {
       <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-100 mb-4">
         {t('setup.title', 'Game Setup')}
       </h2>
-      
+
       {/* Player Count Selection */}
       <div className="flex flex-col items-center gap-4">
         <h3
@@ -55,18 +64,14 @@ export default function PlayerSetup({ onStartGame }: PlayerSetupProps) {
         >
           {t('setup.players', 'Number of Players')}
         </h3>
-        <div
-          role="radiogroup"
-          aria-labelledby="player-count-label"
-          className="flex gap-2"
-        >
-          {[2, 3, 4].map(count => (
+        <div role="radiogroup" aria-labelledby="player-count-label" className="flex gap-2">
+          {[2, 3, 4].map((count) => (
             <button
               key={count}
               role="radio"
               aria-checked={playerCount === count}
               onClick={() => setPlayerCount(count)}
-              onKeyDown={e => {
+              onKeyDown={(e) => {
                 if (e.key === ' ' || e.key === 'Enter') {
                   e.preventDefault()
                   setPlayerCount(count)
@@ -90,7 +95,7 @@ export default function PlayerSetup({ onStartGame }: PlayerSetupProps) {
           {t('setup.assignAI', 'Assign Players')}
         </h3>
         <div className="grid gap-3" role="group" aria-label={t('setup.assignAI', 'Assign Players')}>
-          {GAME_CONFIG.extendedPlayers.slice(0, playerCount).map(player => (
+          {GAME_CONFIG.extendedPlayers.slice(0, playerCount).map((player) => (
             <div key={player} className="flex items-center gap-3">
               <span
                 id={`player-label-${player}`}
@@ -103,7 +108,7 @@ export default function PlayerSetup({ onStartGame }: PlayerSetupProps) {
               <select
                 aria-label={t('setup.assignPlayer', `Assign Player ${player}`)}
                 value={aiAssignments[player] || ''}
-                onChange={e => handleAiAssignment(player as Player, e.target.value)}
+                onChange={(e) => handleAiAssignment(player as Player, e.target.value)}
                 className="px-3 py-1 rounded bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300"
               >
                 <option value="">{t('setup.human', 'Human')}</option>

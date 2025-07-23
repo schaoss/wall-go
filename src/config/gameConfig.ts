@@ -3,16 +3,16 @@ import { type Player } from '@/lib/types'
 export const GAME_CONFIG = {
   // Default player configuration
   players: ['R', 'B'] as Player[],
-  
+
   // Extended player configuration for 3-4 player games
   extendedPlayers: ['R', 'B', 'G', 'Y'] as Player[],
-  
+
   // Stones per player
   stonesPerPlayer: 2,
-  
+
   // Board size
   boardSize: 7,
-  
+
   // Turn time limit in milliseconds
   turnTimeLimit: 90000,
 } as const

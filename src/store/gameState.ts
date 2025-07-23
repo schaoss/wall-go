@@ -34,16 +34,16 @@ export function set2PlayerDefaultBoard(board: Cell[][]): Cell[][] {
 }
 
 export function makeInitialState(initialPlayers: Player[] = [...PLAYER_LIST]): GameSnapshot {
-  let board = createEmptyBoard();
-  const players = [...initialPlayers];
+  let board = createEmptyBoard()
+  const players = [...initialPlayers]
   const initialStonesPlaced: Record<Player, number> = Object.fromEntries(
-    PLAYER_LIST.map(p => [p, 0])
-  ) as Record<Player, number>;
+    PLAYER_LIST.map((p) => [p, 0]),
+  ) as Record<Player, number>
 
   // Only initialize stones for 2-player games
   // For 3-4 player games, board stays empty and stones placed remain 0
-  if (players.length === 2 && players.every(p => p === 'R' || p === 'B')) {
-    board = set2PlayerDefaultBoard(board);
+  if (players.length === 2 && players.every((p) => p === 'R' || p === 'B')) {
+    board = set2PlayerDefaultBoard(board)
     // Don't set stonesPlaced to 2, so players still need to place stones in the placing phase
     // initialStonesPlaced['R'] = 2;
     // initialStonesPlaced['B'] = 2;
@@ -79,7 +79,7 @@ export function snapshotFromState(state: GameSnapshot): GameSnapshot {
     stonesPlaced: { ...state.stonesPlaced },
     result: state.result ? JSON.parse(JSON.stringify(state.result)) : undefined,
     skipReason: state.skipReason,
-    territoryMap: state.territoryMap ? state.territoryMap.map(row => [...row]) : undefined,
+    territoryMap: state.territoryMap ? state.territoryMap.map((row) => [...row]) : undefined,
     isLoading: state.isLoading,
   }
 }
@@ -97,7 +97,7 @@ export function restoreSnapshot(s: GameSnapshot): GameSnapshot {
     stonesPlaced: { ...s.stonesPlaced },
     result: s.result ? JSON.parse(JSON.stringify(s.result)) : undefined,
     skipReason: s.skipReason,
-    territoryMap: s.territoryMap ? s.territoryMap.map(row => [...row]) : undefined,
+    territoryMap: s.territoryMap ? s.territoryMap.map((row) => [...row]) : undefined,
     isLoading: s.isLoading,
   }
 }

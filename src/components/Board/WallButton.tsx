@@ -28,7 +28,7 @@ export default function WallButton({
   return (
     <button
       onClick={() => onBuild(dir)}
-      onKeyDown={e => {
+      onKeyDown={(e) => {
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault()
           onBuild(dir)

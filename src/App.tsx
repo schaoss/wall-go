@@ -25,10 +25,7 @@ export default function App() {
     return false
   })
 
-  const handleStartGame = (
-    players: Player[],
-    aiAssignments: Record<Player, string>
-  ) => {
+  const handleStartGame = (players: Player[], aiAssignments: Record<Player, string>) => {
     setGameConfig({
       players,
       gameMode: 'mixed',

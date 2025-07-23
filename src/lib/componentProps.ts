@@ -254,6 +254,5 @@ export interface LanguageThemeSwitcherProps {
 /**
  * Props for the Footer component
  */
-export interface FooterProps {
-  // Footer component has no props
-}
+// Footer component has no props - intentionally empty
+export type FooterProps = Record<string, never>

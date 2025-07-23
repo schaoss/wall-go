@@ -22,7 +22,10 @@ function Board({
 }: BoardProps) {
   const { t } = useTranslation()
   const { territoryMap: stateTerritory } = useGame()
-  const territoryMap = useMemo(() => stateTerritory || getTerritoryMap(board), [stateTerritory, board])
+  const territoryMap = useMemo(
+    () => stateTerritory || getTerritoryMap(board),
+    [stateTerritory, board],
+  )
   const [focusPos, setFocusPos] = useState<Pos>({ x: 0, y: 0 })
 
   const handleKeyDown = useCallback(
@@ -50,7 +53,10 @@ function Board({
     [focusPos],
   )
 
-  const files = useMemo(() => Array.from({ length: BOARD_SIZE }, (_, i) => String.fromCharCode(65 + i)), [])
+  const files = useMemo(
+    () => Array.from({ length: BOARD_SIZE }, (_, i) => String.fromCharCode(65 + i)),
+    [],
+  )
   const ranks = useMemo(() => Array.from({ length: BOARD_SIZE }, (_, i) => BOARD_SIZE - i), [])
 
   return (

@@ -1,4 +1,3 @@
-
 import clsx from 'clsx'
 import { COLOR } from '@/lib/colors'
 
@@ -38,7 +37,7 @@ export default function GameButton({
         className, // Ensure custom className is applied last
       )}
       onClick={onClick}
-      onKeyDown={e => {
+      onKeyDown={(e) => {
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault()
           onClick()

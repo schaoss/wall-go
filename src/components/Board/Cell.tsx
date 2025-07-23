@@ -79,7 +79,8 @@ export default function Cell({
 
   const getAction = () => {
     if (phase === 'placing' && !cell.stone && placeStone) return () => placeStone({ x, y })
-    if (phase === 'playing' && cell.stone === turn && selectStone) return () => selectStone({ x, y })
+    if (phase === 'playing' && cell.stone === turn && selectStone)
+      return () => selectStone({ x, y })
     if (moveTo && legal.has(posKey)) return () => moveTo({ x, y })
     return undefined
   }

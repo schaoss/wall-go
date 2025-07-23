@@ -1,7 +1,7 @@
 // TurnManager: controls the main game loop, sequentially waits for each player agent's action
 import type { GameSnapshot } from '@/lib/types'
 import type { Player } from '@/lib/types'
-import type { PlayerAgent } from './PlayerAgent'
+import type { PlayerAgent, AgentMessage } from './PlayerAgent'
 import type { PlayerAction } from '@/lib/types'
 import { getRandomWallActionForPlayer } from '@/utils/ai'
 
@@ -19,7 +19,7 @@ export class TurnManager {
     applyAction: (action: PlayerAction) => Promise<void> | void
     isGameOver: (state: GameSnapshot) => boolean
     onTurnStart?: (state: GameSnapshot) => void
-    onMessage?: (message: any) => void
+    onMessage?: (message: AgentMessage) => void
     turnTimeLimit?: number
   }) {
     this.agents = params.agents

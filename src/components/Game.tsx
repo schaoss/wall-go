@@ -17,12 +17,7 @@ import RuleDialog from './ui/RuleDialog'
 import { LoadingOverlay } from './ui/LoadingOverlay'
 import type { GameProps } from '@/lib/componentProps'
 
-export default function Game({
-  gameConfig,
-  onBackToMenu,
-  dark,
-  setDark,
-}: GameProps) {
+export default function Game({ gameConfig, onBackToMenu, dark, setDark }: GameProps) {
   // 內部自行管理 useGame 狀態與 AI 流程
   const {
     board,
@@ -66,20 +61,20 @@ export default function Game({
 
   const setupTurnManager = useCallback(() => {
     if (!gameConfig) return
-    
+
     const human = new HumanAgent()
     humanAgentRef.current = human
-    
+
     const aiMap = {
       practice: new RandomAgent(),
       easy: new MinimaxAgent(2),
       middle: new MinimaxAgent(4),
       hard: new MinimaxAgent(6),
     }
-    
+
     const agents: Record<Player, PlayerAgent> = {} as Record<Player, PlayerAgent>
-    
-    gameConfig.players.forEach(player => {
+
+    gameConfig.players.forEach((player) => {
       const aiLevel = gameConfig.aiAssignments[player]
       if (aiLevel && aiLevel !== '') {
         agents[player] = aiMap[aiLevel as keyof typeof aiMap] || aiMap.middle
@@ -87,7 +82,7 @@ export default function Game({
         agents[player] = human
       }
     })
-    
+
     turnManagerRef.current = new TurnManager({
       agents,
       getGameState: () => snapshotFromState(latestStateRef.current!),
@@ -125,12 +120,12 @@ export default function Game({
       useGame.getState().setHumanSide(null)
       return
     }
-    
+
     // Set up human players for undo/redo functionality
-    const humanPlayers = gameConfig.players.filter(player => {
+    const humanPlayers = gameConfig.players.filter((player) => {
       return !gameConfig.aiAssignments?.[player] || gameConfig.aiAssignments[player] === ''
     })
-    
+
     if (humanPlayers.length === 1) {
       useGame.getState().setHumanSide(humanPlayers[0])
     } else {
@@ -140,14 +135,14 @@ export default function Game({
 
   useEffect(() => {
     if (!gameConfig) return
-    
+
     // Initialize game with correct players
     // Set players first, then reset the game to ensure proper initialization
     useGame.getState().setPlayers(gameConfig.players)
     resetGame()
     setPhase('placing')
     setupTurnManager()
-  }, [gameConfig, setPhase, setupTurnManager])
+  }, [gameConfig, resetGame, setPhase, setupTurnManager])
 
   useEffect(() => {
     if (!turnManagerRef.current) return
@@ -202,21 +197,30 @@ export default function Game({
 
   const getPlayerColorClass = (player: Player, type: 'bg' | 'border' | 'text') => {
     if (type === 'bg') {
-      return player === 'R' ? 'bg-rose-500 dark:bg-rose-400' :
-             player === 'B' ? 'bg-indigo-500 dark:bg-indigo-400' :
-             player === 'G' ? 'bg-emerald-500 dark:bg-emerald-400' :
-             'bg-amber-500 dark:bg-amber-400'
+      return player === 'R'
+        ? 'bg-rose-500 dark:bg-rose-400'
+        : player === 'B'
+          ? 'bg-indigo-500 dark:bg-indigo-400'
+          : player === 'G'
+            ? 'bg-emerald-500 dark:bg-emerald-400'
+            : 'bg-amber-500 dark:bg-amber-400'
     }
     if (type === 'border') {
-      return player === 'R' ? 'border-rose-300 dark:border-rose-500' :
-             player === 'B' ? 'border-indigo-300 dark:border-indigo-500' :
-             player === 'G' ? 'border-emerald-300 dark:border-emerald-500' :
-             'border-amber-300 dark:border-amber-500'
+      return player === 'R'
+        ? 'border-rose-300 dark:border-rose-500'
+        : player === 'B'
+          ? 'border-indigo-300 dark:border-indigo-500'
+          : player === 'G'
+            ? 'border-emerald-300 dark:border-emerald-500'
+            : 'border-amber-300 dark:border-amber-500'
     }
-    return player === 'R' ? 'text-rose-500 dark:text-rose-400' :
-           player === 'B' ? 'text-indigo-500 dark:text-indigo-400' :
-           player === 'G' ? 'text-emerald-500 dark:text-emerald-400' :
-           'text-amber-500 dark:text-amber-400'
+    return player === 'R'
+      ? 'text-rose-500 dark:text-rose-400'
+      : player === 'B'
+        ? 'text-indigo-500 dark:text-indigo-400'
+        : player === 'G'
+          ? 'text-emerald-500 dark:text-emerald-400'
+          : 'text-amber-500 dark:text-amber-400'
   }
 
   return (
@@ -262,10 +266,10 @@ export default function Game({
                   result.winner === 'R'
                     ? t('game.red', 'Red')
                     : result.winner === 'B'
-                    ? t('game.blue', 'Blue')
-                    : result.winner === 'G'
-                    ? t('game.green', 'Green')
-                    : t('game.yellow', 'Yellow')
+                      ? t('game.blue', 'Blue')
+                      : result.winner === 'G'
+                        ? t('game.green', 'Green')
+                        : t('game.yellow', 'Yellow')
                 }
               />
             </>
@@ -296,10 +300,10 @@ export default function Game({
                 p === 'R'
                   ? t('game.red', 'Red')
                   : p === 'B'
-                  ? t('game.blue', 'Blue')
-                  : p === 'G'
-                  ? t('game.green', 'Green')
-                  : t('game.yellow', 'Yellow')
+                    ? t('game.blue', 'Blue')
+                    : p === 'G'
+                      ? t('game.green', 'Green')
+                      : t('game.yellow', 'Yellow')
               }
             />
             {s}
@@ -318,14 +322,19 @@ export default function Game({
           </GameButton>
         )}
       </div>
-      
+
       {/* Status message for territory capture */}
       {phase === 'playing' && skipReason && (
         <div className="w-full max-w-md animate-fade-in">
-          <StatusMessage className={`bg-amber-100 dark:bg-amber-900/80 ${getPlayerColorClass(turn, 'border')}`}>
+          <StatusMessage
+            className={`bg-amber-100 dark:bg-amber-900/80 ${getPlayerColorClass(turn, 'border')}`}
+          >
             {skipReason === 'pieceInCapturedTerritory' && (
               <span>
-                {t('game.pieceInCapturedTerritory', 'This piece is in captured territory and cannot move')}
+                {t(
+                  'game.pieceInCapturedTerritory',
+                  'This piece is in captured territory and cannot move',
+                )}
               </span>
             )}
             {skipReason === 'cannotMoveToTerritory' && (
@@ -366,10 +375,7 @@ export default function Game({
           {t('menu.rule', 'Game Rules')}
         </GameButton>
       </div>
-      <RuleDialog
-        open={showRule}
-        onClose={() => setShowRule(false)}
-      />
+      <RuleDialog open={showRule} onClose={() => setShowRule(false)} />
       <ConfirmDialog
         open={showConfirm}
         title={t('menu.home', 'Home')}

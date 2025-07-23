@@ -37,7 +37,7 @@ export function checkGameEnd(board: Cell[][], players: Player[]): GameResult {
     let winner: Player | undefined
     let tie = false
 
-    players.forEach(player => {
+    players.forEach((player) => {
       if (totals[player] > maxScore) {
         maxScore = totals[player]
         winner = player
@@ -51,7 +51,7 @@ export function checkGameEnd(board: Cell[][], players: Player[]): GameResult {
       finished: true,
       winner: tie ? undefined : winner,
       tie,
-      score: totals
+      score: totals,
     }
   }
   return { finished: false, score: totals }
