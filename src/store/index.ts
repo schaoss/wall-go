@@ -57,6 +57,7 @@ export const useGame = create<State>((_set, get) => {
         redo: ____,
         canUndo: _____,
         canRedo: ______,
+        setIsLoading: _______,
         ...rest
       } = state
       return snapshotFromState(rest)
@@ -101,6 +102,9 @@ export const useGame = create<State>((_set, get) => {
     setHumanSide(side) {
       set({ humanSide: side })
     },
+    setIsLoading(isLoading: boolean) {
+      set({ isLoading })
+    },
     placeStone(pos: Pos) {
       set((state) => {
         const { board, players, stonesPlaced, stonesLimit, phase } = state
@@ -128,7 +132,7 @@ export const useGame = create<State>((_set, get) => {
         // Initialize territory map when transitioning to playing phase
         if (allDone) {
           const { territoryMap } = detectTerritoryCapture(next);
-          next.territoryMap = territoryMap;
+          next.territoryMap = territoryMap ? [...territoryMap.map(row => [...row])] : undefined;
         }
         
         // Push the new state (after mutation) to history
@@ -148,7 +152,7 @@ export const useGame = create<State>((_set, get) => {
         if (board[pos.y][pos.x].stone !== turn) return state
         
         // Check if the piece is in captured territory
-        if (territoryMap && isInPureTerritory(state, pos, turn)) {
+        if (territoryMap && isInPureTerritory(pos, territoryMap, turn)) {
           // Piece is in captured territory and cannot move
           return {
             ...state,
@@ -183,7 +187,7 @@ export const useGame = create<State>((_set, get) => {
         if (!piece) return state
         
         // Check if the destination is in captured territory
-        if (territoryMap && isInPureTerritory(state, to, turn)) {
+        if (territoryMap && isInPureTerritory(to, territoryMap, turn)) {
           // Cannot move to a position in captured territory
           return {
             ...state,
@@ -210,7 +214,7 @@ export const useGame = create<State>((_set, get) => {
         
         // Update territory map after moving
         const { territoryMap: newTerritoryMap } = detectTerritoryCapture(next);
-        next.territoryMap = newTerritoryMap;
+        next.territoryMap = newTerritoryMap ? newTerritoryMap.map(row => [...row]) : undefined;
         
         next.selected = to
         next.legal = nextLegal
@@ -256,8 +260,8 @@ export const useGame = create<State>((_set, get) => {
         }
         
         // Update territory map after building a wall
-        const { territoryMap, captured } = detectTerritoryCapture(next);
-        next.territoryMap = territoryMap;
+        const { territoryMap } = detectTerritoryCapture(next);
+        next.territoryMap = territoryMap ? [...territoryMap.map(row => [...row])] : undefined;
         const end = checkGameEnd(next.board, next.players)
         if (end.finished) {
           next.phase = 'finished' as import('@/lib/types').Phase

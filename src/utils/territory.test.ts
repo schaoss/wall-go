@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { getTerritoryMap, detectTerritoryCapture, isInPureTerritory } from './territory'
-import type { Cell, GameSnapshot, Player } from '@/lib/types'
+import type { Cell, GameSnapshot } from '@/lib/types'
 
 describe('getTerritoryMap', () => {
   it('one stone, fully walled, territory belongs to owner', () => {
@@ -82,6 +82,7 @@ describe('detectTerritoryCapture', () => {
       stonesLimit: 2,
       stonesPlaced: { R: 2, B: 2, G: 0, Y: 0 },
       territoryMap: undefined,
+      isLoading: false,
     };
   });
   
@@ -162,18 +163,19 @@ describe('isInPureTerritory', () => {
       stonesLimit: 2,
       stonesPlaced: { R: 2, B: 2, G: 0, Y: 0 },
       territoryMap,
+      isLoading: false,
     };
     
     // R's piece at [1,1] is in B's territory
-    expect(isInPureTerritory(gameState, { x: 1, y: 1 }, 'R')).toBe(true);
+    expect(isInPureTerritory({ x: 1, y: 1 }, gameState.territoryMap!, 'R')).toBe(true);
     
     // Change the territory owner to R
     gameState.territoryMap![1][1] = 'R';
     
     // R's piece at [1,1] is now in R's territory
-    expect(isInPureTerritory(gameState, { x: 1, y: 1 }, 'R')).toBe(false);
+    expect(isInPureTerritory({ x: 1, y: 1 }, gameState.territoryMap!, 'R')).toBe(false);
     
     // B's piece would be in R's territory
-    expect(isInPureTerritory(gameState, { x: 1, y: 1 }, 'B')).toBe(true);
+    expect(isInPureTerritory({ x: 1, y: 1 }, gameState.territoryMap!, 'B')).toBe(true);
   });
 });

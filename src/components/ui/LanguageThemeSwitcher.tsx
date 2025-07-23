@@ -1,6 +1,7 @@
 import GameButton from './GameButton'
 import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
+import type { LanguageThemeSwitcherProps } from '@/lib/componentProps'
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -15,11 +16,7 @@ export default function LanguageThemeSwitcher({
   dark,
   setDark,
   className = '',
-}: {
-  dark: boolean
-  setDark: (d: boolean | ((d: boolean) => boolean)) => void
-  className?: string
-}) {
+}: LanguageThemeSwitcherProps) {
   const { i18n } = useTranslation()
   const [open, setOpen] = useState(false)
   const selectRef = useRef<HTMLDivElement>(null)

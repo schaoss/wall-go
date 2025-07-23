@@ -1,17 +1,12 @@
 import { playerColorClass } from '@/lib/color'
-import type { Phase, Player } from '@/lib/types'
+import type { TurnTimerProps } from '@/lib/componentProps'
 
 export default function TurnTimer({
   timeLeft,
   timeLimit = 90000,
   turn,
   phase,
-}: {
-  timeLeft: number
-  timeLimit?: number
-  turn: Player
-  phase: Phase
-}) {
+}: TurnTimerProps) {
   const widthPercent = Math.max(0, Math.min(100, (timeLeft / timeLimit) * 100))
   return (
     <div className="fixed top-0 w-full h-1 bg-transparent overflow-hidden">

@@ -1,12 +1,6 @@
 import { type Player, type Cell } from '@/lib/types'
 import { getTerritoryMap } from './territory'
-
-export interface GameResult {
-  finished: boolean
-  winner?: Player
-  tie?: boolean
-  score?: Record<Player, number>
-}
+import { type GameResult } from '@/lib/gameResults'
 
 export function checkGameEnd(board: Cell[][], players: Player[]): GameResult {
   const totals = Object.fromEntries(players.map((p) => [p, 0])) as Record<Player, number>

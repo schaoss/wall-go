@@ -3,10 +3,7 @@ import { GAME_CONFIG } from '@/config/gameConfig'
 import GameButton from './ui/GameButton'
 import { useTranslation } from 'react-i18next'
 import type { Player } from '@/lib/types'
-
-interface PlayerSetupProps {
-  onStartGame: (players: Player[], aiAssignments: Record<Player, string>) => void;
-}
+import type { PlayerSetupProps } from '@/lib/componentProps'
 
 export default function PlayerSetup({ onStartGame }: PlayerSetupProps) {
   const { t } = useTranslation()
@@ -52,14 +49,29 @@ export default function PlayerSetup({ onStartGame }: PlayerSetupProps) {
       
       {/* Player Count Selection */}
       <div className="flex flex-col items-center gap-4">
-        <h3 className="text-lg font-semibold text-zinc-700 dark:text-zinc-300">
+        <h3
+          id="player-count-label"
+          className="text-lg font-semibold text-zinc-700 dark:text-zinc-300"
+        >
           {t('setup.players', 'Number of Players')}
         </h3>
-        <div className="flex gap-2">
+        <div
+          role="radiogroup"
+          aria-labelledby="player-count-label"
+          className="flex gap-2"
+        >
           {[2, 3, 4].map(count => (
             <button
               key={count}
+              role="radio"
+              aria-checked={playerCount === count}
               onClick={() => setPlayerCount(count)}
+              onKeyDown={e => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                  e.preventDefault()
+                  setPlayerCount(count)
+                }
+              }}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 playerCount === count
                   ? 'bg-indigo-500 text-white'
@@ -77,16 +89,19 @@ export default function PlayerSetup({ onStartGame }: PlayerSetupProps) {
         <h3 className="text-lg font-semibold text-zinc-700 dark:text-zinc-300">
           {t('setup.assignAI', 'Assign Players')}
         </h3>
-        <div className="grid gap-3">
+        <div className="grid gap-3" role="group" aria-label={t('setup.assignAI', 'Assign Players')}>
           {GAME_CONFIG.extendedPlayers.slice(0, playerCount).map(player => (
             <div key={player} className="flex items-center gap-3">
               <span
+                id={`player-label-${player}`}
                 className={`inline-block w-6 h-6 rounded-full ${getPlayerColorClass(player as Player, 'bg')} ${getPlayerColorClass(player as Player, 'border')} shadow-sm`}
+                aria-hidden="true"
               />
-              <span className="font-medium text-zinc-700 dark:text-zinc-300 w-8">
-                {player}
+              <span className="font-medium text-zinc-700 dark:text-zinc-300 min-w-[80px]">
+                {t(`game.player.${player.toLowerCase()}`, `Player ${player}`)}
               </span>
               <select
+                aria-label={t('setup.assignPlayer', `Assign Player ${player}`)}
                 value={aiAssignments[player] || ''}
                 onChange={e => handleAiAssignment(player as Player, e.target.value)}
                 className="px-3 py-1 rounded bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300"

@@ -1,15 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import GameButton from './GameButton'
-
-interface ConfirmDialogProps {
-  open: boolean
-  title?: string
-  message: string
-  confirmText?: string
-  cancelText?: string
-  onConfirm: () => void
-  onCancel: () => void
-}
+import type { ConfirmDialogProps } from '@/lib/componentProps'
 
 export default function ConfirmDialog({
   open,

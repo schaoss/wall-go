@@ -49,12 +49,14 @@ export interface GameSnapshot {
   players: Player[]
   stonesLimit: number
   stonesPlaced: Record<Player, number>
-  result?: import('@/utils/game').GameResult
+  result?: import('./gameResults').GameResult
   skipReason?: string
   territoryMap?: (Player | null)[][]
+  isLoading: boolean
 }
 
 export interface State extends GameSnapshot {
+  setIsLoading: (isLoading: boolean) => void
   placeStone: (pos: Pos) => void
   selectStone: (pos: Pos) => void
   moveTo: (to: Pos) => void

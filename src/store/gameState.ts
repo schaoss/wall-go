@@ -62,6 +62,7 @@ export function makeInitialState(initialPlayers: Player[] = [...PLAYER_LIST]): G
     result: undefined,
     skipReason: undefined,
     territoryMap: undefined,
+    isLoading: false,
   }
 }
 
@@ -79,6 +80,7 @@ export function snapshotFromState(state: GameSnapshot): GameSnapshot {
     result: state.result ? JSON.parse(JSON.stringify(state.result)) : undefined,
     skipReason: state.skipReason,
     territoryMap: state.territoryMap ? state.territoryMap.map(row => [...row]) : undefined,
+    isLoading: state.isLoading,
   }
 }
 
@@ -96,5 +98,6 @@ export function restoreSnapshot(s: GameSnapshot): GameSnapshot {
     result: s.result ? JSON.parse(JSON.stringify(s.result)) : undefined,
     skipReason: s.skipReason,
     territoryMap: s.territoryMap ? s.territoryMap.map(row => [...row]) : undefined,
+    isLoading: s.isLoading,
   }
 }

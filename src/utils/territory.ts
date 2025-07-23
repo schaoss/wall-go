@@ -1,89 +1,238 @@
-// src/utils/territory.ts
-import type { GameSnapshot, Player, Cell } from '@/lib/types'
-import { floodRegions } from './region'
+import type { Player, Pos, Cell } from '../lib/types';
 
-// 回傳每格領地歸屬（純淨區域才標記，否則為 null）
-export function getTerritoryMap(board: Cell[][]): (Player | null)[][] {
-  const BOARD_SIZE = board.length
-  const territory = Array.from({ length: BOARD_SIZE }, () =>
-    Array<Player | null>(BOARD_SIZE).fill(null),
-  )
-  const regions = floodRegions(board)
-  regions.forEach(({ borderingCounts: bc, cells }) => {
-    const players = (Object.keys(bc) as Player[]).filter(player => bc[player] > 0)
-    console.log(`Region has ${players.length} bordering players: ${players.join(', ')}`);
-    if (players.length === 1) {
-      const owner = players[0] as Player
-      console.log(`Assigning region to player ${owner}`);
-      cells.forEach(({ x, y }) => {
-        territory[y][x] = owner
-      })
-    }
-  })
-  return territory
+export interface Position {
+  readonly x: number;
+  readonly y: number;
 }
 
+export interface TerritoryMap {
+  readonly [key: string]: Player | null;
+}
+
+export interface Region {
+  readonly cells: readonly Position[];
+  readonly borderingCounts: Readonly<Record<Player, number>>;
+  readonly owner: Player | null;
+}
+
+const PLAYER_LIST: readonly Player[] = ['R', 'B'] as const;
+
 /**
- * Detects if territory has been captured by comparing the current board state with the previous territory map
- * @param gameState Current game state
- * @returns Object containing the new territory map and whether territory was captured
+ * Convert Cell[][] to Player[][] for territory calculation
  */
-export function detectTerritoryCapture(gameState: GameSnapshot): {
-  territoryMap: (Player | null)[][],
-  captured: boolean
-} {
-  const newTerritoryMap = getTerritoryMap(gameState.board);
-  const previousTerritoryMap = gameState.territoryMap;
-  
-  // If there's no previous territory map, just return the new one
-  if (!previousTerritoryMap) {
-    return { territoryMap: newTerritoryMap, captured: false };
-  }
-  
-  // Check if any territory has changed
-  const BOARD_SIZE = gameState.board.length;
-  let captured = false;
-  
-  for (let y = 0; y < BOARD_SIZE; y++) {
-    for (let x = 0; x < BOARD_SIZE; x++) {
-      // If a cell was not territory before but is now, territory has been captured
-      if (previousTerritoryMap[y][x] === null && newTerritoryMap[y][x] !== null) {
-        console.log(`Territory captured at ${x},${y}: null -> ${newTerritoryMap[y][x]}`);
-        captured = true;
-        break;
-      }
-      // If a cell changed ownership, territory has been captured
-      if (previousTerritoryMap[y][x] !== null &&
-          newTerritoryMap[y][x] !== null &&
-          previousTerritoryMap[y][x] !== newTerritoryMap[y][x]) {
-        console.log(`Territory changed ownership at ${x},${y}: ${previousTerritoryMap[y][x]} -> ${newTerritoryMap[y][x]}`);
-        captured = true;
-        break;
-      }
-    }
-    if (captured) break;
-  }
-  
-  return { territoryMap: newTerritoryMap, captured };
+function extractPlayerBoard(board: readonly (readonly Cell[])[]): readonly (readonly (Player | null)[])[] {
+  return board.map(row => 
+    row.map(cell => cell?.stone ?? null)
+  );
 }
 
 /**
- * Checks if a piece is in territory captured by another player
- * @param gameState Current game state
- * @param pos Position to check
- * @param player Player who owns the piece
- * @param territoryMap Optional territory map (will be calculated if not provided)
- * @returns true if the piece is in territory captured by another player
+ * Calculate territory ownership based on bordering pieces
+ */
+export function calculateTerritoryOwnership(
+  region: Region
+): Player | null {
+  const { borderingCounts } = region;
+  
+  const players = PLAYER_LIST.filter(
+    player => borderingCounts[player] > 0
+  );
+  
+  if (players.length === 1) {
+    return players[0];
+  }
+  
+  return null;
+}
+
+/**
+ * Update territory map based on current board state
+ */
+export function updateTerritoryMap(
+  boardState: readonly (readonly Cell[])[],
+  size: number
+): readonly (readonly (Player | null)[])[] {
+  const playerBoard = extractPlayerBoard(boardState);
+  const newTerritoryMap: (Player | null)[][] = Array(size)
+    .fill(null)
+    .map(() => Array(size).fill(null));
+
+  // Initialize bordering counts for each region
+  const regions = initializeRegions(playerBoard, size);
+  
+  // Calculate territory ownership for each region
+  regions.forEach(region => {
+    const owner = calculateTerritoryOwnership(region);
+    region.cells.forEach(({ x, y }) => {
+      newTerritoryMap[y][x] = owner;
+    });
+  });
+
+  return newTerritoryMap;
+}
+
+/**
+ * Initialize regions based on board state
+ */
+function initializeRegions(
+  boardState: readonly (readonly (Player | null)[])[],
+  size: number
+): readonly Region[] {
+  const regions: Region[] = [];
+  const visited: boolean[][] = Array(size)
+    .fill(null)
+    .map(() => Array(size).fill(false));
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (!visited[y][x] && boardState[y][x] === null) {
+        const region = floodFillRegion(boardState, visited, { x, y }, size);
+        if (region.cells.length > 0) {
+          regions.push(region);
+        }
+      }
+    }
+  }
+
+  return regions;
+}
+
+/**
+ * Flood fill algorithm to find connected empty cells
+ */
+function floodFillRegion(
+  boardState: readonly (readonly (Player | null)[])[],
+  visited: boolean[][],
+  start: Position,
+  size: number
+): Region {
+  const cells: Position[] = [];
+  const queue: Position[] = [start];
+  const borderingCounts: Record<Player, number> = PLAYER_LIST.reduce(
+    (acc, player) => ({ ...acc, [player]: 0 }),
+    {} as Record<Player, number>
+  );
+
+  while (queue.length > 0) {
+    const { x, y } = queue.shift()!;
+    
+    if (x < 0 || x >= size || y < 0 || y >= size) continue;
+    if (visited[y][x]) continue;
+    
+    visited[y][x] = true;
+    
+    if (boardState[y][x] === null) {
+      cells.push({ x, y });
+      
+      // Check bordering pieces
+      const neighbors = [
+        { x: x - 1, y },
+        { x: x + 1, y },
+        { x, y: y - 1 },
+        { x, y: y + 1 }
+      ];
+      
+      neighbors.forEach(({ x: nx, y: ny }) => {
+        if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
+          const player = boardState[ny][nx];
+          if (player !== null) {
+            borderingCounts[player] = (borderingCounts[player] || 0) + 1;
+          }
+        }
+      });
+      
+      // Add neighbors to queue
+      queue.push(...neighbors);
+    }
+  }
+
+  return {
+    cells,
+    borderingCounts,
+    owner: null
+  };
+}
+
+/**
+ * Check if a position is in pure territory (only one player's pieces border it)
  */
 export function isInPureTerritory(
-  gameState: GameSnapshot,
-  pos: { x: number; y: number },
-  player: string,
-  territoryMap = gameState.territoryMap || getTerritoryMap(gameState.board),
+  pos: Pos,
+  territoryMap: readonly (readonly (Player | null)[])[],
+  player: Player
 ): boolean {
-  // Check if the position is in territory owned by another player
-  const owner = territoryMap[pos.y][pos.x];
-  const result = owner !== null && owner !== player;
-  console.log(`isInPureTerritory: pos=${pos.x},${pos.y}, player=${player}, owner=${owner}, result=${result}`);
-  return result;
+  const owner = territoryMap[pos.y]?.[pos.x] ?? null;
+  return owner === player;
+}
+
+/**
+ * Count territory for each player
+ */
+export function countTerritory(
+  territoryMap: readonly (readonly (Player | null)[])[]
+): Readonly<Record<Player, number>> {
+  const counts: Record<Player, number> = PLAYER_LIST.reduce(
+    (acc, player) => ({ ...acc, [player]: 0 }),
+    {} as Record<Player, number>
+  );
+
+  territoryMap.forEach(row => {
+    row.forEach(owner => {
+      if (owner !== null) {
+        counts[owner] = (counts[owner] || 0) + 1;
+      }
+    });
+  });
+
+  return counts;
+}
+
+/**
+ * Check if territory has changed
+ */
+export function hasTerritoryChanged(
+  previousTerritoryMap: readonly (readonly (Player | null)[])[],
+  newTerritoryMap: readonly (readonly (Player | null)[])[]
+): boolean {
+  if (previousTerritoryMap.length !== newTerritoryMap.length) return true;
+
+  for (let y = 0; y < previousTerritoryMap.length; y++) {
+    if (previousTerritoryMap[y].length !== newTerritoryMap[y].length) return true;
+    
+    for (let x = 0; x < previousTerritoryMap[y].length; x++) {
+      if (previousTerritoryMap[y][x] !== newTerritoryMap[y][x]) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Get territory map for the current board state
+ */
+export function getTerritoryMap(boardState: readonly (readonly Cell[])[]): readonly (readonly (Player | null)[])[] {
+  const size = boardState.length;
+  return updateTerritoryMap(boardState, size);
+}
+
+/**
+ * Detect territory capture events
+ */
+export function detectTerritoryCapture(gameState: {
+  readonly board: readonly (readonly Cell[])[];
+  readonly territoryMap?: readonly (readonly (Player | null)[])[];
+}): {
+  readonly captured: boolean;
+  readonly territoryMap: readonly (readonly (Player | null)[])[];
+} {
+  const { board, territoryMap: previousTerritoryMap } = gameState;
+  const newTerritoryMap = getTerritoryMap(board);
+  const captured = previousTerritoryMap ? hasTerritoryChanged(previousTerritoryMap, newTerritoryMap) : false;
+  
+  return {
+    captured,
+    territoryMap: newTerritoryMap
+  };
 }

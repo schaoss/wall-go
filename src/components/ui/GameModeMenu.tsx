@@ -2,7 +2,8 @@ import LanguageThemeSwitcher from './LanguageThemeSwitcher'
 import { useState, useRef, useEffect } from 'react'
 import GameButton from './GameButton'
 import { useTranslation } from 'react-i18next'
-import type { AiLevel, GameMode, AiSide } from '@/lib/types'
+import type { GameModeMenuProps } from '@/lib/componentProps'
+import type { AiLevel, GameMode } from '@/lib/types'
 
 const GAME_MODES: GameMode[] = ['pvp', 'ai']
 
@@ -13,12 +14,7 @@ export default function GameModeMenu({
   setAiSide,
   setAiLevel,
   setShowRule,
-}: {
-  setMode: (m: GameMode) => void
-  setAiSide: (s: AiSide) => void
-  setAiLevel: (l: AiLevel) => void
-  setShowRule: (show: boolean) => void
-}) {
+}: GameModeMenuProps) {
   const { t } = useTranslation()
   const [showAiSelect, setShowAiSelect] = useState(false)
   const [selectedLevel, setSelectedLevel] = useState<AiLevel>('middle')

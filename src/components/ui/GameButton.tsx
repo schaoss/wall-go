@@ -1,18 +1,8 @@
-import React from 'react'
+
 import clsx from 'clsx'
 import { COLOR } from '@/lib/colors'
 
-interface GameButtonProps {
-  onClick: () => void
-  disabled?: boolean
-  ariaLabel?: string
-  children: React.ReactNode
-  type?: 'button' | 'submit' | 'reset'
-  className?: string
-  active?: boolean
-  text?: boolean // Text-only button
-  variant?: 'primary' | 'success' | 'warning' | 'danger' | 'neutral'
-}
+import type { GameButtonProps } from '@/lib/componentProps'
 
 export default function GameButton({
   onClick,
@@ -48,6 +38,12 @@ export default function GameButton({
         className, // Ensure custom className is applied last
       )}
       onClick={onClick}
+      onKeyDown={e => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
       disabled={disabled}
       aria-label={ariaLabel}
       type={type}

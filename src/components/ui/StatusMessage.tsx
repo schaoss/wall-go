@@ -1,6 +1,7 @@
 // StatusMessage component moved from App.tsx
+import type { StatusMessageProps } from '@/lib/componentProps'
 
-function StatusMessage({ children, className }: { children: React.ReactNode; className?: string }) {
+function StatusMessage({ children, className }: StatusMessageProps) {
   return (
     <div
       className={

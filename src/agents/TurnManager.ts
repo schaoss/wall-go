@@ -19,9 +19,15 @@ export class TurnManager {
     applyAction: (action: PlayerAction) => Promise<void> | void
     isGameOver: (state: GameSnapshot) => boolean
     onTurnStart?: (state: GameSnapshot) => void
+    onMessage?: (message: any) => void
     turnTimeLimit?: number
   }) {
     this.agents = params.agents
+    Object.values(this.agents).forEach((agent) => {
+      if (agent.onMessage) {
+        agent.onMessage = params.onMessage
+      }
+    })
     this.getGameState = params.getGameState
     this.applyAction = params.applyAction
     this.isGameOver = params.isGameOver

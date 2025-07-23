@@ -14,24 +14,15 @@ import { snapshotFromState } from '@/store/gameState'
 import ConfirmDialog from './ui/ConfirmDialog'
 import TurnTimer from './ui/TurnTimer'
 import RuleDialog from './ui/RuleDialog'
-
-interface GameConfig {
-  players: Player[];
-  gameMode: 'mixed';
-  aiAssignments: Record<Player, string>;
-}
+import { LoadingOverlay } from './ui/LoadingOverlay'
+import type { GameProps } from '@/lib/componentProps'
 
 export default function Game({
   gameConfig,
   onBackToMenu,
   dark,
   setDark,
-}: {
-  gameConfig: GameConfig
-  onBackToMenu: () => void
-  dark: boolean
-  setDark: (d: boolean | ((d: boolean) => boolean)) => void
-}) {
+}: GameProps) {
   // 內部自行管理 useGame 狀態與 AI 流程
   const {
     board,
@@ -51,6 +42,8 @@ export default function Game({
     canUndo,
     canRedo,
     skipReason,
+    isLoading,
+    setIsLoading,
   } = useGame()
   const live = checkGameEnd(board, gameConfig.players)
   const { t } = useTranslation()
@@ -116,9 +109,16 @@ export default function Game({
         setTurnStart(Date.now())
         setTimeLeft(turnTimeLimit)
       },
+      onMessage: (message) => {
+        if (message.type === 'start-thinking') {
+          setIsLoading(true)
+        } else if (message.type === 'stop-thinking') {
+          setIsLoading(false)
+        }
+      },
     })
     turnManagerStartedRef.current = false
-  }, [gameConfig, buildWall, moveTo, placeStone, selectStone])
+  }, [gameConfig, buildWall, moveTo, placeStone, selectStone, setIsLoading])
 
   useEffect(() => {
     if (!gameConfig) {
@@ -229,6 +229,7 @@ export default function Game({
         'p-4 pb-12',
       ].join(' ')}
     >
+      <LoadingOverlay isVisible={isLoading} />
       <TurnTimer timeLeft={timeLeft} timeLimit={turnTimeLimit} turn={turn} phase={phase} />
       <Navbar
         onUndo={undo}
