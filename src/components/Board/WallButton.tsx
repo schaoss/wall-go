@@ -1,18 +1,9 @@
 // WallButton component extracted from Cell.tsx
 import clsx from 'clsx'
-import type { WallDir, Player } from '@/lib/types'
+
 import { useTranslation } from 'react-i18next'
 
-interface WallButtonProps {
-  dir: WallDir
-  show: boolean
-  x: number
-  y: number
-  turn: Player
-  onBuild: (dir: WallDir) => void
-  btnClass: string
-  divClass: string
-}
+import type { WallButtonProps } from '@/lib/componentProps'
 
 export default function WallButton({
   dir,
@@ -37,6 +28,12 @@ export default function WallButton({
   return (
     <button
       onClick={() => onBuild(dir)}
+      onKeyDown={(e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault()
+          onBuild(dir)
+        }
+      }}
       className={clsx(
         'group bg-transparent cursor-pointer z-1',
         btnClass,

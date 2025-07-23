@@ -49,7 +49,9 @@
       "left": "left",
       "right": "right",
       "aria": "Build {{dir}} wall at ({{x}},{{y}})"
-    }
+    },
+    "pieceInCapturedTerritory": "This piece is in captured territory and cannot move",
+    "cannotMoveToTerritory": "Cannot move to a position in captured territory"
   },
   "seo": {
     "title": "Wall Go | Online Strategy Board Game | Devil's Plan Inspired",

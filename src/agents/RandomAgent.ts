@@ -6,6 +6,13 @@ import { sleep } from '@/utils/sleep'
 
 export class RandomAgent implements PlayerAgent {
   private worker: Worker
+  onMessage?: (message: {
+    type?: string
+    action?: PlayerAction | null
+    error?: string
+    stack?: string
+    info?: string
+  }) => void
 
   constructor() {
     this.worker = new Worker(new URL('./AIWorker.ts', import.meta.url), {
@@ -18,12 +25,18 @@ export class RandomAgent implements PlayerAgent {
     return new Promise((resolve, reject) => {
       this.worker.onmessage = (
         event: MessageEvent<{
+          type?: string
           action?: PlayerAction | null
           error?: string
           stack?: string
           info?: string
         }>,
       ) => {
+        if (event.data.type === 'start-thinking' || event.data.type === 'stop-thinking') {
+          this.onMessage?.(event.data)
+          return
+        }
+
         this.worker.onmessage = null
         this.worker.onerror = null
         if (event.data.error) {

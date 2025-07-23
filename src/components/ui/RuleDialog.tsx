@@ -1,11 +1,7 @@
 import { useRef, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import GameButton from './GameButton'
-
-interface RuleDialogProps {
-  open: boolean
-  onClose: () => void
-}
+import type { RuleDialogProps } from '@/lib/componentProps'
 
 export default function RuleDialog({ open, onClose }: RuleDialogProps) {
   const { t } = useTranslation()

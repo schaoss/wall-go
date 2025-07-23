@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { checkGameEnd } from './game'
-import { BOARD_SIZE, PLAYER_LIST, type Cell } from '@/lib/types'
+import { BOARD_SIZE, type Cell } from '@/lib/types'
 
 function makeEmptyBoard(): Cell[][] {
   return Array.from({ length: BOARD_SIZE }, () =>
@@ -15,7 +15,7 @@ function makeEmptyBoard(): Cell[][] {
 describe('checkGameEnd', () => {
   it('returns unfinished for empty board', () => {
     const board = makeEmptyBoard()
-    const result = checkGameEnd(board, [...PLAYER_LIST])
+    const result = checkGameEnd(board, ['R', 'B'])
     expect(result.finished).toBe(false)
     expect(result.score).toBeDefined()
   })
@@ -32,7 +32,7 @@ describe('checkGameEnd', () => {
     board[1][0].wallLeft = 'R'
     board[1][0].wallTop = 'R'
     board[1][1].wallLeft = 'R'
-    const result = checkGameEnd(board, [...PLAYER_LIST])
+    const result = checkGameEnd(board, ['R', 'B'])
     expect(result.finished).toBe(true)
     expect(result.winner).toBe('R')
     expect(result.tie).not.toBe(true)
@@ -65,7 +65,7 @@ describe('checkGameEnd', () => {
     board[N - 1][N - 1].wallTop = 'B'
     board[N - 2][N - 1].wallLeft = 'B'
     board[N - 1][N - 1].wallLeft = 'B'
-    const result = checkGameEnd(board, [...PLAYER_LIST])
+    const result = checkGameEnd(board, ['R', 'B'])
     expect(result.finished).toBe(true)
     expect(result.tie).toBe(true)
   })

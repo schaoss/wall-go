@@ -8,6 +8,13 @@ export class MinimaxAgent implements PlayerAgent {
   private depth: number
   private startTime: number = 0
   private timeLimit: number = 5000
+  onMessage?: (message: {
+    type?: string
+    action?: PlayerAction | null
+    error?: string
+    stack?: string
+    info?: string
+  }) => void
 
   constructor(depth: number = 2) {
     this.worker = new Worker(new URL('./AIWorker.ts', import.meta.url), {
@@ -25,12 +32,18 @@ export class MinimaxAgent implements PlayerAgent {
     return new Promise((resolve, reject) => {
       this.worker.onmessage = (
         event: MessageEvent<{
+          type?: string
           action?: PlayerAction | null
           error?: string
           stack?: string
           info?: string
         }>,
       ) => {
+        if (event.data.type === 'start-thinking' || event.data.type === 'stop-thinking') {
+          this.onMessage?.(event.data)
+          return
+        }
+
         this.worker.onmessage = null
         this.worker.onerror = null
         if (event.data.error) {

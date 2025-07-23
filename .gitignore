@@ -22,3 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Test coverage
+coverage/
+*.tsbuildinfo
+.idea/
+.vscode/settings.json
+.vscode/launch.json
+.env
+.env.local
+.env.*.local
+.DS_Store
+.kilocode/
+.anubis/

@@ -1,6 +1,6 @@
 // src/components/ui/Navbar.tsx
 import GameButton from './GameButton'
-import type { Phase } from '@/lib/types'
+import type { NavbarProps } from '@/lib/componentProps'
 import LanguageThemeSwitcher from './LanguageThemeSwitcher'
 import { useTranslation } from 'react-i18next'
 
@@ -13,16 +13,7 @@ export default function Navbar({
   phase,
   dark,
   setDark,
-}: {
-  onUndo: () => void
-  onRedo: () => void
-  canUndo: boolean
-  canRedo: boolean
-  onHome: () => void
-  phase: Phase
-  dark: boolean
-  setDark: (d: boolean | ((d: boolean) => boolean)) => void
-}) {
+}: NavbarProps) {
   const { t } = useTranslation()
   return (
     <div className="w-full flex justify-between transition-all duration-500">

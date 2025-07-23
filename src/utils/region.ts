@@ -57,8 +57,9 @@ export function floodRegions(board: Cell[][]): Region[] {
         }
       }
       // 統計區域內所有棋子的顏色和數量
+      console.log(`Initializing borderingCounts for players: ${PLAYER_LIST.join(', ')}`)
       const borderingCounts: Record<Player, number> = PLAYER_LIST.reduce(
-        (acc, player) => ({ ...acc, [player]: 0 }),
+        (acc: Record<Player, number>, player: Player) => ({ ...acc, [player]: 0 }),
         {} as Record<Player, number>,
       )
       for (const pos of cells) {

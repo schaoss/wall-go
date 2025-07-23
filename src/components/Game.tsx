@@ -1,7 +1,9 @@
-import { PLAYER_LIST, type AiLevel, type PlayerAction, type State } from '@/lib/types'
+import { type PlayerAction, type State, type Player } from '@/lib/types'
+import type { PlayerAgent } from '@/agents/PlayerAgent'
 import GameButton from './ui/GameButton'
 import Navbar from './ui/Navbar'
 import Board from './Board/Board'
+import StatusMessage from './ui/StatusMessage'
 import { useTranslation } from 'react-i18next'
 import { useGame } from '@/store/index'
 import { checkGameEnd } from '@/utils/game'
@@ -11,24 +13,11 @@ import { HumanAgent, RandomAgent, MinimaxAgent } from '@/agents'
 import { snapshotFromState } from '@/store/gameState'
 import ConfirmDialog from './ui/ConfirmDialog'
 import TurnTimer from './ui/TurnTimer'
+import RuleDialog from './ui/RuleDialog'
+import { LoadingOverlay } from './ui/LoadingOverlay'
+import type { GameProps } from '@/lib/componentProps'
 
-export default function Game({
-  gameMode,
-  aiSide,
-  aiLevel,
-  setGameMode,
-  setShowRule,
-  dark,
-  setDark,
-}: {
-  gameMode: 'pvp' | 'ai'
-  aiSide: 'R' | 'B'
-  aiLevel: AiLevel
-  setGameMode: (m: 'pvp' | 'ai' | null) => void
-  setShowRule: (b: boolean) => void
-  dark: boolean
-  setDark: (d: boolean | ((d: boolean) => boolean)) => void
-}) {
+export default function Game({ gameConfig, onBackToMenu, dark, setDark }: GameProps) {
   // 內部自行管理 useGame 狀態與 AI 流程
   const {
     board,
@@ -47,10 +36,14 @@ export default function Game({
     redo,
     canUndo,
     canRedo,
+    skipReason,
+    isLoading,
+    setIsLoading,
   } = useGame()
-  const live = checkGameEnd(board, [...PLAYER_LIST])
+  const live = checkGameEnd(board, gameConfig.players)
   const { t } = useTranslation()
   const [showConfirm, setShowConfirm] = useState(false)
+  const [showRule, setShowRule] = useState(false)
   const [timeLeft, setTimeLeft] = useState(90_000)
   const turnTimeLimit = 90_000
   const [turnStart, setTurnStart] = useState<number | null>(null)
@@ -67,22 +60,29 @@ export default function Game({
   const turnManagerStartedRef = useRef(false)
 
   const setupTurnManager = useCallback(() => {
-    if (!gameMode) return
+    if (!gameConfig) return
+
     const human = new HumanAgent()
     humanAgentRef.current = human
+
     const aiMap = {
       practice: new RandomAgent(),
       easy: new MinimaxAgent(2),
       middle: new MinimaxAgent(4),
       hard: new MinimaxAgent(6),
     }
-    const ai = aiMap[aiLevel]
-    const agents =
-      gameMode === 'ai'
-        ? aiSide === 'R'
-          ? { R: ai, B: human }
-          : { R: human, B: ai }
-        : { R: human, B: human }
+
+    const agents: Record<Player, PlayerAgent> = {} as Record<Player, PlayerAgent>
+
+    gameConfig.players.forEach((player) => {
+      const aiLevel = gameConfig.aiAssignments[player]
+      if (aiLevel && aiLevel !== '') {
+        agents[player] = aiMap[aiLevel as keyof typeof aiMap] || aiMap.middle
+      } else {
+        agents[player] = human
+      }
+    })
+
     turnManagerRef.current = new TurnManager({
       agents,
       getGameState: () => snapshotFromState(latestStateRef.current!),
@@ -104,27 +104,45 @@ export default function Game({
         setTurnStart(Date.now())
         setTimeLeft(turnTimeLimit)
       },
+      onMessage: (message) => {
+        if (message.type === 'start-thinking') {
+          setIsLoading(true)
+        } else if (message.type === 'stop-thinking') {
+          setIsLoading(false)
+        }
+      },
     })
     turnManagerStartedRef.current = false
-  }, [gameMode, aiSide, aiLevel, buildWall, moveTo, placeStone, selectStone])
+  }, [gameConfig, buildWall, moveTo, placeStone, selectStone, setIsLoading])
 
   useEffect(() => {
-    if (!gameMode) {
+    if (!gameConfig) {
       useGame.getState().setHumanSide(null)
       return
     }
-    if (gameMode === 'ai') {
-      useGame.getState().setHumanSide(aiSide === 'R' ? 'B' : 'R')
+
+    // Set up human players for undo/redo functionality
+    const humanPlayers = gameConfig.players.filter((player) => {
+      return !gameConfig.aiAssignments?.[player] || gameConfig.aiAssignments[player] === ''
+    })
+
+    if (humanPlayers.length === 1) {
+      useGame.getState().setHumanSide(humanPlayers[0])
     } else {
       useGame.getState().setHumanSide(null)
     }
-  }, [gameMode, aiSide])
+  }, [gameConfig])
 
   useEffect(() => {
-    if (!gameMode) return
+    if (!gameConfig) return
+
+    // Initialize game with correct players
+    // Set players first, then reset the game to ensure proper initialization
+    useGame.getState().setPlayers(gameConfig.players)
+    resetGame()
     setPhase('placing')
     setupTurnManager()
-  }, [gameMode, aiSide, setPhase, setupTurnManager])
+  }, [gameConfig, resetGame, setPhase, setupTurnManager])
 
   useEffect(() => {
     if (!turnManagerRef.current) return
@@ -177,6 +195,34 @@ export default function Game({
     onTurnEnd()
   }, [onTurnEnd, turn, phase, result, live])
 
+  const getPlayerColorClass = (player: Player, type: 'bg' | 'border' | 'text') => {
+    if (type === 'bg') {
+      return player === 'R'
+        ? 'bg-rose-500 dark:bg-rose-400'
+        : player === 'B'
+          ? 'bg-indigo-500 dark:bg-indigo-400'
+          : player === 'G'
+            ? 'bg-emerald-500 dark:bg-emerald-400'
+            : 'bg-amber-500 dark:bg-amber-400'
+    }
+    if (type === 'border') {
+      return player === 'R'
+        ? 'border-rose-300 dark:border-rose-500'
+        : player === 'B'
+          ? 'border-indigo-300 dark:border-indigo-500'
+          : player === 'G'
+            ? 'border-emerald-300 dark:border-emerald-500'
+            : 'border-amber-300 dark:border-amber-500'
+    }
+    return player === 'R'
+      ? 'text-rose-500 dark:text-rose-400'
+      : player === 'B'
+        ? 'text-indigo-500 dark:text-indigo-400'
+        : player === 'G'
+          ? 'text-emerald-500 dark:text-emerald-400'
+          : 'text-amber-500 dark:text-amber-400'
+  }
+
   return (
     <div
       className={[
@@ -187,6 +233,7 @@ export default function Game({
         'p-4 pb-12',
       ].join(' ')}
     >
+      <LoadingOverlay isVisible={isLoading} />
       <TurnTimer timeLeft={timeLeft} timeLimit={turnTimeLimit} turn={turn} phase={phase} />
       <Navbar
         onUndo={undo}
@@ -199,7 +246,7 @@ export default function Game({
             phase !== 'finished' && board.some((row) => row.some((c) => c.stone !== null))
           if (inProgress) setShowConfirm(true)
           else {
-            setGameMode(null)
+            onBackToMenu()
             resetGame()
           }
         }}
@@ -214,12 +261,16 @@ export default function Game({
             <>
               {t('game.winner', '🥇 Winner:')}
               <span
-                className={
+                className={`inline-block w-6 h-6 rounded-full ${getPlayerColorClass(result.winner, 'bg')} ${getPlayerColorClass(result.winner, 'border')} shadow-sm mx-1 align-middle`}
+                aria-label={
                   result.winner === 'R'
-                    ? 'inline-block w-6 h-6 rounded-full bg-rose-500 dark:bg-rose-400 border-2 border-rose-300 dark:border-rose-500 shadow-sm mx-1 align-middle'
-                    : 'inline-block w-6 h-6 rounded-full bg-indigo-500 dark:bg-indigo-400 border-2 border-indigo-300 dark:border-indigo-500 shadow-sm mx-1 align-middle'
+                    ? t('game.red', 'Red')
+                    : result.winner === 'B'
+                      ? t('game.blue', 'Blue')
+                      : result.winner === 'G'
+                        ? t('game.green', 'Green')
+                        : t('game.yellow', 'Yellow')
                 }
-                aria-label={result.winner === 'R' ? t('game.red', 'Red') : t('game.blue', 'Blue')}
               />
             </>
           ) : null
@@ -234,9 +285,9 @@ export default function Game({
           </>
         )}
       </h1>
-      <div className="flex gap-4 animate-fade-in items-center">
+      <div className="flex gap-4 animate-fade-in items-center flex-wrap justify-center">
         {(phase === 'placing'
-          ? PLAYER_LIST.map((p) => [p, 0])
+          ? gameConfig.players.map((player) => [player, 0])
           : Object.entries(live.score ?? {})
         ).map(([p, s]) => (
           <span
@@ -244,12 +295,16 @@ export default function Game({
             className="flex items-center gap-2 font-mono text-lg px-2 py-1 rounded bg-white/70 dark:bg-zinc-800/80 shadow-sm border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 transition-all duration-300"
           >
             <span
-              className={
+              className={`inline-block w-5 h-5 rounded-full ${getPlayerColorClass(p as Player, 'bg')} ${getPlayerColorClass(p as Player, 'border')} shadow-sm mr-1`}
+              aria-label={
                 p === 'R'
-                  ? 'inline-block w-5 h-5 rounded-full bg-rose-500 dark:bg-rose-400 border-2 border-rose-300 dark:border-rose-500 shadow-sm mr-1'
-                  : 'inline-block w-5 h-5 rounded-full bg-indigo-500 dark:bg-indigo-400 border-2 border-indigo-300 dark:border-indigo-500 shadow-sm mr-1'
+                  ? t('game.red', 'Red')
+                  : p === 'B'
+                    ? t('game.blue', 'Blue')
+                    : p === 'G'
+                      ? t('game.green', 'Green')
+                      : t('game.yellow', 'Yellow')
               }
-              aria-label={p === 'R' ? t('game.red', 'Red') : t('game.blue', 'Blue')}
             />
             {s}
           </span>
@@ -257,9 +312,8 @@ export default function Game({
         {phase === 'finished' && (
           <GameButton
             onClick={() => {
-              setGameMode(null)
+              onBackToMenu()
               resetGame()
-              setPhase('selecting')
             }}
             ariaLabel={t('game.again', 'Play Again')}
             variant="success"
@@ -268,6 +322,29 @@ export default function Game({
           </GameButton>
         )}
       </div>
+
+      {/* Status message for territory capture */}
+      {phase === 'playing' && skipReason && (
+        <div className="w-full max-w-md animate-fade-in">
+          <StatusMessage
+            className={`bg-amber-100 dark:bg-amber-900/80 ${getPlayerColorClass(turn, 'border')}`}
+          >
+            {skipReason === 'pieceInCapturedTerritory' && (
+              <span>
+                {t(
+                  'game.pieceInCapturedTerritory',
+                  'This piece is in captured territory and cannot move',
+                )}
+              </span>
+            )}
+            {skipReason === 'cannotMoveToTerritory' && (
+              <span>
+                {t('game.cannotMoveToTerritory', 'Cannot move to a position in captured territory')}
+              </span>
+            )}
+          </StatusMessage>
+        </div>
+      )}
       <div className="board-container flex flex-col aspect-ratio-1 items-center w-[min(800px,100dvh-280px)] max-w-[calc(100dvw-32px)] transition-all">
         <Board
           board={board}
@@ -298,6 +375,7 @@ export default function Game({
           {t('menu.rule', 'Game Rules')}
         </GameButton>
       </div>
+      <RuleDialog open={showRule} onClose={() => setShowRule(false)} />
       <ConfirmDialog
         open={showConfirm}
         title={t('menu.home', 'Home')}
@@ -309,7 +387,7 @@ export default function Game({
         cancelText={t('common.cancel', 'Cancel')}
         onConfirm={() => {
           setShowConfirm(false)
-          setGameMode(null)
+          onBackToMenu()
           resetGame()
         }}
         onCancel={() => setShowConfirm(false)}

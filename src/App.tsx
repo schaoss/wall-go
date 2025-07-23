@@ -1,19 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Game from './components/Game'
 import Footer from './components/ui/Footer'
-import GameModeMenu from './components/ui/GameModeMenu'
+import PlayerSetup from './components/PlayerSetup'
 import RuleDialog from './components/ui/RuleDialog'
 import SeoHelmet from './components/SeoHelmet'
-import type { AiLevel } from './lib/types'
+import type { Player } from './lib/types'
 
-type GameMode = 'pvp' | 'ai'
-type AiSide = 'R' | 'B'
+interface GameConfig {
+  players: Player[]
+  gameMode: 'mixed'
+  aiAssignments: Record<Player, string>
+}
 
 export default function App() {
   const [showRule, setShowRule] = useState(false)
-  const [mode, setMode] = useState<GameMode | null>(null)
-  const [aiSide, setAiSide] = useState<AiSide>('B')
-  const [aiLevel, setAiLevel] = useState<AiLevel>('middle')
+  const [gameConfig, setGameConfig] = useState<GameConfig | null>(null)
   const [dark, setDark] = useState(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('theme')
@@ -24,36 +25,40 @@ export default function App() {
     return false
   })
 
-  useEffect(() => {
-    const root = document.documentElement
-    if (dark) {
-      root.classList.add('dark')
-      localStorage.setItem('theme', 'dark')
-    } else {
-      root.classList.remove('dark')
-      localStorage.setItem('theme', 'light')
-    }
-  }, [dark])
+  const handleStartGame = (players: Player[], aiAssignments: Record<Player, string>) => {
+    setGameConfig({
+      players,
+      gameMode: 'mixed',
+      aiAssignments,
+    })
+  }
+
+  const handleBackToMenu = () => {
+    setGameConfig(null)
+  }
 
   return (
     <>
       <SeoHelmet />
-      {mode === null || mode === undefined ? (
-        <GameModeMenu
-          setMode={(m) => {
-            setMode(m)
-          }}
-          setAiSide={setAiSide}
-          setAiLevel={setAiLevel}
-          setShowRule={setShowRule}
-        />
+      {gameConfig === null ? (
+        <div className="flex flex-col items-center justify-center min-h-dvh bg-gradient-to-br from-rose-50 via-indigo-50 to-amber-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 p-4">
+          <div className="fixed top-0 w-full flex justify-end gap-2 mb-2 p-4">
+            <button
+              onClick={() => setShowRule(true)}
+              className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+            >
+              Rules
+            </button>
+          </div>
+          <h1 className="text-3xl font-extrabold mb-6 text-zinc-800 dark:text-zinc-100 drop-shadow animate-fade-in">
+            Wall Go
+          </h1>
+          <PlayerSetup onStartGame={handleStartGame} />
+        </div>
       ) : (
         <Game
-          gameMode={mode}
-          aiSide={aiSide}
-          aiLevel={aiLevel}
-          setGameMode={setMode}
-          setShowRule={setShowRule}
+          gameConfig={gameConfig}
+          onBackToMenu={handleBackToMenu}
           dark={dark}
           setDark={setDark}
         />
