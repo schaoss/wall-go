@@ -4,35 +4,28 @@ import { type GameResult } from '@/lib/gameResults'
 
 export function checkGameEnd(board: Cell[][], players: Player[]): GameResult {
   const totals = Object.fromEntries(players.map((p) => [p, 0])) as Record<Player, number>
-
-  const remainingStones = new Set<string>()
-  board.forEach((row, y) =>
-    row.forEach((cell, x) => {
-      if (cell.stone) remainingStones.add(`${x},${y}`)
-    }),
-  )
-  if (remainingStones.size === 0) {
-    return {
-      finished: false,
-      score: totals,
-    }
-  }
-
   const territory = getTerritoryMap(board)
 
-  // Remove all pure territory cells from remainingStones based on the territory result
-  for (let y = 0; y < board.length; y++) {
-    for (let x = 0; x < board.length; x++) {
-      const owner = territory[y][x]
+  // Calculate territory scores
+  territory.forEach((row, _y) => {
+    row.forEach((owner, _x) => {
       if (owner) {
         totals[owner]++
-        remainingStones.delete(`${x},${y}`)
       }
-    }
-  }
-  // Condition A: All stones are in pure territory
-  if (remainingStones.size === 0) {
-    // Determine winner by comparing all players' scores
+    })
+  })
+
+  // Check if game is finished: all empty cells are claimed and all stones are placed
+  let hasEmptyCells = false
+  board.forEach((row) => {
+    row.forEach((cell) => {
+      if (cell.stone === null) hasEmptyCells = true
+    })
+  })
+
+  // Game is finished when there are no empty cells
+  if (!hasEmptyCells) {
+    // Determine winner by comparing territory scores
     let maxScore = -1
     let winner: Player | undefined
     let tie = false
