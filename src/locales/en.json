@@ -3,6 +3,8 @@
     "title": "Wall Go",
     "mode": {
       "pvp": "🤝 2 Players",
+      "p3": "👪 3 Players",
+      "p4": "👨‍👩‍👧‍👦 4 Players",
       "ai": "🤖 vs AI"
     },
     "rule": "Game Rules",
@@ -43,6 +45,8 @@
     "again": "Play Again",
     "red": "Red",
     "blue": "Blue",
+    "yellow": "Yellow",
+    "green": "Green",
     "wall": {
       "top": "top",
       "bottom": "bottom",
