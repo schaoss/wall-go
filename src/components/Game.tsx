@@ -1,4 +1,4 @@
-import { PLAYER_LIST, type AiLevel, type PlayerAction, type State } from '@/lib/types'
+import { type AiLevel, type PlayerAction, type State } from '@/lib/types'
 import { getPlayerTheme } from '@/lib/color'
 import GameButton from './ui/GameButton'
 import Navbar from './ui/Navbar'
@@ -51,9 +51,10 @@ export default function Game({
     setPlayers,
     isBreakMode,
     toggleBreakMode,
-    wallBreaks
+    wallBreaks,
+    players,
   } = useGame()
-  const live = checkGameEnd(board, [...PLAYER_LIST])
+  const live = checkGameEnd(board, players)
   const { t } = useTranslation()
   const [showConfirm, setShowConfirm] = useState(false)
   const [timeLeft, setTimeLeft] = useState(90_000)
@@ -248,7 +249,7 @@ export default function Game({
       </h1>
       <div className="flex gap-4 animate-fade-in items-center">
         {(phase === 'placing'
-          ? PLAYER_LIST.map((p) => [p, 0])
+          ? players.map((p) => [p, 0])
           : Object.entries(live.score ?? {})
         ).map(([p, s]) => (
           <span
