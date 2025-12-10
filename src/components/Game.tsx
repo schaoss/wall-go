@@ -1,4 +1,5 @@
 import { PLAYER_LIST, type AiLevel, type PlayerAction, type State } from '@/lib/types'
+import { getPlayerTheme } from '@/lib/color'
 import GameButton from './ui/GameButton'
 import Navbar from './ui/Navbar'
 import Board from './Board/Board'
@@ -21,10 +22,10 @@ export default function Game({
   dark,
   setDark,
 }: {
-  gameMode: 'pvp' | 'ai'
+  gameMode: 'pvp' | 'pvp3' | 'pvp4' | 'ai'
   aiSide: 'R' | 'B'
   aiLevel: AiLevel
-  setGameMode: (m: 'pvp' | 'ai' | null) => void
+  setGameMode: (m: 'pvp' | 'pvp3' | 'pvp4' | 'ai' | null) => void
   setShowRule: (b: boolean) => void
   dark: boolean
   setDark: (d: boolean | ((d: boolean) => boolean)) => void
@@ -47,6 +48,10 @@ export default function Game({
     redo,
     canUndo,
     canRedo,
+    setPlayers,
+    isBreakMode,
+    toggleBreakMode,
+    wallBreaks
   } = useGame()
   const live = checkGameEnd(board, [...PLAYER_LIST])
   const { t } = useTranslation()
@@ -80,9 +85,9 @@ export default function Game({
     const agents =
       gameMode === 'ai'
         ? aiSide === 'R'
-          ? { R: ai, B: human }
-          : { R: human, B: ai }
-        : { R: human, B: human }
+          ? { R: ai, B: human, Y: human, G: human }
+          : { R: human, B: ai, Y: human, G: human }
+        : { R: human, B: human, Y: human, G: human }
     turnManagerRef.current = new TurnManager({
       agents,
       getGameState: () => snapshotFromState(latestStateRef.current!),
@@ -113,12 +118,23 @@ export default function Game({
       useGame.getState().setHumanSide(null)
       return
     }
+
+    // Set players based on mode
+    let players = ['R', 'B'] as import('@/lib/types').Player[]
+    if (gameMode === 'pvp3') players = ['R', 'B', 'Y']
+    else if (gameMode === 'pvp4') players = ['R', 'B', 'Y', 'G']
+
+    // Only call setPlayers if it's different (to avoid infinite loop if setPlayers triggers re-render)
+    // Actually setPlayers updates store, which might trigger this effect if we depended on store state.
+    // But we depend on gameMode.
+    setPlayers(players)
+
     if (gameMode === 'ai') {
       useGame.getState().setHumanSide(aiSide === 'R' ? 'B' : 'R')
     } else {
       useGame.getState().setHumanSide(null)
     }
-  }, [gameMode, aiSide])
+  }, [gameMode, aiSide, setPlayers])
 
   useEffect(() => {
     if (!gameMode) return
@@ -214,12 +230,8 @@ export default function Game({
             <>
               {t('game.winner', '🥇 Winner:')}
               <span
-                className={
-                  result.winner === 'R'
-                    ? 'inline-block w-6 h-6 rounded-full bg-rose-500 dark:bg-rose-400 border-2 border-rose-300 dark:border-rose-500 shadow-sm mx-1 align-middle'
-                    : 'inline-block w-6 h-6 rounded-full bg-indigo-500 dark:bg-indigo-400 border-2 border-indigo-300 dark:border-indigo-500 shadow-sm mx-1 align-middle'
-                }
-                aria-label={result.winner === 'R' ? t('game.red', 'Red') : t('game.blue', 'Blue')}
+                className={`inline-block w-6 h-6 rounded-full shadow-sm mx-1 align-middle border-2 ${getPlayerTheme(result.winner).bg} ${getPlayerTheme(result.winner).border}`}
+                aria-label={t(getPlayerTheme(result.winner).nameKey, getPlayerTheme(result.winner).nameDef)}
               />
             </>
           ) : null
@@ -244,12 +256,8 @@ export default function Game({
             className="flex items-center gap-2 font-mono text-lg px-2 py-1 rounded bg-white/70 dark:bg-zinc-800/80 shadow-sm border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 transition-all duration-300"
           >
             <span
-              className={
-                p === 'R'
-                  ? 'inline-block w-5 h-5 rounded-full bg-rose-500 dark:bg-rose-400 border-2 border-rose-300 dark:border-rose-500 shadow-sm mr-1'
-                  : 'inline-block w-5 h-5 rounded-full bg-indigo-500 dark:bg-indigo-400 border-2 border-indigo-300 dark:border-indigo-500 shadow-sm mr-1'
-              }
-              aria-label={p === 'R' ? t('game.red', 'Red') : t('game.blue', 'Blue')}
+              className={`inline-block w-5 h-5 rounded-full shadow-sm mr-1 border-2 ${getPlayerTheme(p as import('@/lib/types').Player).bg} ${getPlayerTheme(p as import('@/lib/types').Player).border}`}
+              aria-label={t(getPlayerTheme(p as import('@/lib/types').Player).nameKey, getPlayerTheme(p as import('@/lib/types').Player).nameDef)}
             />
             {s}
           </span>
@@ -291,6 +299,9 @@ export default function Game({
               ? (pos, dir) => handlePlayerAction({ type: 'wall', pos, dir })
               : undefined
           }
+          isBreakMode={isBreakMode}
+          toggleBreakMode={toggleBreakMode}
+          wallBreaks={wallBreaks}
         />
       </div>
       <div className="w-full flex justify-center mt-3 animate-fade-in">
