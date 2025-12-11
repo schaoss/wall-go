@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { playerColorClass } from '@/lib/color'
+import { playerColorClass, getPlayerTheme } from '@/lib/color'
 import type { Phase, Player, Pos, WallDir } from '@/lib/types'
 import WallButton from './WallButton'
 import { useRef, useEffect } from 'react'
@@ -94,12 +94,11 @@ export default function Cell({
         'flex items-center justify-center',
         // 結算時只顯示領地顏色，不加預設底色
         (phase !== 'finished' && !territoryOwner) ||
-          (phase === 'placing' && 'bg-white/70 dark:bg-zinc-900/70'),
+        (phase === 'placing' && 'bg-white/70 dark:bg-zinc-900/70'),
         !cell.stone && phase === 'placing' && 'hover:bg-amber-100/60 dark:hover:bg-zinc-800/40',
         legal.has(`${x},${y}`) && 'hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40',
         // 只要 territoryOwner 有值就上色
-        territoryOwner === 'R' && 'bg-rose-100 dark:bg-rose-900/60',
-        territoryOwner === 'B' && 'bg-indigo-100 dark:bg-indigo-900/60',
+        territoryOwner && getPlayerTheme(territoryOwner).territory,
       )}
       data-cell-x={x}
       data-cell-y={y}
