@@ -94,7 +94,7 @@ export default function Cell({
         'flex items-center justify-center',
         // 結算時只顯示領地顏色，不加預設底色
         (phase !== 'finished' && !territoryOwner) ||
-        (phase === 'placing' && 'bg-white/70 dark:bg-zinc-900/70'),
+          (phase === 'placing' && 'bg-white/70 dark:bg-zinc-900/70'),
         !cell.stone && phase === 'placing' && 'hover:bg-amber-100/60 dark:hover:bg-zinc-800/40',
         legal.has(`${x},${y}`) && 'hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40',
         // 只要 territoryOwner 有值就上色

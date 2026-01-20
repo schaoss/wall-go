@@ -4,7 +4,9 @@ import GameButton from './GameButton'
 import { useTranslation } from 'react-i18next'
 import type { AiLevel, GameMode, AiSide } from '@/lib/types'
 
-const GAME_MODES: GameMode[] = ['pvp', 'ai']
+type MenuMode = GameMode | 'online'
+
+const GAME_MODES: MenuMode[] = ['pvp', 'online', 'pvp3', 'pvp4', 'ai']
 
 const AI_LEVELS: AiLevel[] = ['practice', 'easy', 'middle', 'hard']
 
@@ -14,7 +16,7 @@ export default function GameModeMenu({
   setAiLevel,
   setShowRule,
 }: {
-  setMode: (m: GameMode) => void
+  setMode: (m: MenuMode) => void
   setAiSide: (s: AiSide) => void
   setAiLevel: (l: AiLevel) => void
   setShowRule: (show: boolean) => void
@@ -66,11 +68,17 @@ export default function GameModeMenu({
         {GAME_MODES.map((m) => (
           <GameButton
             key={m}
-            onClick={m === 'ai' ? () => setShowAiSelect(true) : () => setMode(m as GameMode)}
+            onClick={m === 'ai' ? () => setShowAiSelect(true) : () => setMode(m)}
             className="text-lg py-3"
             active={m === 'ai' && showAiSelect}
           >
-            {t(`menu.mode.${m}`)}
+            {m === 'pvp3'
+              ? t('menu.mode.p3')
+              : m === 'pvp4'
+                ? t('menu.mode.p4')
+                : m === 'online'
+                  ? t('menu.mode.online', '🌐 Online')
+                  : t(`menu.mode.${m}`)}
           </GameButton>
         ))}
       </div>

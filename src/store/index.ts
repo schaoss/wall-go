@@ -1,7 +1,12 @@
 // Zustand store for Wall Go with robust undo/redo and deep copy history pattern
 import { create } from 'zustand'
 import { PLAYER_LIST, STONES_PER_PLAYER, type Pos, type WallDir, type State } from '@/lib/types'
-import { makeInitialState, snapshotFromState, restoreSnapshot, set2PlayerDefaultBoard } from './gameState'
+import {
+  makeInitialState,
+  snapshotFromState,
+  restoreSnapshot,
+  set2PlayerDefaultBoard,
+} from './gameState'
 import { createHistoryHandlers } from './history'
 import { placingTurnIndex, advanceTurn } from './actions'
 import { isLegalMove, getPath } from '@/utils/move'
@@ -21,16 +26,16 @@ export const useGame = create<State>((_set, get) => {
         const next = typeof partial === 'function' ? partial(state) : partial
         const _history =
           typeof next === 'object' &&
-            next &&
-            '_history' in next &&
-            Array.isArray((next as Partial<State>)._history)
+          next &&
+          '_history' in next &&
+          Array.isArray((next as Partial<State>)._history)
             ? (next as Partial<State>)._history!
             : state._history
         const _future =
           typeof next === 'object' &&
-            next &&
-            '_future' in next &&
-            Array.isArray((next as Partial<State>)._future)
+          next &&
+          '_future' in next &&
+          Array.isArray((next as Partial<State>)._future)
             ? (next as Partial<State>)._future!
             : state._future
         return {
@@ -194,9 +199,18 @@ export const useGame = create<State>((_set, get) => {
     moveTo(to: Pos) {
       set((state) => {
         const { selected, board, legal, stepsTaken, phase } = state
-        if (phase !== 'playing') { console.log('moveTo fail: phase', phase); return state }
-        if (!selected) { console.log('moveTo fail: no selected'); return state }
-        if (!legal.has(`${to.x},${to.y}`)) { console.log('moveTo fail: illegal', to.x, to.y, Array.from(legal)); return state }
+        if (phase !== 'playing') {
+          console.log('moveTo fail: phase', phase)
+          return state
+        }
+        if (!selected) {
+          console.log('moveTo fail: no selected')
+          return state
+        }
+        if (!legal.has(`${to.x},${to.y}`)) {
+          console.log('moveTo fail: illegal', to.x, to.y, Array.from(legal))
+          return state
+        }
         const piece = board[selected.y][selected.x].stone
         if (!piece) return state
 
@@ -213,17 +227,18 @@ export const useGame = create<State>((_set, get) => {
         // We need to pass state.isBreakMode? No, getPath doesn't take allowBreak, it just returns path and walls.
         // But we need to know if the path *requires* break.
         // If wallsCrossed > 0, we must consume break (if break mode is on).
-        // Since `legal` checked validity, we know we can move. 
+        // Since `legal` checked validity, we know we can move.
         // If we are in break mode, `legal` allowed us to cross walls.
         // So we should find the path now.
 
-        // Import getPath dynamically or assume it's imported? 
+        // Import getPath dynamically or assume it's imported?
         // We need to update imports.
 
         const pathResult = getPath(selected, to, state.board, 2)
         // If pathResult suggests walls crossed, and we are in break mode (or legal move allowed it), we process removal.
         if (pathResult && pathResult.wallsCrossed.length > 0) {
-          if (state.isBreakMode) { // Logic: only remove if break mode was active (and required?)
+          if (state.isBreakMode) {
+            // Logic: only remove if break mode was active (and required?)
             // Actually, if we crossed walls, we MUST satisfy break conditions.
             // Consume break
             const player = next.turn
@@ -231,7 +246,7 @@ export const useGame = create<State>((_set, get) => {
               next.wallBreaks[player]--
 
               // Remove the crossed walls!
-              pathResult.wallsCrossed.forEach(wc => {
+              pathResult.wallsCrossed.forEach((wc) => {
                 const { pos, type } = wc
                 if (type === 'wallTop') next.board[pos.y][pos.x].wallTop = null
                 if (type === 'wallLeft') next.board[pos.y][pos.x].wallLeft = null
@@ -260,7 +275,15 @@ export const useGame = create<State>((_set, get) => {
               // We pass `state.isBreakMode` (user intent) BUT combined with `next.wallBreaks > 0`.
               // If count is 0, allowBreak becomes false.
 
-              if (isLegalMove(to, { x: xx, y: yy }, next.board, 2 - actualSteps, state.isBreakMode && ((next.wallBreaks && next.wallBreaks[next.turn]) || 0) > 0)) {
+              if (
+                isLegalMove(
+                  to,
+                  { x: xx, y: yy },
+                  next.board,
+                  2 - actualSteps,
+                  state.isBreakMode && ((next.wallBreaks && next.wallBreaks[next.turn]) || 0) > 0,
+                )
+              ) {
                 nextLegal.add(`${xx},${yy}`)
               }
             }
@@ -277,7 +300,7 @@ export const useGame = create<State>((_set, get) => {
           ...next,
           _history: newHistory,
           _future: [],
-          isBreakMode: false, // Turn off break mode after move? Or keep it? 
+          isBreakMode: false, // Turn off break mode after move? Or keep it?
           // If we used it, we definitely want to reset or at least user sees count 0.
           // Safety: reset to false.
         }
@@ -372,7 +395,6 @@ export const useGame = create<State>((_set, get) => {
           _history: [snapshotFromState({ ...initial, phase: 'placing' })],
           _future: [],
           isBreakMode: false,
-
         }
       })
     },
@@ -388,7 +410,7 @@ export const useGame = create<State>((_set, get) => {
             stone: null,
             wallTop: null,
             wallLeft: null,
-          }))
+          })),
         ) as import('@/lib/types').Cell[][]
 
         const is2P = players.length === 2
@@ -407,7 +429,10 @@ export const useGame = create<State>((_set, get) => {
           legal: new Set(),
           result: undefined,
           skipReason: undefined,
-          stonesPlaced: Object.fromEntries(players.map((p) => [p, is2P ? 2 : 0])) as Record<string, number>,
+          stonesPlaced: Object.fromEntries(players.map((p) => [p, is2P ? 2 : 0])) as Record<
+            string,
+            number
+          >,
           wallBreaks: Object.fromEntries(players.map((p) => [p, 1])) as Record<string, number>,
           isBreakMode: false,
           stonesLimit: STONES_PER_PLAYER[players.length as 2 | 3 | 4],

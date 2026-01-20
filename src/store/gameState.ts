@@ -1,6 +1,5 @@
 import {
   BOARD_SIZE,
-  PLAYER_LIST,
   STONES_PER_PLAYER,
   type Player,
   type Cell,
@@ -35,19 +34,25 @@ export function set2PlayerDefaultBoard(board: Cell[][]): Cell[][] {
 
 export function makeInitialState(): GameSnapshot {
   let board = createEmptyBoard()
-  if (PLAYER_LIST.length === 2) board = set2PlayerDefaultBoard(board)
+  const defaultPlayers: Player[] = ['R', 'B']
+  const is2P = defaultPlayers.length === 2
+  if (is2P) board = set2PlayerDefaultBoard(board)
   return {
     board,
-    turn: PLAYER_LIST[0],
+    turn: defaultPlayers[0],
     selected: undefined,
     legal: new Set(),
     stepsTaken: 0,
     phase: 'placing',
-    players: [...PLAYER_LIST],
-    stonesLimit: STONES_PER_PLAYER,
-    stonesPlaced: Object.fromEntries(PLAYER_LIST.map((p) => [p, 2])) as Record<Player, number>,
+    players: defaultPlayers,
+    stonesLimit: is2P ? STONES_PER_PLAYER[2] : STONES_PER_PLAYER[defaultPlayers.length as 3 | 4],
+    stonesPlaced: Object.fromEntries(defaultPlayers.map((p) => [p, is2P ? 2 : 0])) as Record<
+      Player,
+      number
+    >,
     result: undefined,
     skipReason: undefined,
+    wallBreaks: Object.fromEntries(defaultPlayers.map((p) => [p, 1])) as Record<Player, number>, // Everyone gets 1 break
   }
 }
 
@@ -64,6 +69,7 @@ export function snapshotFromState(state: GameSnapshot): GameSnapshot {
     stonesPlaced: { ...state.stonesPlaced },
     result: state.result ? JSON.parse(JSON.stringify(state.result)) : undefined,
     skipReason: state.skipReason,
+    wallBreaks: state.wallBreaks ? { ...state.wallBreaks } : undefined,
   }
 }
 
@@ -80,5 +86,6 @@ export function restoreSnapshot(s: GameSnapshot): GameSnapshot {
     stonesPlaced: { ...s.stonesPlaced },
     result: s.result ? JSON.parse(JSON.stringify(s.result)) : undefined,
     skipReason: s.skipReason,
+    wallBreaks: s.wallBreaks ? { ...s.wallBreaks } : undefined,
   }
 }

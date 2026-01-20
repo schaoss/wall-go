@@ -7,7 +7,10 @@
     "title": "Wall Go · ウォール碁",
     "mode": {
       "pvp": "🤝 2人対戦",
-      "ai": "🤖 AIと対戦"
+      "p3": "👪 3人対戦",
+      "p4": "👨‍👩‍👧‍👦 4人対戦",
+      "ai": "🤖 AIと対戦",
+      "online": "🌐 オンライン"
     },
     "rule": "ルールを見る",
     "ai": {
@@ -26,6 +29,41 @@
     },
     "confirmHome": "ゲームはまだ終了していません。本当にホームに戻りますか？\n現在の進行状況は失われます。",
     "home": "ホームに戻る"
+  },
+  "multiplayer": {
+    "title": "オンライン対戦",
+    "nickname": "ニックネームを入力",
+    "nicknamePlaceholder": "あなたのニックネーム",
+    "welcomePlayer": "ようこそ、{{name}}さん！",
+    "create": "部屋を作成",
+    "join": "部屋に参加",
+    "roomId": "ルームID",
+    "roomIdPlaceholder": "ルームIDを入力",
+    "shareRoomId": "このルームIDを友達に共有してください：",
+    "players": "プレイヤー",
+    "waiting": "対戦相手を待っています...",
+    "waitingSlot": "プレイヤーを待っています...",
+    "copy": "コピー",
+    "copied": "コピーしました！",
+    "back": "戻る",
+    "connecting": "接続中...",
+    "connected": "接続済み",
+    "disconnected": "切断",
+    "ready": "準備完了",
+    "you": "あなた",
+    "yourTurn": "あなたの番です",
+    "opponentDisconnected": "対戦相手が切断しました。再接続を待っています...",
+    "loading": "ゲームを読み込み中...",
+    "leaveGame": "ゲームを退出",
+    "confirmLeave": "本当にゲームを退出しますか？棄権となります。",
+    "backToLobby": "ロビーに戻る",
+    "error": {
+      "ROOM_NOT_FOUND": "部屋が見つかりません",
+      "ROOM_FULL": "部屋が満員です",
+      "NOT_YOUR_TURN": "あなたの番ではありません",
+      "INVALID_MOVE": "無効な操作です",
+      "NOT_IN_ROOM": "部屋に参加していません"
+    }
   },
   "rule": {
     "title": "ゲームルール",

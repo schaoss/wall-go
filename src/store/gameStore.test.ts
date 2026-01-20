@@ -63,7 +63,7 @@ describe('Game Store', () => {
       result.current.placeStone({ x: 1, y: 0 })
     })
 
-    // 2 initial + 2 placed = 4. Total needed 8. 
+    // 2 initial + 2 placed = 4. Total needed 8.
     // Wait, initial stones are placed by makeInitialState.
     // stonesPlaced is initialized to 2.
     // limit is 4.
@@ -124,11 +124,10 @@ describe('Game Store', () => {
       result.current.buildWall({ x: 0, y: 0 }, 'bottom')
     })
     expect(result.current.board[0][0].wallTop).toBe(null) // Top is border
-    expect(result.current.board[1][0].wallTop).toBe(PLAYER_LIST[0]) // Bottom of 0,0 is Top of 1,0? 
+    expect(result.current.board[1][0].wallTop).toBe(PLAYER_LIST[0]) // Bottom of 0,0 is Top of 1,0?
     // Wait, buildWall 'bottom' sets next.board[pos.y + 1][pos.x].wallTop = turn
     // So if I build bottom at 0,0, checking 1,0 wallTop is correct.
     // Let's check that.
-
   })
 
   it('undo/redo: 歷史紀錄正確', () => {
@@ -162,7 +161,6 @@ describe('Game Store', () => {
     expect(result.current.board[0][0].stone).toBe(null)
     // resetGame wipes history, so cannot undo to previous state.
     expect(result.current.canUndo).toBe(false)
-
   })
 
   it('多步 undo/redo', () => {
@@ -294,7 +292,6 @@ describe('Game Store', () => {
     expect(result.current.turn).toBe('R')
   })
 
-
   it('使用破牆模式會移除牆壁', () => {
     const { result } = renderHook(() => useGame())
     act(() => {
@@ -417,7 +414,7 @@ describe('Game Store', () => {
   })
 
   it('多人局遊戲結束判斷: 所有玩家都在領地才結束', () => {
-    // Verify checking logic via checkGameEnd direct import? 
+    // Verify checking logic via checkGameEnd direct import?
     // Or via store state?
     // Store state is easier.
     // Construct a scenario where 1 player is enclosed, others are not.

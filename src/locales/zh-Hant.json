@@ -9,7 +9,8 @@
       "pvp": "🤝 雙人對戰",
       "p3": "👪 3 人對戰",
       "p4": "👨‍👩‍👧‍👦 4 人對戰",
-      "ai": "🤖 vs AI"
+      "ai": "🤖 vs AI",
+      "online": "🌐 線上對戰"
     },
     "rule": "遊戲規則",
     "ai": {
@@ -28,6 +29,41 @@
     },
     "confirmHome": "遊戲尚未結束，確定要回到首頁嗎？\n目前進度將會消失。",
     "home": "回到首頁"
+  },
+  "multiplayer": {
+    "title": "線上多人對戰",
+    "nickname": "輸入暱稱",
+    "nicknamePlaceholder": "你的暱稱",
+    "welcomePlayer": "歡迎，{{name}}！",
+    "create": "建立房間",
+    "join": "加入房間",
+    "roomId": "房間代碼",
+    "roomIdPlaceholder": "輸入房間代碼",
+    "shareRoomId": "分享房間代碼給朋友：",
+    "players": "玩家",
+    "waiting": "等待對手中...",
+    "waitingSlot": "等待玩家加入...",
+    "copy": "複製",
+    "copied": "已複製！",
+    "back": "返回",
+    "connecting": "連線中...",
+    "connected": "已連線",
+    "disconnected": "已斷線",
+    "ready": "準備完成",
+    "you": "你",
+    "yourTurn": "輪到你了",
+    "opponentDisconnected": "對手已斷線，等待重新連線...",
+    "loading": "載入遊戲中...",
+    "leaveGame": "離開遊戲",
+    "confirmLeave": "確定要離開遊戲嗎？這將視為棄權。",
+    "backToLobby": "返回大廳",
+    "error": {
+      "ROOM_NOT_FOUND": "找不到房間",
+      "ROOM_FULL": "房間已滿",
+      "NOT_YOUR_TURN": "還沒輪到你",
+      "INVALID_MOVE": "無效的操作",
+      "NOT_IN_ROOM": "尚未加入房間"
+    }
   },
   "rule": {
     "title": "遊戲規則說明",

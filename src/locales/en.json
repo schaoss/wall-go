@@ -5,7 +5,8 @@
       "pvp": "🤝 2 Players",
       "p3": "👪 3 Players",
       "p4": "👨‍👩‍👧‍👦 4 Players",
-      "ai": "🤖 vs AI"
+      "ai": "🤖 vs AI",
+      "online": "🌐 Online"
     },
     "rule": "Game Rules",
     "ai": {
@@ -28,6 +29,41 @@
   "common": {
     "confirm": "Confirm",
     "cancel": "Cancel"
+  },
+  "multiplayer": {
+    "title": "Online Multiplayer",
+    "nickname": "Enter Nickname",
+    "nicknamePlaceholder": "Your nickname",
+    "welcomePlayer": "Welcome, {{name}}!",
+    "create": "Create Room",
+    "join": "Join Room",
+    "roomId": "Room ID",
+    "roomIdPlaceholder": "Enter Room ID",
+    "shareRoomId": "Share this Room ID with your friend:",
+    "players": "Players",
+    "waiting": "Waiting for opponent...",
+    "waitingSlot": "Waiting for player...",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "back": "Back",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "ready": "Ready",
+    "you": "You",
+    "yourTurn": "Your turn",
+    "opponentDisconnected": "Opponent disconnected. Waiting for reconnect...",
+    "loading": "Loading game...",
+    "leaveGame": "Leave Game",
+    "confirmLeave": "Are you sure you want to leave this game? You will forfeit the match.",
+    "backToLobby": "Back to Lobby",
+    "error": {
+      "ROOM_NOT_FOUND": "Room not found",
+      "ROOM_FULL": "Room is full",
+      "NOT_YOUR_TURN": "Not your turn",
+      "INVALID_MOVE": "Invalid move",
+      "NOT_IN_ROOM": "Not in a room"
+    }
   },
   "rule": {
     "title": "Game Rules",

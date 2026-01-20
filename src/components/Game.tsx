@@ -232,7 +232,10 @@ export default function Game({
               {t('game.winner', '🥇 Winner:')}
               <span
                 className={`inline-block w-6 h-6 rounded-full shadow-sm mx-1 align-middle border-2 ${getPlayerTheme(result.winner).bg} ${getPlayerTheme(result.winner).border}`}
-                aria-label={t(getPlayerTheme(result.winner).nameKey, getPlayerTheme(result.winner).nameDef)}
+                aria-label={t(
+                  getPlayerTheme(result.winner).nameKey,
+                  getPlayerTheme(result.winner).nameDef,
+                )}
               />
             </>
           ) : null
@@ -248,21 +251,23 @@ export default function Game({
         )}
       </h1>
       <div className="flex gap-4 animate-fade-in items-center">
-        {(phase === 'placing'
-          ? players.map((p) => [p, 0])
-          : Object.entries(live.score ?? {})
-        ).map(([p, s]) => (
-          <span
-            key={p}
-            className="flex items-center gap-2 font-mono text-lg px-2 py-1 rounded bg-white/70 dark:bg-zinc-800/80 shadow-sm border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 transition-all duration-300"
-          >
+        {(phase === 'placing' ? players.map((p) => [p, 0]) : Object.entries(live.score ?? {})).map(
+          ([p, s]) => (
             <span
-              className={`inline-block w-5 h-5 rounded-full shadow-sm mr-1 border-2 ${getPlayerTheme(p as import('@/lib/types').Player).bg} ${getPlayerTheme(p as import('@/lib/types').Player).border}`}
-              aria-label={t(getPlayerTheme(p as import('@/lib/types').Player).nameKey, getPlayerTheme(p as import('@/lib/types').Player).nameDef)}
-            />
-            {s}
-          </span>
-        ))}
+              key={p}
+              className="flex items-center gap-2 font-mono text-lg px-2 py-1 rounded bg-white/70 dark:bg-zinc-800/80 shadow-sm border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 transition-all duration-300"
+            >
+              <span
+                className={`inline-block w-5 h-5 rounded-full shadow-sm mr-1 border-2 ${getPlayerTheme(p as import('@/lib/types').Player).bg} ${getPlayerTheme(p as import('@/lib/types').Player).border}`}
+                aria-label={t(
+                  getPlayerTheme(p as import('@/lib/types').Player).nameKey,
+                  getPlayerTheme(p as import('@/lib/types').Player).nameDef,
+                )}
+              />
+              {s}
+            </span>
+          ),
+        )}
         {phase === 'finished' && (
           <GameButton
             onClick={() => {

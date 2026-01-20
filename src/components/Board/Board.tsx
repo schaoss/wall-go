@@ -47,9 +47,7 @@ function Board({
         'relative w-full min-w-[266px] p-8 border-4 border-zinc-300 dark:border-zinc-700 rounded-2xl shadow-xl transition-all duration-500',
         'box-border aspect-ratio-1',
         'bg-gradient-to-br from-zinc-50 to-zinc-200 dark:from-zinc-900 dark:to-zinc-800',
-        phase === 'playing' || phase === 'placing'
-          ? getPlayerTheme(turn).ring
-          : '',
+        phase === 'playing' || phase === 'placing' ? getPlayerTheme(turn).ring : '',
       )}
     >
       {/* Chessboard body */}
@@ -128,7 +126,7 @@ function Board({
               'px-3 py-1 rounded-full text-xs font-bold transition-all shadow-lg border-2',
               isBreakMode
                 ? 'bg-red-500 text-white border-red-600 animate-pulse'
-                : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700'
+                : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700',
             )}
           >
             🔨 {wallBreaks[turn]}
