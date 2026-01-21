@@ -39,7 +39,7 @@ describe('applyActionSequence (store)', () => {
 
     // call applyActionSequence
     // applyActionSequence is optional on State typing; cast to unknown->Function to avoid eslint no-explicit-any
-    ;((useGame.getState().applyActionSequence as unknown) as (a?: unknown) => void)(action)
+    ;(useGame.getState().applyActionSequence as unknown as (a?: unknown) => void)(action)
 
     const after = useGame.getState()
     // moved piece should be at target
