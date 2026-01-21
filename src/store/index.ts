@@ -395,6 +395,9 @@ export const useGame = create<State>((_set, get) => {
         // existing action handlers where possible.
         // We'll implement a minimal direct application here to ensure atomicity.
         const next = snapshotFromState(state)
+        // If no action provided, nothing to do
+        if (!action) return state
+
         // Determine the acting player for this action.
         // For move actions, prefer the stone owner at `from` (handles cases where
         // tests set up board manually but `state.turn` may differ). Otherwise
@@ -406,14 +409,10 @@ export const useGame = create<State>((_set, get) => {
           const owner = board[action.from.y][action.from.x].stone
           if (owner) actor = owner
         }
-        if (!action) return state
         if (action.type === 'place') {
           board[action.pos.y][action.pos.x].stone = actor
           // update stonesPlaced if exists
-          if (
-            next.stonesPlaced &&
-            typeof (next.stonesPlaced as Record<string, number>)[turn as string] === 'number'
-          ) {
+          if (next.stonesPlaced && typeof (next.stonesPlaced as Record<string, number>)[actor as string] === 'number') {
             ;(next.stonesPlaced as Record<string, number>)[actor as string] =
               ((next.stonesPlaced as Record<string, number>)[actor as string] || 0) + 1
           }
