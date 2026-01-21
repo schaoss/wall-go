@@ -192,20 +192,20 @@ export default function MultiplayerGame({
                 )}
               </div>
                <span
-                 role="status"
-                 aria-label={p.connected ? `${p.nickname} (Connected)` : `${p.nickname} (Disconnected)`}
-                 className={`text-xs px-2 py-0.5 rounded-full transition-colors duration-200 ${
-                   p.connected
-                     ? `${getPlayerTheme(p.player).bg} ${getPlayerTheme(p.player).text} ${getPlayerTheme(
-                         p.player,
-                       ).border}`
-                     : `bg-white/50 dark:bg-zinc-800/40 ${getPlayerTheme(p.player).border} ${getPlayerTheme(
-                         p.player,
-                       ).text}`
-                 }`}
-               >
-                 {p.connected ? t('multiplayer.ready', 'Ready') : t('multiplayer.disconnected', 'Disconnected')}
-               </span>
+                role="status"
+                aria-label={p.connected ? `${p.nickname} (Connected)` : `${p.nickname} (Disconnected)`}
+                className={
+                  p.connected
+                    ? `text-xs px-2 py-0.5 rounded-full transition-colors duration-200 ${getPlayerTheme(
+                        p.player,
+                      ).bg} ${getPlayerTheme(p.player).text} ${getPlayerTheme(p.player).border}`
+                    : `text-xs px-2 py-0.5 rounded-full transition-colors duration-200 bg-white/50 dark:bg-zinc-800/40 ${getPlayerTheme(
+                        p.player,
+                      ).border} ${getPlayerTheme(p.player).text}`
+                }
+              >
+                {p.connected ? t('multiplayer.ready', 'Ready') : t('multiplayer.disconnected', 'Disconnected')}
+              </span>
             </div>
           ))}
         </div>
