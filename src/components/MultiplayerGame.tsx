@@ -170,9 +170,9 @@ export default function MultiplayerGame({
           {roomPlayers.map((p) => (
             <div
               key={p.player}
-              className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 shadow-sm ${
+              className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 shadow-sm transition-colors duration-300 ${
                 p.player === myPlayer
-                  ? 'bg-indigo-100/80 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-700'
+                  ? `${getPlayerTheme(p.player).territory} ${getPlayerTheme(p.player).border}`
                   : 'bg-white/80 dark:bg-zinc-900/70 border-zinc-200 dark:border-zinc-700'
               }`}
             >
@@ -180,11 +180,13 @@ export default function MultiplayerGame({
                 <span
                   className={`inline-block w-4 h-4 rounded-full border-2 ${getPlayerTheme(p.player).bg} ${getPlayerTheme(p.player).border}`}
                 />
-                <span className="font-medium text-zinc-700 dark:text-zinc-100 truncate">
+                <span
+                  className={`font-medium truncate ${p.player === myPlayer ? getPlayerTheme(p.player).text : 'text-zinc-700 dark:text-zinc-100'}`}
+                >
                   {p.nickname}
                 </span>
                 {p.player === myPlayer && (
-                  <span className="text-xs text-indigo-600 dark:text-indigo-300">
+                  <span className={`text-xs ${getPlayerTheme(p.player).text}`}>
                     ({t('multiplayer.you', 'You')})
                   </span>
                 )}

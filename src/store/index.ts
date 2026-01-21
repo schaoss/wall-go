@@ -385,6 +385,75 @@ export const useGame = create<State>((_set, get) => {
         }
       })
     },
+    // Atomically apply an action (move/place/wall) and any follow-up actions
+    // in a single state mutation. This prevents intermediate UI updates where
+    // the board reflects a moved piece but the turn hasn't been advanced yet.
+    applyActionSequence(action: import('@/lib/types').PlayerAction | undefined) {
+      // Reuse existing apply logic from utils/ai.applyAction but operate on store
+      set((state) => {
+        // Clone snapshot and reuse existing mutation logic by delegating to
+        // existing action handlers where possible.
+        // We'll implement a minimal direct application here to ensure atomicity.
+        const next = snapshotFromState(state)
+        const {
+          board,
+          turn,
+          players = PLAYERS,
+        } = next as unknown as {
+          board: import('@/lib/types').Cell[][]
+          turn: import('@/lib/types').Player
+          players: import('@/lib/types').Player[]
+        }
+        if (!action) return state
+        if (action.type === 'place') {
+          board[action.pos.y][action.pos.x].stone = turn
+          // update stonesPlaced if exists
+          if (
+            next.stonesPlaced &&
+            typeof (next.stonesPlaced as Record<string, number>)[turn as string] === 'number'
+          ) {
+            ;(next.stonesPlaced as Record<string, number>)[turn as string] =
+              ((next.stonesPlaced as Record<string, number>)[turn as string] || 0) + 1
+          }
+        } else if (action.type === 'move' && action.from) {
+          board[action.from.y][action.from.x].stone = null
+          board[action.pos.y][action.pos.x].stone = turn
+        } else if (action.type === 'wall' && action.dir) {
+          if (action.dir === 'top') board[action.pos.y][action.pos.x].wallTop = turn
+          if (action.dir === 'left') board[action.pos.y][action.pos.x].wallLeft = turn
+          if (action.dir === 'right') board[action.pos.y][action.pos.x + 1].wallLeft = turn
+          if (action.dir === 'bottom') board[action.pos.y + 1][action.pos.x].wallTop = turn
+        }
+
+        // If there is a followUp action, apply it immediately (atomic)
+        if (action.followUp) {
+          const fu = action.followUp
+          if (fu.type === 'place') {
+            board[fu.pos.y][fu.pos.x].stone = turn
+          } else if (fu.type === 'move' && fu.from) {
+            board[fu.from.y][fu.from.x].stone = null
+            board[fu.pos.y][fu.pos.x].stone = turn
+          } else if (fu.type === 'wall' && fu.dir) {
+            if (fu.dir === 'top') board[fu.pos.y][fu.pos.x].wallTop = turn
+            if (fu.dir === 'left') board[fu.pos.y][fu.pos.x].wallLeft = turn
+            if (fu.dir === 'right') board[fu.pos.y][fu.pos.x + 1].wallLeft = turn
+            if (fu.dir === 'bottom') board[fu.pos.y + 1][fu.pos.x].wallTop = turn
+          }
+        }
+
+        // Advance turn deterministically
+        const idx = players.indexOf(next.turn)
+        next.turn = players[(idx + 1) % players.length]
+
+        // push to history
+        const newHistory = [...state._history, snapshotFromState(next)]
+        return {
+          ...next,
+          _history: newHistory,
+          _future: [],
+        }
+      })
+    },
     resetGame() {
       set(() => {
         // Mutate a new initial state

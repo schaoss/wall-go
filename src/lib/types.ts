@@ -76,4 +76,6 @@ export interface State extends GameSnapshot {
   setHumanSide: (side: Player | null) => void
   toggleBreakMode: () => void
   isBreakMode: boolean
+  // Atomically apply an action and optional follow-up in a single mutation
+  applyActionSequence?: (action?: PlayerAction) => void
 }

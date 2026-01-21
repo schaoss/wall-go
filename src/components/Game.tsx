@@ -1,4 +1,4 @@
-import { type AiLevel, type PlayerAction, type State } from '@/lib/types'
+import { type AiLevel, type PlayerAction } from '@/lib/types'
 import { getPlayerTheme } from '@/lib/color'
 import GameButton from './ui/GameButton'
 import Navbar from './ui/Navbar'
@@ -64,11 +64,6 @@ export default function Game({
   // --- 代理主流程整合 ---
   const turnManagerRef = useRef<TurnManager | null>(null)
   const humanAgentRef = useRef<HumanAgent | null>(null)
-  // 直接用 useGame() 的完整 state 當 snapshot
-  const latestStateRef = useRef<State | null>(null)
-  useEffect(() => {
-    latestStateRef.current = useGame.getState()
-  }, [board, turn, selected, legal, phase, result])
 
   const turnManagerStartedRef = useRef(false)
 
@@ -91,16 +86,26 @@ export default function Game({
         : { R: human, B: human, Y: human, G: human }
     turnManagerRef.current = new TurnManager({
       agents,
-      getGameState: () => snapshotFromState(latestStateRef.current!),
+      getGameState: () => snapshotFromState(useGame.getState()),
       applyAction: async (action: PlayerAction) => {
-        if (action.type === 'place') {
-          placeStone(action.pos)
-        } else if (action.type === 'move') {
-          if (action.from) selectStone(action.from)
-          moveTo(action.pos)
-        } else if (action.type === 'wall' && action.dir) {
-          if (action.from) selectStone(action.from)
-          buildWall(action.pos, action.dir)
+        // Use atomic applyActionSequence on the store to ensure multi-step actions
+        // (move + followUp wall) are applied in a single state transition to avoid
+        // transient UI states where a piece moved but turn hasn't advanced yet.
+        if (!action) return
+        const state = useGame.getState()
+        if (typeof state.applyActionSequence === 'function') {
+          state.applyActionSequence(action)
+        } else {
+          // Fallback to previous behavior if applyActionSequence is unavailable
+          if (action.type === 'place') {
+            placeStone(action.pos)
+          } else if (action.type === 'move') {
+            if (action.from) selectStone(action.from)
+            moveTo(action.pos)
+          } else if (action.type === 'wall' && action.dir) {
+            if (action.from) selectStone(action.from)
+            buildWall(action.pos, action.dir)
+          }
         }
       },
       isGameOver: (state) => state.phase === 'finished' || !!state.result,
