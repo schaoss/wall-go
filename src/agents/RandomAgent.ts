@@ -16,14 +16,9 @@ export class RandomAgent implements PlayerAgent {
   async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
     await sleep(200 + Math.floor(Math.random() * 200)) // Simulate thinking delay 200~400ms
     return new Promise((resolve, reject) => {
-      this.worker.onmessage = (
-        event: MessageEvent<{
-          action?: PlayerAction | null
-          error?: string
-          stack?: string
-          info?: string
-        }>,
-      ) => {
+      // Attach listener which will ignore late messages if terminated
+      const onmessage = (event: MessageEvent<{ action?: PlayerAction | null; error?: string; stack?: string; info?: string }>) => {
+        // clear handlers to avoid duplicate resolution
         this.worker.onmessage = null
         this.worker.onerror = null
         if (event.data.error) {
@@ -33,14 +28,10 @@ export class RandomAgent implements PlayerAgent {
         } else if (event.data.action) {
           resolve(event.data.action)
         } else {
-          // Fallback or error if action is unexpectedly null/undefined for non-finished states
-          reject(
-            new Error(
-              'Unknown or missing action from AIWorker for RandomAgent. Info: ' + event.data.info,
-            ),
-          )
+          reject(new Error('Unknown or missing action from AIWorker for RandomAgent. Info: ' + event.data.info))
         }
       }
+      this.worker.onmessage = onmessage
 
       this.worker.onerror = (error: ErrorEvent) => {
         this.worker.onmessage = null

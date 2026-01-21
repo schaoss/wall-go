@@ -25,6 +25,8 @@ export class HumanAgent implements PlayerAgent {
 
   cancel() {
     if (this.waiting) {
+      // Resolve with a noop action? For human, we'll just clear resolver so the looping manager
+      // can fall back to timeout-driven auto action.
       this.actionResolver = null
       this.waiting = false
     }

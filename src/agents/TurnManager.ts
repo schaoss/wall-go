@@ -12,6 +12,8 @@ export class TurnManager {
   private isGameOver: (state: GameSnapshot) => boolean
   private onTurnStart?: (state: GameSnapshot) => void
   private turnTimeLimit: number
+  // incrementing id to identify the current request; used to ignore late replies
+  private currentRequestId = 0
 
   constructor(params: {
     agents: Record<Player, PlayerAgent>
@@ -44,10 +46,20 @@ export class TurnManager {
       const state = this.getGameState()
       if (this.onTurnStart) this.onTurnStart(state)
       const agent = this.agents[state.turn]
+      // bump request id for this turn so late responses can be ignored
+      const requestId = ++this.currentRequestId
+
+      // Prepare timeout promise which will cancel agent and resolve with an auto action
       let timeoutId: ReturnType<typeof setTimeout> | null = null
       const timeoutPromise = new Promise<PlayerAction>((resolve) => {
         timeoutId = setTimeout(() => {
-          agent.cancel?.()
+          // Signal agent to cancel any in-flight work; agent implementations should
+          // terminate/cleanup their workers on cancel to avoid late onmessage handlers.
+          try {
+            agent.cancel?.()
+          } catch (e) {
+            // ignore cancellation errors
+          }
           const auto =
             getRandomWallActionForPlayer(state, state.turn) ??
             ({
@@ -60,9 +72,39 @@ export class TurnManager {
         }, this.turnTimeLimit)
       })
 
-      const action = await Promise.race([agent.getAction(state), timeoutPromise])
-      if (timeoutId) clearTimeout(timeoutId)
-      await this.executeAction(action as PlayerAction)
+      // Ask agent for action; if it resolves after we've moved on (requestId mismatch)
+      // we must ignore it. Use try/catch to handle agent promise rejection.
+      let action: PlayerAction | undefined
+      try {
+        const result = await Promise.race([agent.getAction(this.getGameState()), timeoutPromise])
+        // If requestId has changed, ignore result (late reply)
+        if (requestId !== this.currentRequestId) {
+          // A later request started; ignore this result
+          continue
+        }
+        action = result as PlayerAction
+      } catch (e) {
+        // On agent failure, pick auto action
+        try {
+          agent.cancel?.()
+        } catch (_) {}
+        action = getRandomWallActionForPlayer(state, state.turn) ?? ({
+          type: 'wall',
+          from: { x: 0, y: 0 },
+          pos: { x: 0, y: 0 },
+          dir: 'top',
+        } as PlayerAction)
+      } finally {
+        if (timeoutId) clearTimeout(timeoutId)
+      }
+
+      // If no action resolved (shouldn't happen), continue the loop
+      if (!action) continue
+
+      // Only execute action if this requestId is still current
+      if (requestId === this.currentRequestId) {
+        await this.executeAction(action as PlayerAction)
+      }
     }
   }
 }
