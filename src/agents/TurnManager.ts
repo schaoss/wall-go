@@ -57,7 +57,7 @@ export class TurnManager {
           // terminate/cleanup their workers on cancel to avoid late onmessage handlers.
           try {
             agent.cancel?.()
-          } catch (e) {
+          } catch (_err) {
             // ignore cancellation errors
           }
           const auto =
@@ -83,17 +83,21 @@ export class TurnManager {
           continue
         }
         action = result as PlayerAction
-      } catch (e) {
-        // On agent failure, pick auto action
+      } catch (_err) {
+        // On agent failure, pick auto action. Attempt to cancel agent if possible.
         try {
           agent.cancel?.()
-        } catch (_) {}
-        action = getRandomWallActionForPlayer(state, state.turn) ?? ({
-          type: 'wall',
-          from: { x: 0, y: 0 },
-          pos: { x: 0, y: 0 },
-          dir: 'top',
-        } as PlayerAction)
+        } catch (_cancelErr) {
+          // ignore
+        }
+        action =
+          getRandomWallActionForPlayer(state, state.turn) ??
+          ({
+            type: 'wall',
+            from: { x: 0, y: 0 },
+            pos: { x: 0, y: 0 },
+            dir: 'top',
+          } as PlayerAction)
       } finally {
         if (timeoutId) clearTimeout(timeoutId)
       }

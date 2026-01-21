@@ -23,7 +23,14 @@ export class MinimaxAgent implements PlayerAgent {
     this.timeLimit = 3000
 
     return new Promise((resolve, reject) => {
-      const onmessage = (event: MessageEvent<{ action?: PlayerAction | null; error?: string; stack?: string; info?: string }>) => {
+      const onmessage = (
+        event: MessageEvent<{
+          action?: PlayerAction | null
+          error?: string
+          stack?: string
+          info?: string
+        }>,
+      ) => {
         this.worker.onmessage = null
         this.worker.onerror = null
         if (event.data.error) {
@@ -33,7 +40,11 @@ export class MinimaxAgent implements PlayerAgent {
         } else if (event.data.action) {
           resolve(event.data.action)
         } else {
-          reject(new Error('Unknown or missing action from AIWorker for MinimaxAgent. Info: ' + event.data.info))
+          reject(
+            new Error(
+              'Unknown or missing action from AIWorker for MinimaxAgent. Info: ' + event.data.info,
+            ),
+          )
         }
       }
       this.worker.onmessage = onmessage

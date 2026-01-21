@@ -402,7 +402,8 @@ export const useGame = create<State>((_set, get) => {
         // For move actions, prefer the stone owner at `from` (handles cases where
         // tests set up board manually but `state.turn` may differ). Otherwise
         // fall back to the canonical state.turn.
-        const players = (next as any).players || PLAYERS
+        const players =
+          (next as unknown as { players?: import('@/lib/types').Player[] }).players || PLAYERS
         const board = next.board as import('@/lib/types').Cell[][]
         let actor = state.turn
         if (action.type === 'move' && action.from) {
@@ -412,7 +413,10 @@ export const useGame = create<State>((_set, get) => {
         if (action.type === 'place') {
           board[action.pos.y][action.pos.x].stone = actor
           // update stonesPlaced if exists
-          if (next.stonesPlaced && typeof (next.stonesPlaced as Record<string, number>)[actor as string] === 'number') {
+          if (
+            next.stonesPlaced &&
+            typeof (next.stonesPlaced as Record<string, number>)[actor as string] === 'number'
+          ) {
             ;(next.stonesPlaced as Record<string, number>)[actor as string] =
               ((next.stonesPlaced as Record<string, number>)[actor as string] || 0) + 1
           }

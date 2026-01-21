@@ -17,7 +17,14 @@ export class RandomAgent implements PlayerAgent {
     await sleep(200 + Math.floor(Math.random() * 200)) // Simulate thinking delay 200~400ms
     return new Promise((resolve, reject) => {
       // Attach listener which will ignore late messages if terminated
-      const onmessage = (event: MessageEvent<{ action?: PlayerAction | null; error?: string; stack?: string; info?: string }>) => {
+      const onmessage = (
+        event: MessageEvent<{
+          action?: PlayerAction | null
+          error?: string
+          stack?: string
+          info?: string
+        }>,
+      ) => {
         // clear handlers to avoid duplicate resolution
         this.worker.onmessage = null
         this.worker.onerror = null
@@ -28,7 +35,11 @@ export class RandomAgent implements PlayerAgent {
         } else if (event.data.action) {
           resolve(event.data.action)
         } else {
-          reject(new Error('Unknown or missing action from AIWorker for RandomAgent. Info: ' + event.data.info))
+          reject(
+            new Error(
+              'Unknown or missing action from AIWorker for RandomAgent. Info: ' + event.data.info,
+            ),
+          )
         }
       }
       this.worker.onmessage = onmessage
