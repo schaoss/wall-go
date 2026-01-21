@@ -222,47 +222,47 @@ export const useMultiplayer = create<MultiplayerState>((set, get) => ({
     peer.on('connection', (conn) => {
       conn.on('open', () => {
         addConnection(conn)
+        const state = get()
+        const maxP = state.gameState?.players.length || 2
+
+        if (state.roomPlayers.length >= maxP) {
+          conn.close()
+          removeConnection(conn)
+          return
+        }
+
+        const metadata = (conn.metadata ?? {}) as { nickname?: string }
+        const nicknameFromConn = metadata.nickname?.trim() || 'Guest'
+        const nextPlayerColor = PLAYER_LIST[state.roomPlayers.length]
+        const updatedPlayers: RoomPlayerInfo[] = [
+          ...state.roomPlayers,
+          { nickname: nicknameFromConn, player: nextPlayerColor, connected: true },
+        ]
+        const isFull = updatedPlayers.length === maxP
+
+        set({
+          roomPlayers: updatedPlayers,
+          gameStarted: isFull,
+          opponentDisconnected: false,
+        })
+
+        conn.send({
+          type: 'welcome',
+          player: nextPlayerColor,
+          gameState: serializeGameState(state.gameState!),
+          players: updatedPlayers,
+        } as MessageType)
+
+        broadcast({
+          type: 'state_update',
+          gameState: serializeGameState(state.gameState!),
+          players: updatedPlayers,
+        })
       })
 
       conn.on('data', (data) => {
         const msg = data as MessageType
-        if (msg.type === 'join') {
-          const state = get()
-          const maxP = state.gameState?.players.length || 2
-
-          if (state.roomPlayers.length >= maxP) {
-            conn.close()
-            return
-          }
-
-          const nextPlayerColor = PLAYER_LIST[state.roomPlayers.length]
-
-          const updatedPlayers: RoomPlayerInfo[] = [
-            ...state.roomPlayers,
-            { nickname: msg.nickname, player: nextPlayerColor, connected: true },
-          ]
-
-          const isFull = updatedPlayers.length === maxP
-
-          set({
-            roomPlayers: updatedPlayers,
-            gameStarted: isFull,
-            opponentDisconnected: false,
-          })
-
-          conn.send({
-            type: 'welcome',
-            player: nextPlayerColor,
-            gameState: serializeGameState(state.gameState!),
-            players: updatedPlayers,
-          } as MessageType)
-
-          broadcast({
-            type: 'state_update',
-            gameState: serializeGameState(state.gameState!),
-            players: updatedPlayers,
-          })
-        } else if (msg.type === 'action') {
+        if (msg.type === 'action') {
           const state = get()
           if (!state.gameStarted) return
           handleAction(msg.action)
@@ -314,11 +314,10 @@ export const useMultiplayer = create<MultiplayerState>((set, get) => ({
     set({ nickname, error: null, roomId: roomIdInput })
 
     const hostPeerId = `${PEER_PREFIX}${roomIdInput}`
-    const conn = peer.connect(hostPeerId)
+    const conn = peer.connect(hostPeerId, { metadata: { nickname } })
 
     conn.on('open', () => {
       set({ connection: conn, roomId: roomIdInput })
-      conn.send({ type: 'join', nickname } as MessageType)
     })
 
     conn.on('data', (data) => {
