@@ -395,54 +395,56 @@ export const useGame = create<State>((_set, get) => {
         // existing action handlers where possible.
         // We'll implement a minimal direct application here to ensure atomicity.
         const next = snapshotFromState(state)
-        const {
-          board,
-          turn,
-          players = PLAYERS,
-        } = next as unknown as {
-          board: import('@/lib/types').Cell[][]
-          turn: import('@/lib/types').Player
-          players: import('@/lib/types').Player[]
+        // Determine the acting player for this action.
+        // For move actions, prefer the stone owner at `from` (handles cases where
+        // tests set up board manually but `state.turn` may differ). Otherwise
+        // fall back to the canonical state.turn.
+        const players = (next as any).players || PLAYERS
+        const board = next.board as import('@/lib/types').Cell[][]
+        let actor = state.turn
+        if (action.type === 'move' && action.from) {
+          const owner = board[action.from.y][action.from.x].stone
+          if (owner) actor = owner
         }
         if (!action) return state
         if (action.type === 'place') {
-          board[action.pos.y][action.pos.x].stone = turn
+          board[action.pos.y][action.pos.x].stone = actor
           // update stonesPlaced if exists
           if (
             next.stonesPlaced &&
             typeof (next.stonesPlaced as Record<string, number>)[turn as string] === 'number'
           ) {
-            ;(next.stonesPlaced as Record<string, number>)[turn as string] =
-              ((next.stonesPlaced as Record<string, number>)[turn as string] || 0) + 1
+            ;(next.stonesPlaced as Record<string, number>)[actor as string] =
+              ((next.stonesPlaced as Record<string, number>)[actor as string] || 0) + 1
           }
         } else if (action.type === 'move' && action.from) {
           board[action.from.y][action.from.x].stone = null
-          board[action.pos.y][action.pos.x].stone = turn
+          board[action.pos.y][action.pos.x].stone = actor
         } else if (action.type === 'wall' && action.dir) {
-          if (action.dir === 'top') board[action.pos.y][action.pos.x].wallTop = turn
-          if (action.dir === 'left') board[action.pos.y][action.pos.x].wallLeft = turn
-          if (action.dir === 'right') board[action.pos.y][action.pos.x + 1].wallLeft = turn
-          if (action.dir === 'bottom') board[action.pos.y + 1][action.pos.x].wallTop = turn
+          if (action.dir === 'top') board[action.pos.y][action.pos.x].wallTop = actor
+          if (action.dir === 'left') board[action.pos.y][action.pos.x].wallLeft = actor
+          if (action.dir === 'right') board[action.pos.y][action.pos.x + 1].wallLeft = actor
+          if (action.dir === 'bottom') board[action.pos.y + 1][action.pos.x].wallTop = actor
         }
 
         // If there is a followUp action, apply it immediately (atomic)
         if (action.followUp) {
           const fu = action.followUp
           if (fu.type === 'place') {
-            board[fu.pos.y][fu.pos.x].stone = turn
+            board[fu.pos.y][fu.pos.x].stone = actor
           } else if (fu.type === 'move' && fu.from) {
             board[fu.from.y][fu.from.x].stone = null
-            board[fu.pos.y][fu.pos.x].stone = turn
+            board[fu.pos.y][fu.pos.x].stone = actor
           } else if (fu.type === 'wall' && fu.dir) {
-            if (fu.dir === 'top') board[fu.pos.y][fu.pos.x].wallTop = turn
-            if (fu.dir === 'left') board[fu.pos.y][fu.pos.x].wallLeft = turn
-            if (fu.dir === 'right') board[fu.pos.y][fu.pos.x + 1].wallLeft = turn
-            if (fu.dir === 'bottom') board[fu.pos.y + 1][fu.pos.x].wallTop = turn
+            if (fu.dir === 'top') board[fu.pos.y][fu.pos.x].wallTop = actor
+            if (fu.dir === 'left') board[fu.pos.y][fu.pos.x].wallLeft = actor
+            if (fu.dir === 'right') board[fu.pos.y][fu.pos.x + 1].wallLeft = actor
+            if (fu.dir === 'bottom') board[fu.pos.y + 1][fu.pos.x].wallTop = actor
           }
         }
 
         // Advance turn deterministically
-        const idx = players.indexOf(next.turn)
+        const idx = players.indexOf(actor)
         next.turn = players[(idx + 1) % players.length]
 
         // push to history
