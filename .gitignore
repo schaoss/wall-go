@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Tooling artifacts
+coverage
+.serena
+.sisyphus
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import Peer, { DataConnection } from 'peerjs'
+import Peer from 'peerjs'
+import type { DataConnection } from 'peerjs'
 import {
   type Player,
   type GameSnapshot,
