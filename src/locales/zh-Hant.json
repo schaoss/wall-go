@@ -58,12 +58,16 @@
     "confirmLeave": "確定要離開遊戲嗎？這將視為棄權。",
     "backToLobby": "返回大廳",
     "error": {
-      "ROOM_NOT_FOUND": "找不到房間",
-      "ROOM_FULL": "房間已滿",
+      "ROOM_NOT_FOUND": "找不到房間，請確認房間代碼後再試。",
+      "ROOM_FULL": "房間已滿，請嘗試加入其他房間。",
       "NOT_YOUR_TURN": "還沒輪到你",
       "INVALID_MOVE": "無效的操作",
-      "NOT_IN_ROOM": "尚未加入房間"
-    }
+      "NOT_IN_ROOM": "尚未加入房間",
+      "PEER_UNAVAILABLE": "連線伺服器無法使用，請檢查網路連線後再試。",
+      "NETWORK_ERROR": "網路錯誤，請檢查連線後再試。",
+      "TIMEOUT": "連線逾時，房間可能不存在或房主已離線。"
+    },
+    "playersCount": "玩家人數"
   },
   "rule": {
     "title": "遊戲規則說明",

@@ -58,12 +58,16 @@
     "confirmLeave": "¿Seguro que quieres salir? Perderás la partida.",
     "backToLobby": "Volver al lobby",
     "error": {
-      "ROOM_NOT_FOUND": "Sala no encontrada",
-      "ROOM_FULL": "La sala está llena",
+      "ROOM_NOT_FOUND": "Sala no encontrada. Por favor verifica el código e intenta de nuevo.",
+      "ROOM_FULL": "La sala está llena. Intenta con otra sala.",
       "NOT_YOUR_TURN": "No es tu turno",
       "INVALID_MOVE": "Movimiento inválido",
-      "NOT_IN_ROOM": "No estás en una sala"
-    }
+      "NOT_IN_ROOM": "No estás en una sala",
+      "PEER_UNAVAILABLE": "Servidor de conexión no disponible. Verifica tu conexión a internet.",
+      "NETWORK_ERROR": "Error de red. Verifica tu conexión.",
+      "TIMEOUT": "Se agotó el tiempo de conexión. La sala puede no existir o el anfitrión está desconectado."
+    },
+    "playersCount": "Jugadores"
   },
   "rule": {
     "title": "Reglas del Juego",

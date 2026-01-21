@@ -58,12 +58,16 @@
     "confirmLeave": "确定要离开游戏吗？这将视为弃权。",
     "backToLobby": "返回大厅",
     "error": {
-      "ROOM_NOT_FOUND": "找不到房间",
-      "ROOM_FULL": "房间已满",
+      "ROOM_NOT_FOUND": "找不到房间，请确认房间代码后再试。",
+      "ROOM_FULL": "房间已满，请尝试加入其他房间。",
       "NOT_YOUR_TURN": "还没轮到你",
       "INVALID_MOVE": "无效的操作",
-      "NOT_IN_ROOM": "尚未加入房间"
-    }
+      "NOT_IN_ROOM": "尚未加入房间",
+      "PEER_UNAVAILABLE": "连接服务器无法使用，请检查网络连接后再试。",
+      "NETWORK_ERROR": "网络错误，请检查连接后再试。",
+      "TIMEOUT": "连接超时，房间可能不存在或房主已离线。"
+    },
+    "playersCount": "玩家人数"
   },
   "rule": {
     "title": "游戏规则说明",

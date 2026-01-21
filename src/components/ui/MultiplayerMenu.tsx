@@ -87,20 +87,24 @@ export default function MultiplayerMenu({ onBack, dark, setDark }: MultiplayerMe
   }
 
   const inputClassName =
-    'rounded border border-zinc-300 dark:border-zinc-600 px-3 py-2 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full'
+    'rounded-xl border border-zinc-200 dark:border-zinc-700 px-4 py-3 bg-white/80 dark:bg-zinc-900/70 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full shadow-sm'
 
   const ConnectionStatus = () => (
-    <div className="flex items-center gap-2 text-sm">
-      <div
+    <div
+      className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase border ${
+        connected
+          ? 'bg-emerald-100/80 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-200 border-emerald-200 dark:border-emerald-700'
+          : 'bg-amber-100/80 dark:bg-amber-900/30 text-amber-700 dark:text-amber-200 border-amber-200 dark:border-amber-700'
+      }`}
+    >
+      <span
         className={`w-2 h-2 rounded-full ${
-          connected ? 'bg-green-500' : 'bg-red-500 animate-pulse'
+          connected ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
         }`}
       />
-      <span className="text-zinc-600 dark:text-zinc-400">
-        {connected
-          ? t('multiplayer.connected', 'Connected')
-          : t('multiplayer.connecting', 'Connecting...')}
-      </span>
+      {connected
+        ? t('multiplayer.connected', 'Connected')
+        : t('multiplayer.connecting', 'Connecting...')}
     </div>
   )
 
@@ -113,195 +117,209 @@ export default function MultiplayerMenu({ onBack, dark, setDark }: MultiplayerMe
 
   // Determine max players for waiting view
   const targetPlayers = gameState?.players.length || 2
+  const connectedCount = roomPlayers.filter((player) => player.connected).length
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-dvh bg-gradient-to-br from-rose-50 via-indigo-50 to-amber-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 p-4">
-      <div className="fixed top-0 w-full flex justify-between items-center gap-2 p-4">
+    <div className="relative flex flex-col items-center justify-center min-h-dvh bg-gradient-to-br from-rose-50 via-indigo-50 to-amber-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 p-4 overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-16 -left-16 w-64 h-64 rounded-full bg-indigo-200/40 dark:bg-indigo-900/30 blur-3xl" />
+        <div className="absolute -bottom-20 -right-10 w-72 h-72 rounded-full bg-rose-200/40 dark:bg-rose-900/30 blur-3xl" />
+      </div>
+
+      <div className="relative w-full max-w-3xl flex items-center justify-between mb-6">
         <ConnectionStatus />
         <LanguageThemeSwitcher dark={dark} setDark={setDark} />
       </div>
 
-      <h1 className="text-3xl font-extrabold mb-6 text-zinc-800 dark:text-zinc-100 drop-shadow animate-fade-in">
-        {t('multiplayer.title', 'Online Multiplayer')}
-      </h1>
+      <div className="relative w-full max-w-xl bg-white/80 dark:bg-zinc-900/80 border border-white/60 dark:border-zinc-800/80 rounded-3xl shadow-xl px-6 py-8 sm:px-8 sm:py-10 backdrop-blur">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-800 dark:text-zinc-100 drop-shadow animate-fade-in text-center">
+          {t('multiplayer.title', 'Online Multiplayer')}
+        </h1>
 
-      <div className="flex flex-col gap-4 w-full max-w-xs animate-fade-in">
-        <ErrorDisplay />
+        <div className="mt-6 flex flex-col gap-5 animate-fade-in">
+          <ErrorDisplay />
 
-        {view === 'nickname' && (
-          <div className="flex flex-col gap-4">
-            <label className="text-zinc-700 dark:text-zinc-200 text-sm font-medium">
-              {t('multiplayer.nickname', 'Enter Nickname')}
-            </label>
-            <input
-              type="text"
-              value={nicknameInput}
-              onChange={(e) => setNicknameInput(e.target.value)}
-              placeholder={t('multiplayer.nicknamePlaceholder', 'Your nickname')}
-              className={inputClassName}
-              maxLength={20}
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && nicknameInput.trim()) {
-                  setView('options')
-                }
-              }}
-            />
-            <GameButton
-              onClick={() => setView('options')}
-              disabled={!nicknameInput.trim() || !connected}
-              className="text-lg py-3"
-            >
-              {t('common.confirm', 'Confirm')}
-            </GameButton>
-          </div>
-        )}
-
-        {view === 'options' && (
-          <div className="flex flex-col gap-4">
-            <div className="text-center text-zinc-600 dark:text-zinc-400 text-sm mb-2">
-              {t('multiplayer.welcomePlayer', 'Welcome, {{name}}!', { name: nicknameInput })}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-zinc-700 dark:text-zinc-300 text-xs font-medium uppercase tracking-wider">
-                {t('multiplayer.playersCount', 'Players')}
+          {view === 'nickname' && (
+            <div className="flex flex-col gap-4">
+              <label className="text-zinc-700 dark:text-zinc-200 text-sm font-medium">
+                {t('multiplayer.nickname', 'Enter Nickname')}
               </label>
-              <div className="flex justify-between gap-2 mb-2">
-                {[2, 3, 4].map((count) => (
-                  <button
-                    key={count}
-                    onClick={() => setPlayerCount(count)}
-                    className={`flex-1 py-2 rounded border text-sm font-bold transition-all ${
-                      playerCount === count
-                        ? 'bg-indigo-500 border-indigo-600 text-white shadow-md transform scale-105'
-                        : 'bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
-                    }`}
-                  >
-                    {count}P
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <GameButton onClick={handleCreateRoom} disabled={!connected} className="text-lg py-3">
-              {t('multiplayer.create', 'Create Room')}
-            </GameButton>
-            <GameButton
-              onClick={() => setView('join')}
-              disabled={!connected}
-              className="text-lg py-3"
-            >
-              {t('multiplayer.join', 'Join Room')}
-            </GameButton>
-          </div>
-        )}
-
-        {view === 'join' && (
-          <div className="flex flex-col gap-4">
-            <label className="text-zinc-700 dark:text-zinc-200 text-sm font-medium">
-              {t('multiplayer.roomId', 'Room ID')}
-            </label>
-            <input
-              type="text"
-              value={roomIdInput}
-              onChange={(e) => setRoomIdInput(e.target.value.toUpperCase())}
-              placeholder={t('multiplayer.roomIdPlaceholder', 'Enter Room ID')}
-              className={`${inputClassName} uppercase tracking-widest text-center font-mono`}
-              maxLength={6}
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleJoinRoom()
-                }
-              }}
-            />
-            <GameButton
-              onClick={handleJoinRoom}
-              disabled={!roomIdInput.trim() || !connected}
-              className="text-lg py-3"
-            >
-              {t('multiplayer.join', 'Join Room')}
-            </GameButton>
-          </div>
-        )}
-
-        {view === 'waiting' && roomId && (
-          <div className="flex flex-col gap-4 items-center">
-            <div className="text-zinc-600 dark:text-zinc-400 text-sm">
-              {t('multiplayer.shareRoomId', 'Share this Room ID with your friend:')}
-            </div>
-
-            <div className="flex items-center gap-2 w-full">
-              <div className="flex-1 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-600 rounded px-4 py-3 text-center">
-                <span className="text-2xl font-mono font-bold tracking-[0.3em] text-zinc-800 dark:text-zinc-100">
-                  {roomId}
-                </span>
-              </div>
-              <GameButton onClick={handleCopyRoomId} className="px-4 py-3">
-                {copied ? t('multiplayer.copied', 'Copied!') : t('multiplayer.copy', 'Copy')}
+              <input
+                type="text"
+                value={nicknameInput}
+                onChange={(e) => setNicknameInput(e.target.value)}
+                placeholder={t('multiplayer.nicknamePlaceholder', 'Your nickname')}
+                className={inputClassName}
+                maxLength={20}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && nicknameInput.trim()) {
+                    setView('options')
+                  }
+                }}
+              />
+              <GameButton
+                onClick={() => setView('options')}
+                disabled={!nicknameInput.trim() || !connected}
+                className="text-lg py-3"
+              >
+                {t('common.confirm', 'Confirm')}
               </GameButton>
             </div>
+          )}
 
-            <div className="w-full mt-4">
-              <div className="flex justify-between items-baseline mb-2">
-                <div className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">
-                  {t('multiplayer.players', 'Players')}:
-                </div>
-                <div className="text-xs text-zinc-500">
-                  {roomPlayers.length} / {targetPlayers}
-                </div>
+          {view === 'options' && (
+            <div className="flex flex-col gap-5">
+              <div className="text-center text-zinc-600 dark:text-zinc-400 text-sm">
+                {t('multiplayer.welcomePlayer', 'Welcome, {{name}}!', { name: nicknameInput })}
               </div>
-              <div className="bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-600 rounded p-3">
-                {roomPlayers.map((player, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between py-1 text-zinc-700 dark:text-zinc-200"
-                  >
-                    <span>{player.nickname}</span>
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded ${
-                        player.connected
-                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                          : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+
+              <div className="flex flex-col gap-2">
+                <label className="text-zinc-700 dark:text-zinc-300 text-xs font-semibold uppercase tracking-widest">
+                  {t('multiplayer.playersCount', 'Players')}
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[2, 3, 4].map((count) => (
+                    <button
+                      key={count}
+                      onClick={() => setPlayerCount(count)}
+                      className={`py-2.5 rounded-xl border text-sm font-bold transition-all ${
+                        playerCount === count
+                          ? 'bg-indigo-500 border-indigo-600 text-white shadow-md scale-[1.03]'
+                          : 'bg-white/90 dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700'
                       }`}
                     >
-                      {player.connected
-                        ? t('multiplayer.ready', 'Ready')
-                        : t('multiplayer.disconnected', 'Disconnected')}
-                    </span>
-                  </div>
-                ))}
-                {Array.from({ length: Math.max(0, targetPlayers - roomPlayers.length) }).map(
-                  (_, i) => (
-                    <div
-                      key={`empty-${i}`}
-                      className="text-zinc-400 dark:text-zinc-500 text-sm py-1 italic border-t border-dashed border-zinc-200 dark:border-zinc-700 first:border-0 mt-1 first:mt-0"
-                    >
-                      {t('multiplayer.waitingSlot', 'Waiting for player...')}
-                    </div>
-                  ),
-                )}
+                      {count}P
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid gap-3">
+                <GameButton
+                  onClick={handleCreateRoom}
+                  disabled={!connected}
+                  className="text-lg py-3"
+                >
+                  {t('multiplayer.create', 'Create Room')}
+                </GameButton>
+                <GameButton
+                  onClick={() => setView('join')}
+                  disabled={!connected}
+                  className="text-lg py-3"
+                >
+                  {t('multiplayer.join', 'Join Room')}
+                </GameButton>
               </div>
             </div>
+          )}
 
-            {roomPlayers.length < targetPlayers && (
-              <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400 mt-4">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" />
-                </div>
-                <span>{t('multiplayer.waiting', 'Waiting for opponent...')}</span>
+          {view === 'join' && (
+            <div className="flex flex-col gap-4">
+              <label className="text-zinc-700 dark:text-zinc-200 text-sm font-medium">
+                {t('multiplayer.roomId', 'Room ID')}
+              </label>
+              <input
+                type="text"
+                value={roomIdInput}
+                onChange={(e) => setRoomIdInput(e.target.value.toUpperCase())}
+                placeholder={t('multiplayer.roomIdPlaceholder', 'Enter Room ID')}
+                className={`${inputClassName} uppercase tracking-[0.35em] text-center font-mono`}
+                maxLength={6}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleJoinRoom()
+                  }
+                }}
+              />
+              <GameButton
+                onClick={handleJoinRoom}
+                disabled={!roomIdInput.trim() || !connected}
+                className="text-lg py-3"
+              >
+                {t('multiplayer.join', 'Join Room')}
+              </GameButton>
+            </div>
+          )}
+
+          {view === 'waiting' && roomId && (
+            <div className="flex flex-col gap-5">
+              <div className="text-zinc-600 dark:text-zinc-400 text-sm text-center">
+                {t('multiplayer.shareRoomId', 'Share this Room ID with your friend:')}
               </div>
-            )}
-          </div>
-        )}
 
-        <div className="mt-4">
-          <GameButton onClick={handleBack} text ariaLabel={t('multiplayer.back', 'Back')}>
-            {t('multiplayer.back', 'Back')}
-          </GameButton>
+              <div className="flex flex-col sm:flex-row items-stretch gap-3">
+                <div className="flex-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl px-4 py-4 text-center">
+                  <span className="text-2xl font-mono font-bold tracking-[0.3em] text-zinc-800 dark:text-zinc-100">
+                    {roomId}
+                  </span>
+                </div>
+                <GameButton onClick={handleCopyRoomId} className="px-5 py-3">
+                  {copied ? t('multiplayer.copied', 'Copied!') : t('multiplayer.copy', 'Copy')}
+                </GameButton>
+              </div>
+
+              <div className="bg-white/90 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-4">
+                <div className="flex justify-between items-baseline mb-3">
+                  <div className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">
+                    {t('multiplayer.players', 'Players')}:
+                  </div>
+                  <div className="text-xs text-zinc-500">
+                    {connectedCount} / {targetPlayers}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {roomPlayers.map((player, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between rounded-xl bg-zinc-50 dark:bg-zinc-800/60 px-3 py-2 text-zinc-700 dark:text-zinc-200"
+                    >
+                      <span className="font-medium truncate">{player.nickname}</span>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full ${
+                          player.connected
+                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                            : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300'
+                        }`}
+                      >
+                        {player.connected
+                          ? t('multiplayer.ready', 'Ready')
+                          : t('multiplayer.disconnected', 'Disconnected')}
+                      </span>
+                    </div>
+                  ))}
+                  {Array.from({ length: Math.max(0, targetPlayers - roomPlayers.length) }).map(
+                    (_, i) => (
+                      <div
+                        key={`empty-${i}`}
+                        className="text-zinc-400 dark:text-zinc-500 text-sm py-2 italic border border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl text-center"
+                      >
+                        {t('multiplayer.waitingSlot', 'Waiting for player...')}
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+
+              {connectedCount < targetPlayers && (
+                <div className="flex items-center justify-center gap-3 text-zinc-600 dark:text-zinc-400 mt-2">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" />
+                  </div>
+                  <span>{t('multiplayer.waiting', 'Waiting for opponent...')}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="pt-2">
+            <GameButton onClick={handleBack} text ariaLabel={t('multiplayer.back', 'Back')}>
+              {t('multiplayer.back', 'Back')}
+            </GameButton>
+          </div>
         </div>
       </div>
     </div>

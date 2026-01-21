@@ -68,53 +68,54 @@ export function getLegalActions(gameState: GameSnapshot): PlayerAction[] {
   return legalActions
 }
 
-export function placeScore(board: Cell[][], x: number, y: number, me: Player): number {
-  const opp = me === 'R' ? 'B' : 'R'
+export function placeScore(
+  board: Cell[][],
+  x: number,
+  y: number,
+  me: Player,
+  players: Player[] = ['R', 'B'],
+): number {
+  const opponents = players.filter((p) => p !== me)
 
-  // 1. 中心
   const central = 3 - Math.max(Math.abs(x - 3), Math.abs(y - 3))
 
-  // 2. 與己子形成短牆
   let cut = 0
   let oppBlock = 0
   board.forEach((row, yy) =>
     row.forEach((c, xx) => {
       if (c.stone === me) {
         if ((xx === x && Math.abs(yy - y) <= 2) || (yy === y && Math.abs(xx - x) <= 2)) cut = 2
-      } else if (c.stone === opp) {
+      } else if (c.stone && opponents.includes(c.stone)) {
         if ((xx === x && Math.abs(yy - y) <= 2) || (yy === y && Math.abs(xx - x) <= 2)) oppBlock = 2
       }
     }),
   )
 
-  // 3. Edge penalty (自己)
   const edge = -(Number(x === 0 || x === 6) + Number(y === 0 || y === 6))
 
-  // 4. CornerPressure：如果對手子距角≤2，我放在同角方向+分
   let cornerP = 0
   board.forEach((row, yy) =>
     row.forEach((c, xx) => {
-      if (c.stone === opp) {
+      if (c.stone && opponents.includes(c.stone)) {
         const d = Math.min(xx + yy, xx + 6 - yy, 6 - xx + yy, 12 - xx - yy)
-        cornerP += Math.max(0, 2 - d) // 角=2, 邊下一格=1, 其他=0
+        cornerP += Math.max(0, 2 - d)
       }
     }),
   )
-  // scale down
   cornerP = Math.min(2, cornerP)
 
   return 3 * central + 4 * cut + 2 * oppBlock + 1 * cornerP + 1 * edge
 }
 
 export function getBestPlacement(state: GameSnapshot): PlayerAction {
-  const { board, turn } = state
+  const { board, turn, players } = state
   let best = -Infinity
   const cands: { x: number; y: number }[] = []
 
   for (let y = 0; y < 7; y++) {
     for (let x = 0; x < 7; x++) {
-      if (board[y][x].stone) continue // 已佔
-      const s = placeScore(board, x, y, turn)
+      if (board[y][x].stone) continue
+      const s = placeScore(board, x, y, turn, players)
       if (s > best) {
         best = s
         cands.length = 0
@@ -122,21 +123,23 @@ export function getBestPlacement(state: GameSnapshot): PlayerAction {
       } else if (s === best) cands.push({ x, y })
     }
   }
-  // 同分隨機
   const pick = cands[Math.floor(Math.random() * cands.length)]
   return { type: 'place', pos: pick }
 }
 
-// 行動
-// 複製遊戲狀態（淺拷貝，僅用於模擬）
 export function cloneGameState(state: GameSnapshot): GameSnapshot {
   return JSON.parse(JSON.stringify(state))
 }
 
-// 模擬執行 action，回傳新狀態（僅處理棋子/牆，忽略複雜規則）
+function getNextPlayer(current: Player, players: Player[]): Player {
+  const idx = players.indexOf(current)
+  return players[(idx + 1) % players.length]
+}
+
 export function applyAction(state: GameSnapshot, action: PlayerAction): GameSnapshot {
   const newState = cloneGameState(state)
-  const { board, turn } = newState
+  const { board, turn, players = ['R', 'B'] } = newState
+
   if (action.type === 'place') {
     board[action.pos.y][action.pos.x].stone = turn
   } else if (action.type === 'move' && action.from) {
@@ -151,7 +154,7 @@ export function applyAction(state: GameSnapshot, action: PlayerAction): GameSnap
     if (action.dir === 'right') board[action.pos.y][action.pos.x + 1].wallLeft = turn
     if (action.dir === 'bottom') board[action.pos.y + 1][action.pos.x].wallTop = turn
   }
-  // 換手
-  newState.turn = turn === 'R' ? 'B' : 'R'
+
+  newState.turn = getNextPlayer(turn, players)
   return newState
 }

@@ -58,12 +58,16 @@
     "confirmLeave": "Are you sure you want to leave this game? You will forfeit the match.",
     "backToLobby": "Back to Lobby",
     "error": {
-      "ROOM_NOT_FOUND": "Room not found",
-      "ROOM_FULL": "Room is full",
+      "ROOM_NOT_FOUND": "Room not found. Please check the Room ID and try again.",
+      "ROOM_FULL": "Room is full. Please try a different room.",
       "NOT_YOUR_TURN": "Not your turn",
       "INVALID_MOVE": "Invalid move",
-      "NOT_IN_ROOM": "Not in a room"
-    }
+      "NOT_IN_ROOM": "Not in a room",
+      "PEER_UNAVAILABLE": "Connection server unavailable. Please check your internet connection and try again.",
+      "NETWORK_ERROR": "Network error. Please check your connection and try again.",
+      "TIMEOUT": "Connection timed out. The room may not exist or the host may be offline."
+    },
+    "playersCount": "Players"
   },
   "rule": {
     "title": "Game Rules",

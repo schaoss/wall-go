@@ -129,13 +129,18 @@ export default function MultiplayerGame({
   return (
     <div
       className={[
-        'flex flex-col items-center gap-4 py-4 min-h-dvh min-w-0',
-        'bg-gradient-to-br from-rose-50 via-indigo-50 to-amber-50 dark:from-zinc-900 dark:via-zinc-700 dark:to-zinc-900',
+        'relative flex flex-col items-center gap-4 py-4 min-h-dvh min-w-0',
+        'bg-gradient-to-br from-rose-50 via-indigo-50 to-amber-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900',
         'transition-color',
         'box-border',
         'p-4 pb-12',
       ].join(' ')}
     >
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-20 -right-10 w-72 h-72 rounded-full bg-indigo-200/40 dark:bg-indigo-900/30 blur-3xl" />
+        <div className="absolute -bottom-24 -left-10 w-72 h-72 rounded-full bg-rose-200/40 dark:bg-rose-900/30 blur-3xl" />
+      </div>
+
       <TurnTimer timeLeft={timeLeft} timeLimit={turnTimeLimit} turn={turn} phase={phase} />
 
       <Navbar
@@ -155,98 +160,115 @@ export default function MultiplayerGame({
       />
 
       {opponentDisconnected && (
-        <div className="bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300 px-4 py-2 rounded text-sm animate-fade-in">
+        <div className="bg-amber-100/90 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-200 px-4 py-2 rounded-xl text-sm animate-fade-in shadow-sm">
           {t('multiplayer.opponentDisconnected', 'Opponent disconnected. Waiting for reconnect...')}
         </div>
       )}
 
-      <div className="flex items-center gap-4 text-sm text-zinc-600 dark:text-zinc-400">
-        {roomPlayers.map((p) => (
-          <div
-            key={p.player}
-            className={`flex items-center gap-2 px-3 py-1 rounded ${
-              p.player === myPlayer
-                ? 'bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-300 dark:border-indigo-700'
-                : 'bg-zinc-100 dark:bg-zinc-800'
-            }`}
-          >
-            <span
-              className={`inline-block w-4 h-4 rounded-full border-2 ${getPlayerTheme(p.player).bg} ${getPlayerTheme(p.player).border}`}
-            />
-            <span className="font-medium">{p.nickname}</span>
-            {p.player === myPlayer && (
-              <span className="text-xs text-indigo-600 dark:text-indigo-400">
-                ({t('multiplayer.you', 'You')})
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 drop-shadow animate-fade-in flex items-center gap-2">
-        {phase === 'finished' && result ? (
-          result.tie ? (
-            <>{t('game.tie', '🤜🤛 Draw!')}</>
-          ) : result.winner ? (
-            <>
-              {t('game.winner', '🥇 Winner:')}
+      <div className="w-full max-w-5xl flex flex-col gap-3">
+        <div className="grid gap-2 sm:grid-cols-2">
+          {roomPlayers.map((p) => (
+            <div
+              key={p.player}
+              className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 shadow-sm ${
+                p.player === myPlayer
+                  ? 'bg-indigo-100/80 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-700'
+                  : 'bg-white/80 dark:bg-zinc-900/70 border-zinc-200 dark:border-zinc-700'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className={`inline-block w-4 h-4 rounded-full border-2 ${getPlayerTheme(p.player).bg} ${getPlayerTheme(p.player).border}`}
+                />
+                <span className="font-medium text-zinc-700 dark:text-zinc-100 truncate">
+                  {p.nickname}
+                </span>
+                {p.player === myPlayer && (
+                  <span className="text-xs text-indigo-600 dark:text-indigo-300">
+                    ({t('multiplayer.you', 'You')})
+                  </span>
+                )}
+              </div>
               <span
-                className={`inline-block w-6 h-6 rounded-full shadow-sm mx-1 align-middle border-2 ${getPlayerTheme(result.winner).bg} ${getPlayerTheme(result.winner).border}`}
+                className={`text-xs px-2 py-0.5 rounded-full ${
+                  p.connected
+                    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                    : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300'
+                }`}
+              >
+                {p.connected
+                  ? t('multiplayer.ready', 'Ready')
+                  : t('multiplayer.disconnected', 'Disconnected')}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 drop-shadow animate-fade-in flex items-center gap-2">
+          {phase === 'finished' && result ? (
+            result.tie ? (
+              <>{t('game.tie', '🤜🤛 Draw!')}</>
+            ) : result.winner ? (
+              <>
+                {t('game.winner', '🥇 Winner:')}
+                <span
+                  className={`inline-block w-6 h-6 rounded-full shadow-sm mx-1 align-middle border-2 ${getPlayerTheme(result.winner).bg} ${getPlayerTheme(result.winner).border}`}
+                  aria-label={t(
+                    getPlayerTheme(result.winner).nameKey,
+                    getPlayerTheme(result.winner).nameDef,
+                  )}
+                />
+              </>
+            ) : null
+          ) : (
+            <>
+              Wall Go ·{' '}
+              {phase === 'placing'
+                ? t('game.phase.placing', 'Placement Phase')
+                : phase === 'playing'
+                  ? t('game.phase.playing', 'Action Phase')
+                  : t('game.phase.finished', 'Scoring Phase')}
+              {isMyTurn && (
+                <span className="text-sm font-normal text-indigo-600 dark:text-indigo-400 ml-2">
+                  ({t('multiplayer.yourTurn', 'Your turn')})
+                </span>
+              )}
+            </>
+          )}
+        </h1>
+
+        <div className="flex flex-wrap gap-3 animate-fade-in items-center">
+          {(phase === 'placing'
+            ? players.map((p): [string, number] => [p, 0])
+            : (Object.entries(live.score ?? {}) as [string, number][])
+          ).map(([p, s]) => (
+            <span
+              key={p}
+              className="flex items-center gap-2 font-mono text-lg px-3 py-1.5 rounded-2xl bg-white/80 dark:bg-zinc-900/70 shadow-sm border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 transition-all duration-300"
+            >
+              <span
+                className={`inline-block w-5 h-5 rounded-full shadow-sm mr-1 border-2 ${getPlayerTheme(p as Player).bg} ${getPlayerTheme(p as Player).border}`}
                 aria-label={t(
-                  getPlayerTheme(result.winner).nameKey,
-                  getPlayerTheme(result.winner).nameDef,
+                  getPlayerTheme(p as Player).nameKey,
+                  getPlayerTheme(p as Player).nameDef,
                 )}
               />
-            </>
-          ) : null
-        ) : (
-          <>
-            Wall Go ·{' '}
-            {phase === 'placing'
-              ? t('game.phase.placing', 'Placement Phase')
-              : phase === 'playing'
-                ? t('game.phase.playing', 'Action Phase')
-                : t('game.phase.finished', 'Scoring Phase')}
-            {isMyTurn && (
-              <span className="text-sm font-normal text-indigo-600 dark:text-indigo-400 ml-2">
-                ({t('multiplayer.yourTurn', 'Your turn')})
-              </span>
-            )}
-          </>
-        )}
-      </h1>
-
-      <div className="flex gap-4 animate-fade-in items-center">
-        {(phase === 'placing'
-          ? players.map((p): [string, number] => [p, 0])
-          : (Object.entries(live.score ?? {}) as [string, number][])
-        ).map(([p, s]) => (
-          <span
-            key={p}
-            className="flex items-center gap-2 font-mono text-lg px-2 py-1 rounded bg-white/70 dark:bg-zinc-800/80 shadow-sm border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 transition-all duration-300"
-          >
-            <span
-              className={`inline-block w-5 h-5 rounded-full shadow-sm mr-1 border-2 ${getPlayerTheme(p as Player).bg} ${getPlayerTheme(p as Player).border}`}
-              aria-label={t(
-                getPlayerTheme(p as Player).nameKey,
-                getPlayerTheme(p as Player).nameDef,
-              )}
-            />
-            {s}
-          </span>
-        ))}
-        {phase === 'finished' && (
-          <GameButton
-            onClick={handleLeave}
-            ariaLabel={t('multiplayer.backToLobby', 'Back to Lobby')}
-            variant="success"
-          >
-            {t('multiplayer.backToLobby', 'Back to Lobby')}
-          </GameButton>
-        )}
+              {s}
+            </span>
+          ))}
+          {phase === 'finished' && (
+            <GameButton
+              onClick={handleLeave}
+              ariaLabel={t('multiplayer.backToLobby', 'Back to Lobby')}
+              variant="success"
+            >
+              {t('multiplayer.backToLobby', 'Back to Lobby')}
+            </GameButton>
+          )}
+        </div>
       </div>
 
-      <div className="board-container flex flex-col aspect-ratio-1 items-center w-[min(800px,100dvh-280px)] max-w-[calc(100dvw-32px)] transition-all">
+      <div className="board-container flex flex-col aspect-ratio-1 items-center w-[min(820px,100dvh-280px)] max-w-[calc(100dvw-32px)] transition-all">
         <Board
           board={board}
           phase={phase}

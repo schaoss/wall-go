@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import Peer from 'peerjs'
-import type { DataConnection } from 'peerjs'
+import type { DataConnection, PeerJSOption } from 'peerjs'
 import {
   type Player,
   type GameSnapshot,
@@ -19,6 +19,7 @@ export interface RoomPlayerInfo {
   nickname: string
   player: Player
   connected: boolean
+  peerId: string
 }
 
 type MessageType =
@@ -30,6 +31,7 @@ type MessageType =
       players: RoomPlayerInfo[]
     }
   | { type: 'state_update'; gameState: SerializedGameSnapshot; players: RoomPlayerInfo[] }
+  | { type: 'error'; reason: string }
   | { type: 'action'; action: GameAction }
 
 type GameAction =
@@ -72,10 +74,13 @@ interface MultiplayerState {
   error: string | null
   gameStarted: boolean
   opponentDisconnected: boolean
+  retryCount: number
+  connectionStatus: 'idle' | 'connecting' | 'connected' | 'error'
 
   initPeer: () => Promise<string>
   createRoom: (nickname: string, maxPlayers?: number) => Promise<void>
   joinRoom: (roomId: string, nickname: string) => void
+  joinRoomWithRetry: (roomId: string, nickname: string, retryAttempt?: number) => void
   leaveRoom: () => void
 
   selectStone: (pos: Pos) => void
@@ -103,6 +108,54 @@ function deserializeGameState(data: SerializedGameSnapshot): GameSnapshot {
 
 function generateRoomId(): string {
   return Math.random().toString(36).substring(2, 8).toUpperCase()
+}
+
+function getPeerConfig(): PeerJSOption {
+  const config: PeerJSOption = {}
+  const host = import.meta.env.VITE_PEER_HOST
+  const port = import.meta.env.VITE_PEER_PORT
+  const path = import.meta.env.VITE_PEER_PATH
+  const secure = import.meta.env.VITE_PEER_SECURE
+  const hasCustomConfig = Boolean(host || port || path || secure !== undefined)
+
+  if (!hasCustomConfig) {
+    return {
+      secure: true,
+      port: 443,
+    }
+  }
+
+  if (host) config.host = host
+  if (port) {
+    const parsed = Number(port)
+    if (!Number.isNaN(parsed)) config.port = parsed
+  }
+  if (path) config.path = path
+  if (secure !== undefined) config.secure = secure === 'true'
+
+  return config
+}
+
+function createPeer(id?: string): Peer {
+  const config = getPeerConfig()
+  const iceServers = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' },
+    { urls: 'stun:global.stun.twilio.com:3478' },
+    { urls: 'stun:stun.stunprotocol.org:3478' },
+    { urls: 'stun:stun.voip.blackberry.com:3478' },
+  ]
+  const peerConfig: PeerJSOption = {
+    ...config,
+    config: {
+      iceServers,
+      ...(config.config ?? {}),
+    },
+  }
+  return id ? new Peer(id, peerConfig) : new Peer(peerConfig)
 }
 
 function createInitialGameState(maxPlayers: number): GameSnapshot {
@@ -134,6 +187,36 @@ function createInitialGameState(maxPlayers: number): GameSnapshot {
 }
 
 const PEER_PREFIX = 'WALL-GO-V1-'
+const JOIN_TIMEOUT_MS = 30_000
+const MAX_RETRY_COUNT = 3
+const RETRY_DELAY_MS = 2000
+
+export const ERROR_MESSAGES: Record<string, { key: string; suggestion: string }> = {
+  ROOM_NOT_FOUND: {
+    key: 'multiplayer.error.ROOM_NOT_FOUND',
+    suggestion: 'Check Room ID or ask the host to recreate the room.',
+  },
+  ROOM_FULL: {
+    key: 'multiplayer.error.ROOM_FULL',
+    suggestion: 'The room is already full. Try another room.',
+  },
+  PEER_UNAVAILABLE: {
+    key: 'multiplayer.error.PEER_UNAVAILABLE',
+    suggestion: 'Unable to connect to the host. Check your network connection.',
+  },
+  NETWORK_ERROR: {
+    key: 'multiplayer.error.NETWORK_ERROR',
+    suggestion: 'Network connection failed. Please check your internet connection.',
+  },
+  TIMEOUT: {
+    key: 'multiplayer.error.TIMEOUT',
+    suggestion: 'Connection timed out. Try again or check your network.',
+  },
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 export const useMultiplayer = create<MultiplayerState>((set, get) => ({
   peer: null,
@@ -149,6 +232,8 @@ export const useMultiplayer = create<MultiplayerState>((set, get) => ({
   error: null,
   gameStarted: false,
   opponentDisconnected: false,
+  retryCount: 0,
+  connectionStatus: 'idle',
 
   initPeer: () => {
     return new Promise((resolve, reject) => {
@@ -158,7 +243,8 @@ export const useMultiplayer = create<MultiplayerState>((set, get) => ({
         return
       }
 
-      const peer = new Peer()
+      set({ connected: false })
+      const peer = createPeer()
 
       peer.on('open', (id) => {
         set({ peer, connected: true, error: null })
@@ -179,6 +265,11 @@ export const useMultiplayer = create<MultiplayerState>((set, get) => ({
 
       peer.on('disconnected', () => {
         set({ connected: false })
+        peer.reconnect()
+      })
+
+      peer.on('close', () => {
+        set({ connected: false })
       })
     })
   },
@@ -190,11 +281,12 @@ export const useMultiplayer = create<MultiplayerState>((set, get) => ({
     const roomId = generateRoomId()
     const fullPeerId = `${PEER_PREFIX}${roomId}`
     const gameState = createInitialGameState(maxPlayers)
-    const roomPlayers: RoomPlayerInfo[] = [{ nickname, player: 'R', connected: true }]
 
-    const peer = new Peer(fullPeerId)
+    set({ connected: false })
+    const peer = createPeer(fullPeerId)
 
-    peer.on('open', () => {
+    peer.on('open', (id) => {
+      const roomPlayers: RoomPlayerInfo[] = [{ nickname, player: 'R', connected: true, peerId: id }]
       set({
         peer,
         connected: true,
@@ -224,27 +316,36 @@ export const useMultiplayer = create<MultiplayerState>((set, get) => ({
     const registerPlayer = (conn: DataConnection, nickname: string) => {
       const state = get()
       const maxP = state.gameState?.players.length || 2
+      const disconnectedSlot = state.roomPlayers.find((p) => !p.connected)
+      const connectedCount = state.roomPlayers.filter((p) => p.connected).length
 
       if (joinedPeers.has(conn.peer)) return
-      if (state.roomPlayers.length >= maxP) {
+      if (connectedCount >= maxP && !disconnectedSlot) {
+        conn.send({ type: 'error', reason: 'ROOM_FULL' } as MessageType)
         conn.close()
         removeConnection(conn)
         return
       }
 
-      const nextPlayerColor = PLAYER_LIST[state.roomPlayers.length]
-      const updatedPlayers: RoomPlayerInfo[] = [
-        ...state.roomPlayers,
-        { nickname, player: nextPlayerColor, connected: true },
-      ]
-      const isFull = updatedPlayers.length === maxP
+      let nextPlayerColor: Player
+      let updatedPlayers: RoomPlayerInfo[]
+      if (disconnectedSlot) {
+        nextPlayerColor = disconnectedSlot.player
+        updatedPlayers = state.roomPlayers.map((p) =>
+          p.player === nextPlayerColor ? { ...p, nickname, connected: true, peerId: conn.peer } : p,
+        )
+      } else {
+        nextPlayerColor = PLAYER_LIST[state.roomPlayers.length]
+        updatedPlayers = [
+          ...state.roomPlayers,
+          { nickname, player: nextPlayerColor, connected: true, peerId: conn.peer },
+        ]
+      }
+
+      const isFull = updatedPlayers.filter((p) => p.connected).length === maxP
 
       joinedPeers.add(conn.peer)
-      set({
-        roomPlayers: updatedPlayers,
-        gameStarted: isFull,
-        opponentDisconnected: false,
-      })
+      set({ roomPlayers: updatedPlayers, gameStarted: isFull, opponentDisconnected: false })
 
       conn.send({
         type: 'welcome',
@@ -282,7 +383,16 @@ export const useMultiplayer = create<MultiplayerState>((set, get) => ({
       })
 
       conn.on('close', () => {
-        set({ opponentDisconnected: true })
+        const state = get()
+        const updatedPlayers = state.roomPlayers.map((p) =>
+          p.peerId === conn.peer ? { ...p, connected: false } : p,
+        )
+        set({ opponentDisconnected: true, roomPlayers: updatedPlayers, gameStarted: false })
+        broadcast({
+          type: 'state_update',
+          gameState: serializeGameState(state.gameState!),
+          players: updatedPlayers,
+        })
         removeConnection(conn)
         joinedPeers.delete(conn.peer)
       })
@@ -321,47 +431,114 @@ export const useMultiplayer = create<MultiplayerState>((set, get) => ({
   },
 
   joinRoom: (roomIdInput: string, nickname: string) => {
+    get().joinRoomWithRetry(roomIdInput, nickname, 0)
+  },
+
+  joinRoomWithRetry: (roomIdInput: string, nickname: string, retryAttempt: number = 0) => {
     const { peer } = get()
     if (!peer) return
 
-    set({ nickname, error: null, roomId: roomIdInput })
+    set({
+      nickname,
+      error: null,
+      roomId: roomIdInput,
+      retryCount: retryAttempt,
+      connectionStatus: 'connecting',
+    })
 
     const hostPeerId = `${PEER_PREFIX}${roomIdInput}`
     const conn = peer.connect(hostPeerId, { metadata: { nickname } })
 
+    const handleRetryOrFail = async (errorCode: string) => {
+      if (retryAttempt < MAX_RETRY_COUNT) {
+        const delay = RETRY_DELAY_MS * Math.pow(1.5, retryAttempt)
+        await sleep(delay)
+        get().joinRoomWithRetry(roomIdInput, nickname, retryAttempt + 1)
+      } else {
+        set({
+          error: errorCode,
+          connection: null,
+          roomId: null,
+          roomPlayers: [],
+          gameState: null,
+          gameStarted: false,
+          retryCount: 0,
+          connectionStatus: 'error',
+        })
+      }
+    }
+
+    const timeout = setTimeout(() => {
+      if (!conn.open) {
+        conn.close()
+        handleRetryOrFail('TIMEOUT')
+      }
+    }, JOIN_TIMEOUT_MS)
+
     conn.on('open', () => {
-      set({ connection: conn, roomId: roomIdInput })
+      clearTimeout(timeout)
+      set({
+        connection: conn,
+        roomId: roomIdInput,
+        retryCount: 0,
+        connectionStatus: 'connected',
+      })
       conn.send({ type: 'join', nickname } as MessageType)
     })
 
     conn.on('data', (data) => {
       const msg = data as MessageType
+      if (msg.type === 'error') {
+        clearTimeout(timeout)
+        set({
+          error: msg.reason,
+          connection: null,
+          roomId: null,
+          roomPlayers: [],
+          gameState: null,
+          gameStarted: false,
+          connectionStatus: 'error',
+        })
+        conn.close()
+        return
+      }
       if (msg.type === 'welcome') {
+        const connectedCount = msg.players.filter((p) => p.connected).length
         set({
           isHost: false,
           myPlayer: msg.player,
           gameState: deserializeGameState(msg.gameState),
           roomPlayers: msg.players,
-          gameStarted: msg.players.length === msg.gameState.players.length,
+          gameStarted: connectedCount === msg.gameState.players.length,
           opponentDisconnected: false,
+          connectionStatus: 'connected',
         })
       } else if (msg.type === 'state_update') {
         const newState = deserializeGameState(msg.gameState)
+        const connectedCount = msg.players.filter((p) => p.connected).length
         set({
           gameState: newState,
           roomPlayers: msg.players,
-          gameStarted: msg.players.length === newState.players.length,
+          gameStarted: connectedCount === newState.players.length,
         })
       }
     })
 
     conn.on('close', () => {
-      set({ opponentDisconnected: true })
+      clearTimeout(timeout)
+      set({ opponentDisconnected: true, connectionStatus: 'error' })
     })
 
     conn.on('error', (err) => {
       console.error('Connection error:', err)
-      set({ error: 'CONNECTION_FAILED' })
+      clearTimeout(timeout)
+      const errorType =
+        typeof err === 'object' && err && 'type' in err
+          ? (err as { type?: string }).type
+          : undefined
+      const reason =
+        errorType === 'peer-unavailable' ? 'PEER_UNAVAILABLE' : errorType || 'NETWORK_ERROR'
+      handleRetryOrFail(reason)
     })
   },
 
@@ -486,6 +663,8 @@ export const useMultiplayer = create<MultiplayerState>((set, get) => ({
       error: null,
       gameStarted: false,
       opponentDisconnected: false,
+      retryCount: 0,
+      connectionStatus: 'idle',
     })
   },
 }))
