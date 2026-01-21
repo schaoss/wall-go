@@ -311,7 +311,7 @@ export const useMultiplayer = create<MultiplayerState>((set, get) => ({
     const { peer } = get()
     if (!peer) return
 
-    set({ nickname, error: null })
+    set({ nickname, error: null, roomId: roomIdInput })
 
     const hostPeerId = `${PEER_PREFIX}${roomIdInput}`
     const conn = peer.connect(hostPeerId)
