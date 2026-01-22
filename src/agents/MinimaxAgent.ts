@@ -8,6 +8,7 @@ export class MinimaxAgent implements PlayerAgent {
   private depth: number
   private startTime: number = 0
   private timeLimit: number = 5000
+  private _canceled = false
 
   constructor(depth: number = 2) {
     this.worker = new Worker(new URL('./AIWorker.ts', import.meta.url), {
@@ -16,12 +17,13 @@ export class MinimaxAgent implements PlayerAgent {
     this.depth = depth
   }
 
-  async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
+  async getAction(gameState: GameSnapshot, _requestId?: number): Promise<PlayerAction> {
     if (gameState.phase === 'placing') await sleep(300 + Math.floor(Math.random() * 50)) // Simulate thinking delay 300~500ms
 
     this.startTime = performance.now()
     this.timeLimit = 3000
 
+    this._canceled = false
     return new Promise((resolve, reject) => {
       const onmessage = (
         event: MessageEvent<{
@@ -31,6 +33,8 @@ export class MinimaxAgent implements PlayerAgent {
           info?: string
         }>,
       ) => {
+        // Ignore late messages if canceled
+        if (this._canceled) return
         this.worker.onmessage = null
         this.worker.onerror = null
         if (event.data.error) {
@@ -50,6 +54,7 @@ export class MinimaxAgent implements PlayerAgent {
       this.worker.onmessage = onmessage
 
       this.worker.onerror = (error: ErrorEvent) => {
+        if (this._canceled) return
         this.worker.onmessage = null
         this.worker.onerror = null
         reject(new Error(`AIWorker onerror (MinimaxAgent): ${error.message}`))
@@ -59,6 +64,7 @@ export class MinimaxAgent implements PlayerAgent {
         aiType: 'minimax',
         gameState: toSerializableSnapshot(gameState),
         config: { depth: this.depth, startTime: this.startTime, timeLimit: this.timeLimit },
+        requestId: _requestId,
       })
     })
   }
@@ -66,6 +72,19 @@ export class MinimaxAgent implements PlayerAgent {
   public terminate(): void {
     if (this.worker) {
       this.worker.terminate()
+    }
+  }
+
+  public cancel(): void {
+    this._canceled = true
+    try {
+      if (this.worker) {
+        this.worker.onmessage = null
+        this.worker.onerror = null
+        this.worker.terminate()
+      }
+    } catch (e) {
+      // ignore
     }
   }
 }

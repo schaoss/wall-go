@@ -76,13 +76,21 @@ export class TurnManager {
       // we must ignore it. Use try/catch to handle agent promise rejection.
       let action: PlayerAction | undefined
       try {
-        const result = await Promise.race([agent.getAction(this.getGameState()), timeoutPromise])
+        const result = await Promise.race([agent.getAction(this.getGameState(), requestId), timeoutPromise])
         // If requestId has changed, ignore result (late reply)
         if (requestId !== this.currentRequestId) {
           // A later request started; ignore this result
           continue
         }
-        action = result as PlayerAction
+        // If agent returned a response object with requestId, double-check
+        if (result && typeof result === 'object' && 'requestId' in (result as any)) {
+          if ((result as any).requestId !== requestId) {
+            continue
+          }
+          action = (result as any).action as PlayerAction
+        } else {
+          action = result as PlayerAction
+        }
       } catch (_err) {
         // On agent failure, pick auto action. Attempt to cancel agent if possible.
         try {

@@ -6,6 +6,7 @@ import { sleep } from '@/utils/sleep'
 
 export class RandomAgent implements PlayerAgent {
   private worker: Worker
+  private _canceled = false
 
   constructor() {
     this.worker = new Worker(new URL('./AIWorker.ts', import.meta.url), {
@@ -13,8 +14,9 @@ export class RandomAgent implements PlayerAgent {
     })
   }
 
-  async getAction(gameState: GameSnapshot): Promise<PlayerAction> {
+  async getAction(gameState: GameSnapshot, _requestId?: number): Promise<PlayerAction> {
     await sleep(200 + Math.floor(Math.random() * 200)) // Simulate thinking delay 200~400ms
+    this._canceled = false
     return new Promise((resolve, reject) => {
       // Attach listener which will ignore late messages if terminated
       const onmessage = (
@@ -25,6 +27,8 @@ export class RandomAgent implements PlayerAgent {
           info?: string
         }>,
       ) => {
+        // If we've been canceled, ignore late messages
+        if (this._canceled) return
         // clear handlers to avoid duplicate resolution
         this.worker.onmessage = null
         this.worker.onerror = null
@@ -45,6 +49,7 @@ export class RandomAgent implements PlayerAgent {
       this.worker.onmessage = onmessage
 
       this.worker.onerror = (error: ErrorEvent) => {
+        if (this._canceled) return
         this.worker.onmessage = null
         this.worker.onerror = null
         reject(new Error(`AIWorker onerror (RandomAgent): ${error.message}`))
@@ -53,6 +58,7 @@ export class RandomAgent implements PlayerAgent {
       this.worker.postMessage({
         aiType: 'random',
         gameState: toSerializableSnapshot(gameState),
+        requestId: _requestId,
       })
     })
   }
@@ -60,6 +66,21 @@ export class RandomAgent implements PlayerAgent {
   public terminate(): void {
     if (this.worker) {
       this.worker.terminate()
+    }
+  }
+
+  // Provide cancel() to match PlayerAgent.cancel optional API. Marks canceled and
+  // terminates the underlying worker and clears handlers to avoid late messages.
+  public cancel(): void {
+    this._canceled = true
+    try {
+      if (this.worker) {
+        this.worker.onmessage = null
+        this.worker.onerror = null
+        this.worker.terminate()
+      }
+    } catch (e) {
+      // ignore
     }
   }
 }

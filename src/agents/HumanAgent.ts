@@ -1,6 +1,6 @@
 // Human player agent, waits for UI input
 import type { PlayerAgent } from './PlayerAgent'
-import type { PlayerAction } from '@/lib/types'
+import type { PlayerAction, GameSnapshot } from '@/lib/types'
 
 export class HumanAgent implements PlayerAgent {
   private actionResolver: ((action: PlayerAction) => void) | null = null
@@ -16,7 +16,7 @@ export class HumanAgent implements PlayerAgent {
   }
 
   // Called by main game loop, waits for player action
-  getAction(): Promise<PlayerAction> {
+  getAction(_gameState?: GameSnapshot, _requestId?: number): Promise<PlayerAction> {
     this.waiting = true
     return new Promise<PlayerAction>((resolve) => {
       this.actionResolver = resolve
