@@ -29,7 +29,7 @@ html, body {
 }
 @keyframes player-glow-blue {
   0% { box-shadow: 0 0 0 0 rgba(99,102,241,0.12); }
-  100 { box-shadow: 0 0 0 0.4rem rgba(99,102,241,0.22), 0 0 80px 16px rgba(99,102,241,0.18); }
+  100% { box-shadow: 0 0 0 0.4rem rgba(99,102,241,0.22), 0 0 80px 16px rgba(99,102,241,0.18); }
 }
 .animate-player-glow-red {
   animation: player-glow-red ease-out 1s infinite alternate;
@@ -38,6 +38,23 @@ html, body {
 .animate-player-glow-blue {
   animation: player-glow-blue ease-out 1s infinite alternate;
   box-shadow: 0 0 0 0 rgba(99,102,241,0.12);
+}
+
+@keyframes player-glow-yellow {
+  0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.12); }
+  100% { box-shadow: 0 0 0 0.4rem rgba(251, 191, 36, 0.22), 0 0 80px 16px rgba(251, 191, 36, 0.18); }
+}
+@keyframes player-glow-green {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.12); }
+  100% { box-shadow: 0 0 0 0.4rem rgba(16, 185, 129, 0.22), 0 0 80px 16px rgba(16, 185, 129, 0.18); }
+}
+.animate-player-glow-yellow {
+  animation: player-glow-yellow ease-out 1s infinite alternate;
+  box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.12);
+}
+.animate-player-glow-green {
+  animation: player-glow-green ease-out 1s infinite alternate;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.12);
 }
 
 @keyframes fade-in {

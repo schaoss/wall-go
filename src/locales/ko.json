@@ -7,7 +7,10 @@
     "title": "Wall Go · 벽 바둑",
     "mode": {
       "pvp": "🤝 2인 플레이",
-      "ai": "🤖 AI 대전"
+      "p3": "👪 3인 플레이",
+      "p4": "👨‍👩‍👧‍👦 4인 플레이",
+      "ai": "🤖 AI 대전",
+      "online": "🌐 온라인"
     },
     "rule": "게임 규칙",
     "ai": {
@@ -26,6 +29,45 @@
     },
     "confirmHome": "게임이 아직 끝나지 않았습니다. 홈으로 돌아가시겠습니까?\n현재 진행 상황이 사라집니다.",
     "home": "홈으로 돌아가기"
+  },
+  "multiplayer": {
+    "title": "온라인 대전",
+    "nickname": "닉네임 입력",
+    "nicknamePlaceholder": "닉네임",
+    "welcomePlayer": "환영합니다, {{name}}님!",
+    "create": "방 만들기",
+    "join": "방 참가",
+    "roomId": "방 코드",
+    "roomIdPlaceholder": "방 코드 입력",
+    "shareRoomId": "이 방 코드를 친구에게 공유하세요:",
+    "players": "플레이어",
+    "waiting": "상대방을 기다리는 중...",
+    "waitingSlot": "플레이어 대기 중...",
+    "copy": "복사",
+    "copied": "복사됨!",
+    "back": "뒤로",
+    "connecting": "연결 중...",
+    "connected": "연결됨",
+    "disconnected": "연결 끊김",
+    "ready": "준비 완료",
+    "you": "나",
+    "yourTurn": "당신의 차례입니다",
+    "opponentDisconnected": "상대방 연결이 끊겼습니다. 재연결을 기다리는 중...",
+    "loading": "게임 로딩 중...",
+    "leaveGame": "게임 나가기",
+    "confirmLeave": "정말 게임을 나가시겠습니까? 기권으로 처리됩니다.",
+    "backToLobby": "로비로 돌아가기",
+    "error": {
+      "ROOM_NOT_FOUND": "방을 찾을 수 없습니다. 방 코드를 확인하세요.",
+      "ROOM_FULL": "방이 가득 찼습니다. 다른 방을 시도해 보세요.",
+      "NOT_YOUR_TURN": "아직 당신의 차례가 아닙니다",
+      "INVALID_MOVE": "잘못된 동작입니다",
+      "NOT_IN_ROOM": "방에 참가하지 않았습니다",
+      "PEER_UNAVAILABLE": "연결 서버를 사용할 수 없습니다. 인터넷 연결을 확인하세요.",
+      "NETWORK_ERROR": "네트워크 오류입니다. 연결을 확인하세요.",
+      "TIMEOUT": "연결 시간이 초과되었습니다. 방이 존재하지 않거나 호스트가 오프라인일 수 있습니다."
+    },
+    "playersCount": "플레이어 수"
   },
   "rule": {
     "title": "게임 규칙 안내",

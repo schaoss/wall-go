@@ -3,7 +3,10 @@
     "title": "Wall Go",
     "mode": {
       "pvp": "🤝 2 Players",
-      "ai": "🤖 vs AI"
+      "p3": "👪 3 Players",
+      "p4": "👨‍👩‍👧‍👦 4 Players",
+      "ai": "🤖 vs AI",
+      "online": "🌐 Online"
     },
     "rule": "Game Rules",
     "ai": {
@@ -27,6 +30,45 @@
     "confirm": "Confirm",
     "cancel": "Cancel"
   },
+  "multiplayer": {
+    "title": "Online Multiplayer",
+    "nickname": "Enter Nickname",
+    "nicknamePlaceholder": "Your nickname",
+    "welcomePlayer": "Welcome, {{name}}!",
+    "create": "Create Room",
+    "join": "Join Room",
+    "roomId": "Room ID",
+    "roomIdPlaceholder": "Enter Room ID",
+    "shareRoomId": "Share this Room ID with your friend:",
+    "players": "Players",
+    "waiting": "Waiting for opponent...",
+    "waitingSlot": "Waiting for player...",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "back": "Back",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "ready": "Ready",
+    "you": "You",
+    "yourTurn": "Your turn",
+    "opponentDisconnected": "Opponent disconnected. Waiting for reconnect...",
+    "loading": "Loading game...",
+    "leaveGame": "Leave Game",
+    "confirmLeave": "Are you sure you want to leave this game? You will forfeit the match.",
+    "backToLobby": "Back to Lobby",
+    "error": {
+      "ROOM_NOT_FOUND": "Room not found. Please check the Room ID and try again.",
+      "ROOM_FULL": "Room is full. Please try a different room.",
+      "NOT_YOUR_TURN": "Not your turn",
+      "INVALID_MOVE": "Invalid move",
+      "NOT_IN_ROOM": "Not in a room",
+      "PEER_UNAVAILABLE": "Connection server unavailable. Please check your internet connection and try again.",
+      "NETWORK_ERROR": "Network error. Please check your connection and try again.",
+      "TIMEOUT": "Connection timed out. The room may not exist or the host may be offline."
+    },
+    "playersCount": "Players"
+  },
   "rule": {
     "title": "Game Rules",
     "content": "【Objective】\n\nMove your pieces on a 7×7 board and build walls to carve out your own ‘territory’ (an enclosed area containing only your pieces). When the game ends, count the squares in each player’s territory; the player with the most wins.\n\n【Equipment & Players】\n&nbsp;•&nbsp;Board: 7×7 squares\n&nbsp;•&nbsp;Players:\n&nbsp;&nbsp;&nbsp;•&nbsp;2-player: Red and Blue, each with 4 pieces\n&nbsp;&nbsp;&nbsp;•&nbsp;3/4-player: Add Yellow/Light Blue, each color has 2 pieces\n&nbsp;•&nbsp;Walls: Unlimited, color-coded by player\n\n【Game Flow】\nPlacement Phase\n&nbsp;•&nbsp;2-player: Starting positions fixed: Red [1,1],[5,5]; Blue [1,5],[5,1]. The other two are placed alternately: Red, Blue, Blue, Red\n&nbsp;•&nbsp;3/4-player: Each player places 2 pieces, in alternating order (e.g. A→B→C→C→B→A)\n\nAction Phase (turn-based)\n&nbsp;1.&nbsp;Choose any of your pieces that can still act\n&nbsp;2.&nbsp;Move 0, 1, or 2 steps:\n&nbsp;&nbsp;&nbsp;•&nbsp;Each step must be up, down, left, or right\n&nbsp;&nbsp;&nbsp;•&nbsp;Cannot cross or pass through walls or other pieces\n&nbsp;3.&nbsp;After moving, you must place a wall on an open side of that piece’s square (even if you moved 0 steps)\n\n【Walls & Borders】\n&nbsp;•&nbsp;The board’s outer edge counts as a wall\n&nbsp;•&nbsp;2-player: Walls cannot be removed once placed\n&nbsp;•&nbsp;3/4-player: Each player gets one “wall break” per game, usable on their turn\n\n【Time Limit】\n&nbsp;•&nbsp;90 seconds per turn\n&nbsp;•&nbsp;If time runs out, a wall is placed randomly and the turn ends\n\n【End Condition】\n&nbsp;•&nbsp;The game ends when all players’ pieces are in separate territories\n\n【Scoring】\n&nbsp;•&nbsp;Each square in a territory is worth 1 point\n&nbsp;•&nbsp;If total scores are tied, the player with the largest single territory wins\n\n【Victory】\n&nbsp;•&nbsp;Highest score wins\n&nbsp;•&nbsp;If both total and largest territory are tied, it’s a draw\n\n──&nbsp;Enjoy the game!",
@@ -43,6 +85,8 @@
     "again": "Play Again",
     "red": "Red",
     "blue": "Blue",
+    "yellow": "Yellow",
+    "green": "Green",
     "wall": {
       "top": "top",
       "bottom": "bottom",

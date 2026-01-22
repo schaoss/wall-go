@@ -7,7 +7,10 @@
     "title": "Wall Go · 牆壁圍棋",
     "mode": {
       "pvp": "🤝 雙人對戰",
-      "ai": "🤖 vs AI"
+      "p3": "👪 3 人對戰",
+      "p4": "👨‍👩‍👧‍👦 4 人對戰",
+      "ai": "🤖 vs AI",
+      "online": "🌐 線上對戰"
     },
     "rule": "遊戲規則",
     "ai": {
@@ -27,6 +30,45 @@
     "confirmHome": "遊戲尚未結束，確定要回到首頁嗎？\n目前進度將會消失。",
     "home": "回到首頁"
   },
+  "multiplayer": {
+    "title": "線上多人對戰",
+    "nickname": "輸入暱稱",
+    "nicknamePlaceholder": "你的暱稱",
+    "welcomePlayer": "歡迎，{{name}}！",
+    "create": "建立房間",
+    "join": "加入房間",
+    "roomId": "房間代碼",
+    "roomIdPlaceholder": "輸入房間代碼",
+    "shareRoomId": "分享房間代碼給朋友：",
+    "players": "玩家",
+    "waiting": "等待對手中...",
+    "waitingSlot": "等待玩家加入...",
+    "copy": "複製",
+    "copied": "已複製！",
+    "back": "返回",
+    "connecting": "連線中...",
+    "connected": "已連線",
+    "disconnected": "已斷線",
+    "ready": "準備完成",
+    "you": "你",
+    "yourTurn": "輪到你了",
+    "opponentDisconnected": "對手已斷線，等待重新連線...",
+    "loading": "載入遊戲中...",
+    "leaveGame": "離開遊戲",
+    "confirmLeave": "確定要離開遊戲嗎？這將視為棄權。",
+    "backToLobby": "返回大廳",
+    "error": {
+      "ROOM_NOT_FOUND": "找不到房間，請確認房間代碼後再試。",
+      "ROOM_FULL": "房間已滿，請嘗試加入其他房間。",
+      "NOT_YOUR_TURN": "還沒輪到你",
+      "INVALID_MOVE": "無效的操作",
+      "NOT_IN_ROOM": "尚未加入房間",
+      "PEER_UNAVAILABLE": "連線伺服器無法使用，請檢查網路連線後再試。",
+      "NETWORK_ERROR": "網路錯誤，請檢查連線後再試。",
+      "TIMEOUT": "連線逾時，房間可能不存在或房主已離線。"
+    },
+    "playersCount": "玩家人數"
+  },
   "rule": {
     "title": "遊戲規則說明",
     "content": "【遊戲目標】\n\n在 7×7 棋盤上移動棋子並建造牆壁，劃分自己的「領地」（封閉且只包含本方棋子的區域）。遊戲結束時計算各玩家領地內的格子數，格數多者獲勝。\n\n【棋具與人數】\n&nbsp;•&nbsp;棋盤：7×7&nbsp;格\n&nbsp;•&nbsp;玩家：\n&nbsp;&nbsp;&nbsp;•&nbsp;雙人遊戲：紅、藍兩色玩家，各別擁有&nbsp;4&nbsp;枚棋子\n&nbsp;&nbsp;&nbsp;•&nbsp;三人/四人遊戲：新增黃/淺藍色玩家，四色玩家各別擁有&nbsp;2&nbsp;枚棋子\n&nbsp;•&nbsp;牆壁：不限數量，分屬玩家顏色\n\n【遊戲流程】\n一、擺子階段\n&nbsp;•&nbsp;雙人遊戲時，起始位置固定：紅&nbsp;[1,1]、[5,5]；藍&nbsp;[1,5]、[5,1]，另外兩顆依「紅、藍、藍、紅」順序輪流擺放\n&nbsp;•&nbsp;三人／四人遊戲時，每人兩顆棋子，依正序、反序交錯擺完（如&nbsp;A→B→C→C→B→A）\n\n二、行動階段（輪流進行）\n&nbsp;1.&nbsp;選擇己方任一仍可行動的棋子\n&nbsp;2.&nbsp;移動&nbsp;0、1&nbsp;或&nbsp;2&nbsp;步：\n&nbsp;&nbsp;&nbsp;•&nbsp;每步僅能上下左右\n&nbsp;&nbsp;&nbsp;•&nbsp;不能穿牆、越牆，也不能穿過其他棋子\n&nbsp;3.&nbsp;移動結束後，必須在該棋子四周仍無牆的位置放置一段牆（即使&nbsp;0&nbsp;步亦同）\n\n【牆壁與邊界】\n&nbsp;•&nbsp;棋盤邊框視為牆壁\n&nbsp;•&nbsp;雙人遊戲：放置後的牆壁不可拆除\n&nbsp;•&nbsp;三人／四人遊戲：每人每局有一次「破牆機會」，可在自己回合中使用\n\n【時間限制】\n&nbsp;•&nbsp;每手限時&nbsp;90&nbsp;秒\n&nbsp;•&nbsp;若超時，則自動隨機建牆並結束回合\n\n【終局條件】\n&nbsp;•&nbsp;棋盤上所有玩家棋子均在不同的領地內時，遊戲結束\n\n【計分方式】\n&nbsp;•&nbsp;每個領地內的格子數，每格&nbsp;1&nbsp;分\n&nbsp;•&nbsp;若總分相同，則比較最大單一領地的格子數，多者獲勝\n\n【勝負判定】\n&nbsp;•&nbsp;分數高者獲勝\n&nbsp;•&nbsp;若總分與最大領地格數皆相同，則為平局\n\n──&nbsp;祝遊戲愉快！",
@@ -43,6 +85,8 @@
     "again": "再玩一次",
     "red": "紅方",
     "blue": "藍方",
+    "yellow": "黃方",
+    "green": "綠方",
     "wall": {
       "top": "上",
       "bottom": "下",

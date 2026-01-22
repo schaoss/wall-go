@@ -3,6 +3,7 @@ import { BOARD_SIZE } from '@/lib/types'
 import type { Phase, WallDir, Player, Pos } from '@/lib/types'
 import Cell from './Cell'
 import { getTerritoryMap } from '@/utils/territory'
+import { getPlayerTheme } from '@/lib/color'
 
 export interface BoardProps {
   board: import('@/lib/types').Cell[][]
@@ -14,6 +15,9 @@ export interface BoardProps {
   placeStone?: (pos: Pos) => void
   moveTo?: (pos: Pos) => void
   buildWall?: (pos: Pos, dir: WallDir) => void
+  isBreakMode?: boolean
+  toggleBreakMode?: () => void
+  wallBreaks?: Record<Player, number>
 }
 
 function Board({
@@ -26,6 +30,9 @@ function Board({
   placeStone,
   moveTo,
   buildWall,
+  isBreakMode,
+  toggleBreakMode,
+  wallBreaks,
 }: BoardProps) {
   // Territory information: calculated every time
   const territoryMap = getTerritoryMap(board)
@@ -40,11 +47,7 @@ function Board({
         'relative w-full min-w-[266px] p-8 border-4 border-zinc-300 dark:border-zinc-700 rounded-2xl shadow-xl transition-all duration-500',
         'box-border aspect-ratio-1',
         'bg-gradient-to-br from-zinc-50 to-zinc-200 dark:from-zinc-900 dark:to-zinc-800',
-        phase === 'playing' || phase === 'placing'
-          ? turn === 'R'
-            ? 'ring-4 ring-rose-400/60 animate-player-glow-red'
-            : 'ring-4 ring-indigo-400/60 animate-player-glow-blue'
-          : '',
+        phase === 'playing' || phase === 'placing' ? getPlayerTheme(turn).ring : '',
       )}
     >
       {/* Chessboard body */}
@@ -113,6 +116,23 @@ function Board({
           }),
         )}
       </div>
+
+      {/* Break Wall Toggle */}
+      {phase === 'playing' && wallBreaks && wallBreaks[turn] > 0 && (
+        <div className="absolute top-4 right-4 z-50">
+          <button
+            onClick={toggleBreakMode}
+            className={clsx(
+              'px-3 py-1 rounded-full text-xs font-bold transition-all shadow-lg border-2',
+              isBreakMode
+                ? 'bg-red-500 text-white border-red-600 animate-pulse'
+                : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700',
+            )}
+          >
+            🔨 {wallBreaks[turn]}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

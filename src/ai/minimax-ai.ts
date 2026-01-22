@@ -25,15 +25,12 @@ export class MinimaxAI extends BaseAI {
   maxDepth: number
   startTime: number = 0
   timeLimit: number = 5000
-  private zocCache = new Map<number, { redDist: number[][]; blueDist: number[][] }>()
+  private zocCache = new Map<number, Record<Player, number[][]>>()
   private tt: Map<number, number> = new Map()
 
   evaluate(state: GameSnapshot): number {
-    // 計算ZOC，紅正藍負
     const zocScore = this.evaluateZOCDistance(state)
-    // 計算領土潛力，紅正藍負
     const territoryScore = this.evaluateTerritoryPotential(state)
-
     return 1.5 * zocScore + territoryScore
   }
 
@@ -137,6 +134,9 @@ export class MinimaxAI extends BaseAI {
     const config = maximizing ? PROCESS_CONFIG.max : PROCESS_CONFIG.min
     let bestScore = config.defaultValue
     const actions = getLegalActions(state)
+
+    actions.sort((a, b) => this.actionHeuristic(b, state) - this.actionHeuristic(a, state))
+
     for (const action of actions) {
       const evalScore = this.minimax(
         applyAction(state, action),
@@ -149,48 +149,27 @@ export class MinimaxAI extends BaseAI {
         bestScore = evalScore
         config.updateFunction(evalScore)
       }
-      if (alpha >= beta) break // Cut-off condition met
+      if (alpha >= beta) break
     }
     this.tt.set(ttKey, bestScore)
     return bestScore
   }
 
-  /**
-   * 計算每格與雙方棋子的最短距離差異，紅方越近加分，藍方越近扣分。
-   * @param state
-   * @param player
-   * @returns {number}
-   */
   private evaluateZOCDistance(
     state: GameSnapshot,
     stones = getAllPlayerStones(state.board),
   ): number {
-    // Generate a simple key for the board to reuse BFS results
     const boardKey = computeHash(state)
-    let redDist: number[][], blueDist: number[][]
+    const me = state.turn
+    const opponents = state.players.filter((p) => p !== me)
+    let distByPlayer: Record<Player, number[][]>
+
     if (this.zocCache.has(boardKey)) {
-      const cached = this.zocCache.get(boardKey)!
-      redDist = cached.redDist
-      blueDist = cached.blueDist
+      distByPlayer = this.zocCache.get(boardKey)!
     } else {
       const board = state.board
+      distByPlayer = { R: [], B: [], Y: [], G: [] }
 
-      const redPositions: Pos[] = stones
-        .filter((stone) => stone.player === 'R')
-        .map((stone) => stone.position)
-      const bluePositions: Pos[] = stones
-        .filter((stone) => stone.player === 'B')
-        .map((stone) => stone.position)
-
-      for (let y = 0; y < BOARD_SIZE; y++) {
-        for (let x = 0; x < BOARD_SIZE; x++) {
-          if (board[y][x].stone === 'R') redPositions.push({ x, y })
-          if (board[y][x].stone === 'B') bluePositions.push({ x, y })
-        }
-      }
-      // 若某方無子，避免無窮距離
-      if (redPositions.length === 0 || bluePositions.length === 0) return 0
-      // BFS 計算從所有紅/藍子到每格的最短距離
       function bfsAll(starts: Pos[]): number[][] {
         const dist = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(Infinity))
         const queue: [number, number, number][] = []
@@ -205,7 +184,6 @@ export class MinimaxAI extends BaseAI {
             const ny = cy + dy
             if (isOutbound(nx, ny)) continue
             if (isWallBetween(board, { x: cx, y: cy }, { x: nx, y: ny })) continue
-
             if (dist[ny][nx] > d + 1) {
               dist[ny][nx] = d + 1
               queue.push([nx, ny, d + 1])
@@ -214,53 +192,68 @@ export class MinimaxAI extends BaseAI {
         }
         return dist
       }
-      redDist = bfsAll(redPositions)
-      blueDist = bfsAll(bluePositions)
-      this.zocCache.set(boardKey, { redDist, blueDist })
+
+      for (const player of state.players) {
+        const positions: Pos[] = stones.filter((s) => s.player === player).map((s) => s.position)
+        for (let y = 0; y < BOARD_SIZE; y++) {
+          for (let x = 0; x < BOARD_SIZE; x++) {
+            if (board[y][x].stone === player) positions.push({ x, y })
+          }
+        }
+        distByPlayer[player] =
+          positions.length > 0
+            ? bfsAll(positions)
+            : Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(Infinity))
+      }
+      this.zocCache.set(boardKey, distByPlayer)
     }
-    // 對每格計算距離差
+
+    const myDist = distByPlayer[me]
+    if (!myDist || myDist.length === 0) return 0
+
     let score = 0
     for (let y = 0; y < BOARD_SIZE; y++) {
       for (let x = 0; x < BOARD_SIZE; x++) {
-        const dRed = redDist[y][x]
-        const dBlue = blueDist[y][x]
-        if (!isFinite(dRed) && !isFinite(dBlue)) continue
+        const dMe = myDist[y][x]
+        const minOppDist = Math.min(
+          ...opponents.map((opp) => distByPlayer[opp]?.[y]?.[x] ?? Infinity),
+        )
 
-        // Use inverse-distance difference: cells closer to me score more, far cells near opponent score negatively
-        const invRed = 1 / (dRed + 1)
-        const invBlue = 1 / (dBlue + 1)
+        if (!isFinite(dMe) && !isFinite(minOppDist)) continue
+
+        const invMe = 1 / (dMe + 1)
+        const invOpp = 1 / (minOppDist + 1)
 
         const isStone = state.board[y][x].stone !== null
         const weight = isStone ? 0.2 : 1
-        score += weight * (invRed - invBlue)
+        score += weight * (invMe - invOpp)
       }
     }
     return score
   }
 
-  /**
-   * Evaluate the territory potential for the given player on the current game state.
-   * Territory is defined as empty areas fully enclosed by the player's stones and walls.
-   * @param state - The current game snapshot.
-   * @returns A numeric score representing the net territory potential (red minus blue).
-   */
   private evaluateTerritoryPotential(state: GameSnapshot): number {
     const board = state.board
     const territory = getTerritoryMap(board)
+    const me = state.turn
+    const opponents = state.players.filter((p) => p !== me)
 
-    const totals: Record<Player, number> = { R: 0, B: 0 }
+    const totals: Record<Player, number> = { R: 0, B: 0, Y: 0, G: 0 }
     for (let y = 0; y < board.length; y++) {
       for (let x = 0; x < board.length; x++) {
         const owner = territory[y][x]
         if (owner) totals[owner]++
       }
     }
-    const score = totals['R'] - totals['B']
+
+    const myTerritory = totals[me]
+    const oppTerritory = opponents.reduce((sum, opp) => sum + totals[opp], 0)
+    const score = myTerritory - oppTerritory / opponents.length
+
     if (score !== 0) return score
 
-    // If total territory is tied, compare largest single territory size
     const visited = new Set<string>()
-    const largest: Record<Player, number> = { R: 0, B: 0 }
+    const largest: Record<Player, number> = { R: 0, B: 0, Y: 0, G: 0 }
     for (let y = 0; y < board.length; y++) {
       for (let x = 0; x < board.length; x++) {
         const owner = territory[y][x]
@@ -288,13 +281,15 @@ export class MinimaxAI extends BaseAI {
       }
     }
 
-    return largest['R'] - largest['B']
+    const myLargest = largest[me]
+    const oppLargest = Math.max(...opponents.map((opp) => largest[opp]))
+    return myLargest - oppLargest
   }
 
   private actionHeuristic(action: PlayerAction, state: GameSnapshot): number {
     if (action.type !== 'move') return 0
-    const opponent = state.turn === 'R' ? 'B' : 'R'
-    const oppStones = getAllPlayerStones(state.board).filter((s) => s.player === opponent)
+    const opponents = state.players.filter((p) => p !== state.turn)
+    const oppStones = getAllPlayerStones(state.board).filter((s) => opponents.includes(s.player))
     let best = Infinity
     for (const s of oppStones) {
       const d = Math.abs(s.position.x - action.pos.x) + Math.abs(s.position.y - action.pos.y)
@@ -303,13 +298,6 @@ export class MinimaxAI extends BaseAI {
     return -best
   }
 
-  /**
-   * Returns a set of string keys representing positions claimed by the player.
-   * Claimed territory is empty regions fully enclosed by the player's stones and walls.
-   * @param state - The current game snapshot.
-   * @param me - The player to get claimed territory for.
-   * @returns Set of position keys (e.g., "x,y") claimed by the player.
-   */
   getClaimedTerritoryPositions(state: GameSnapshot, me: Player): Set<string> {
     const board = state.board
     const claimedPositions = new Set<string>()
@@ -325,31 +313,29 @@ export class MinimaxAI extends BaseAI {
   }
 }
 
-// Zobrist hashing setup
 function randomUInt32(): number {
   return Math.floor(Math.random() * 0x100000000) >>> 0
 }
 
-// encode one cell: piece (0 empty,1 R,2 B) and wall bits (bit0=left, bit1=top)
+const PIECE_INDEX: Record<string, number> = { R: 1, B: 2, Y: 3, G: 4 }
+
 function encodeCell(cell: Cell): number {
-  const piece = cell.stone === 'R' ? 1 : cell.stone === 'B' ? 2 : 0
+  const piece = cell.stone ? PIECE_INDEX[cell.stone] : 0
   let bits = 0
   if (cell.wallLeft) bits |= 1
   if (cell.wallTop) bits |= 2
-  return piece * 4 + bits // 3*4+3 = up to 11
+  return piece * 4 + bits
 }
 
-// generate ZOBRIST table
 const ZOBRIST: number[][][] = (() => {
   const s = BOARD_SIZE
-  const states = 12
+  const states = 20
   const table: number[][][] = Array.from({ length: s }, () =>
     Array.from({ length: s }, () => Array.from({ length: states }, () => randomUInt32())),
   )
   return table
 })()
 
-// compute full board hash
 function computeHash(state: GameSnapshot): number {
   let h = 0
   for (let y = 0; y < BOARD_SIZE; y++) {
@@ -361,9 +347,7 @@ function computeHash(state: GameSnapshot): number {
   return h >>> 0
 }
 
-// transposition key: numeric hash combined with depth/max flag
 function getTranspositionKey(state: GameSnapshot, depth: number, maximizing: boolean): number {
   const h = computeHash(state)
-  // shift depth and flag into low bits
   return (h ^ ((depth << 1) >>> 0) ^ (maximizing ? 1 : 0)) >>> 0
 }
