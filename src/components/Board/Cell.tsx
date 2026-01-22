@@ -100,6 +100,7 @@ export default function Cell({
         // 只要 territoryOwner 有值就上色
         territoryOwner && getPlayerTheme(territoryOwner).territory,
       )}
+      data-testid={`cell-${x}-${y}`}
       data-cell-x={x}
       data-cell-y={y}
     >

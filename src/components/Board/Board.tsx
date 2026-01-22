@@ -43,6 +43,7 @@ function Board({
 
   return (
     <div
+      data-testid="board-container"
       className={clsx(
         'relative w-full min-w-[266px] p-8 border-4 border-zinc-300 dark:border-zinc-700 rounded-2xl shadow-xl transition-all duration-500',
         'box-border aspect-ratio-1',
@@ -52,6 +53,7 @@ function Board({
     >
       {/* Chessboard body */}
       <div
+        data-testid="board-grid"
         className={clsx(
           'relative',
           'grid',
