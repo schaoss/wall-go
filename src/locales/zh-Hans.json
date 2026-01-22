@@ -7,7 +7,10 @@
     "title": "Wall Go · 墙壁围棋",
     "mode": {
       "pvp": "🤝 双人对战",
-      "ai": "🤖 vs AI"
+      "p3": "👪 3 人对战",
+      "p4": "👨‍👩‍👧‍👦 4 人对战",
+      "ai": "🤖 vs AI",
+      "online": "🌐 在线对战"
     },
     "rule": "游戏规则",
     "ai": {
@@ -26,6 +29,45 @@
     },
     "confirmHome": "游戏尚未结束，确定要回到首页吗？\n目前进度将会消失。",
     "home": "回到首页"
+  },
+  "multiplayer": {
+    "title": "在线多人对战",
+    "nickname": "输入昵称",
+    "nicknamePlaceholder": "你的昵称",
+    "welcomePlayer": "欢迎，{{name}}！",
+    "create": "创建房间",
+    "join": "加入房间",
+    "roomId": "房间代码",
+    "roomIdPlaceholder": "输入房间代码",
+    "shareRoomId": "分享房间代码给朋友：",
+    "players": "玩家",
+    "waiting": "等待对手中...",
+    "waitingSlot": "等待玩家加入...",
+    "copy": "复制",
+    "copied": "已复制！",
+    "back": "返回",
+    "connecting": "连接中...",
+    "connected": "已连接",
+    "disconnected": "已断开",
+    "ready": "准备完成",
+    "you": "你",
+    "yourTurn": "轮到你了",
+    "opponentDisconnected": "对手已断开，等待重新连接...",
+    "loading": "加载游戏中...",
+    "leaveGame": "离开游戏",
+    "confirmLeave": "确定要离开游戏吗？这将视为弃权。",
+    "backToLobby": "返回大厅",
+    "error": {
+      "ROOM_NOT_FOUND": "找不到房间，请确认房间代码后再试。",
+      "ROOM_FULL": "房间已满，请尝试加入其他房间。",
+      "NOT_YOUR_TURN": "还没轮到你",
+      "INVALID_MOVE": "无效的操作",
+      "NOT_IN_ROOM": "尚未加入房间",
+      "PEER_UNAVAILABLE": "连接服务器无法使用，请检查网络连接后再试。",
+      "NETWORK_ERROR": "网络错误，请检查连接后再试。",
+      "TIMEOUT": "连接超时，房间可能不存在或房主已离线。"
+    },
+    "playersCount": "玩家人数"
   },
   "rule": {
     "title": "游戏规则说明",

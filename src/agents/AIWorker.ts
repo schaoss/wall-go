@@ -12,9 +12,9 @@ function calculateMinimaxPlayingAction(gameState: GameSnapshot, depth = 2): Play
 
 // --- Worker message handler ---
 self.onmessage = (
-  event: MessageEvent<{ aiType: string; gameState: GameSnapshot; config: Record<string, unknown> }>,
+  event: MessageEvent<{ aiType: string; gameState: GameSnapshot; config: Record<string, unknown>; requestId?: number }>,
 ) => {
-  const { aiType, gameState } = event.data
+  const { aiType, gameState, requestId } = event.data
   let action: PlayerAction | null = null
 
   try {
@@ -25,6 +25,7 @@ self.onmessage = (
       self.postMessage({
         action: null,
         info: 'Game finished, no action taken.',
+        requestId,
       })
       return
     }
@@ -32,6 +33,7 @@ self.onmessage = (
     if (legalActions.length === 0) {
       self.postMessage({
         error: 'No legal actions available but game is not finished.',
+        requestId,
       })
       return
     }
@@ -66,7 +68,7 @@ self.onmessage = (
     }
 
     if (action) {
-      self.postMessage({ action })
+      self.postMessage({ action, requestId })
     } else {
       // If action is null here, it implies an issue in decision logic for non-finished phases
       // or a specific AI logic failed to return an action.
@@ -74,12 +76,14 @@ self.onmessage = (
       self.postMessage({
         action: getRandomAction(legalActions)!,
         info: 'Fell back to random action.',
+        requestId,
       })
     }
   } catch (e) {
     self.postMessage({
       error: (e as Error).message,
       stack: (e as Error).stack,
+      requestId,
     })
   }
 }

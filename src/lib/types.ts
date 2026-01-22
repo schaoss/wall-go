@@ -1,5 +1,5 @@
 export const BOARD_SIZE = 7 as const
-export type Player = 'R' | 'B'
+export type Player = 'R' | 'B' | 'Y' | 'G'
 export interface Pos {
   x: number
   y: number
@@ -11,13 +11,17 @@ export interface Cell {
   wallLeft: Player | null // left wall
 }
 
-export type GameMode = 'pvp' | 'ai'
+export type GameMode = 'pvp' | 'pvp3' | 'pvp4' | 'ai'
 export type AiSide = 'R' | 'B'
 export type AiLevel = 'practice' | 'easy' | 'middle' | 'hard'
 export type Phase = 'selecting' | 'placing' | 'playing' | 'finished'
 export type WallDir = 'top' | 'left' | 'right' | 'bottom'
-export const PLAYER_LIST = ['R', 'B'] as readonly Player[]
-export const STONES_PER_PLAYER = 4 as const
+export const PLAYER_LIST = ['R', 'B', 'Y', 'G'] as readonly Player[]
+export const STONES_PER_PLAYER = {
+  2: 4,
+  3: 2,
+  4: 2,
+} as const
 export const WallDirArray = ['top', 'left', 'right', 'bottom'] as const
 
 // Shared action type for both player and AI
@@ -51,6 +55,7 @@ export interface GameSnapshot {
   stonesPlaced: Record<Player, number>
   result?: import('@/utils/game').GameResult
   skipReason?: string
+  wallBreaks?: Record<Player, number>
 }
 
 export interface State extends GameSnapshot {
@@ -69,4 +74,8 @@ export interface State extends GameSnapshot {
   _future: GameSnapshot[]
   humanSide: Player | null
   setHumanSide: (side: Player | null) => void
+  toggleBreakMode: () => void
+  isBreakMode: boolean
+  // Atomically apply an action and optional follow-up in a single mutation
+  applyActionSequence?: (action?: PlayerAction) => void
 }

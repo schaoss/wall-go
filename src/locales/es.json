@@ -7,7 +7,10 @@
     "title": "Wall Go · Go de Muros",
     "mode": {
       "pvp": "🤝 Dos jugadores",
-      "ai": "🤖 vs IA"
+      "p3": "👪 3 jugadores",
+      "p4": "👨‍👩‍👧‍👦 4 jugadores",
+      "ai": "🤖 vs IA",
+      "online": "🌐 En línea"
     },
     "rule": "Reglas del Juego",
     "ai": {
@@ -26,6 +29,45 @@
     },
     "confirmHome": "El juego no ha terminado. ¿Seguro que quieres volver al inicio?\nEl progreso actual se perderá.",
     "home": "Inicio"
+  },
+  "multiplayer": {
+    "title": "Multijugador en línea",
+    "nickname": "Introduce tu apodo",
+    "nicknamePlaceholder": "Tu apodo",
+    "welcomePlayer": "¡Bienvenido, {{name}}!",
+    "create": "Crear sala",
+    "join": "Unirse a sala",
+    "roomId": "Código de sala",
+    "roomIdPlaceholder": "Introduce el código de sala",
+    "shareRoomId": "Comparte este código con tu amigo:",
+    "players": "Jugadores",
+    "waiting": "Esperando oponente...",
+    "waitingSlot": "Esperando jugador...",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "back": "Volver",
+    "connecting": "Conectando...",
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "ready": "Listo",
+    "you": "Tú",
+    "yourTurn": "Tu turno",
+    "opponentDisconnected": "El oponente se desconectó. Esperando reconexión...",
+    "loading": "Cargando juego...",
+    "leaveGame": "Salir del juego",
+    "confirmLeave": "¿Seguro que quieres salir? Perderás la partida.",
+    "backToLobby": "Volver al lobby",
+    "error": {
+      "ROOM_NOT_FOUND": "Sala no encontrada. Por favor verifica el código e intenta de nuevo.",
+      "ROOM_FULL": "La sala está llena. Intenta con otra sala.",
+      "NOT_YOUR_TURN": "No es tu turno",
+      "INVALID_MOVE": "Movimiento inválido",
+      "NOT_IN_ROOM": "No estás en una sala",
+      "PEER_UNAVAILABLE": "Servidor de conexión no disponible. Verifica tu conexión a internet.",
+      "NETWORK_ERROR": "Error de red. Verifica tu conexión.",
+      "TIMEOUT": "Se agotó el tiempo de conexión. La sala puede no existir o el anfitrión está desconectado."
+    },
+    "playersCount": "Jugadores"
   },
   "rule": {
     "title": "Reglas del Juego",
